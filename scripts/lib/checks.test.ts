@@ -84,6 +84,20 @@ describe("checkBundle", () => {
     );
   });
 
+  it("fails when a worker chunk touches the DOM, which a Web Worker does not have", () => {
+    writeBundle("ok");
+    writeFileSync(
+      join(root, "assets", "markdown.worker-abc.js"),
+      "const e=document.createElement('i')",
+    );
+    expect(checkBundle(root).join("\n")).toMatch(/worker chunk calls document.createElement/);
+  });
+
+  it("allows DOM use in ordinary chunks", () => {
+    writeBundle("ok", "const e=document.createElement('i')");
+    expect(checkBundle(root)).toEqual([]);
+  });
+
   it("fails on fonts inlined as data: URIs that the CSP would block", () => {
     writeBundle("ok");
     writeFileSync(

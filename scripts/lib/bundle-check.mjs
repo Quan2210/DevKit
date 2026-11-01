@@ -63,6 +63,13 @@ export function checkBundle(root) {
     }
   }
 
+  // A Web Worker has no `document`: a DOM-dependent build of a dependency would crash it at load time.
+  for (const file of listJs(assetsDir).filter((name) => /worker/i.test(name))) {
+    if (/document\.createElement/.test(readFileSync(file, "utf8"))) {
+      errors.push(`${file.slice(root.length + 1)}: a worker chunk calls document.createElement`);
+    }
+  }
+
   // Fonts inlined as data: URIs are blocked by `font-src 'self'` (found in the M1 browser check).
   for (const file of listFiles(assetsDir, ".css")) {
     if (/url\(\s*["']?data:(font|application\/(x-)?font)/.test(readFileSync(file, "utf8"))) {

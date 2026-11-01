@@ -386,5 +386,9 @@ Skill `frontend-design` thiên về thiết kế có cá tính, tránh "mặc đ
 | 2026-11-01 | Layout | UUID: không ảo hóa danh sách khi >200 dòng (layouts.md §4.4, plan 3.4) | 1.000 dòng nhẹ, hiệu năng chấp nhận được; sẽ đo ở M7 và thêm ảo hóa nếu cần | Đã duyệt (2026-11-01) |
 | 2026-11-01 | Components | Thêm `Checkbox`, `Notice` (cảnh báo/thông tin thường trực), `SplitWorkspace` | `Notice` cho cảnh báo JWT, số mất độ chính xác, tài liệu lớn; `SplitWorkspace` là bố cục Input\|Output dùng chung | Chờ duyệt |
 | 2026-11-01 | Behaviour | JSON trên 200.000 ký tự không tự cập nhật; hiện thông báo "bấm Format" và nhãn "Kết quả trước đó" | Tránh đơ UI; làm rõ kết quả đang cũ (review M3) | Chờ duyệt |
+| 2026-11-01 | Components | Thêm `MenuButton` (menu Copy, Tải xuống, Mục lục) và `SafeHtml` (điểm duy nhất đặt innerHTML) | Menu thả xuống theo Design System §9.3; `SafeHtml` để dễ kiểm toán ranh giới tin cậy | Chờ duyệt |
+| 2026-11-01 | Layout | Markdown Preview: thanh công cụ tự xuống dòng trên mobile, chưa gom nút phụ vào menu "…" (design §9.3) | Giữ đơn giản; tinh chỉnh ở M7 | Chờ duyệt |
+| 2026-11-01 | Scope | Markdown Preview: chưa làm đồng bộ cuộn giữa editor và preview | Là hạng mục tách rời, cắt được theo PRD §10; TOC, xuất HTML, chiều rộng tài liệu, banner, copy từng code block đã có | Chờ duyệt |
+| 2026-11-01 | Behaviour | Raw HTML trong Markdown bị bỏ hẳn, kèm thông báo "HTML thô đã bị bỏ qua" | Đúng System Design §3.4; minh bạch thay vì bỏ im lặng | Chờ duyệt |
 
 *(Bổ sung dòng mới cho mỗi sai khác trong quá trình thiết kế/implement.)*

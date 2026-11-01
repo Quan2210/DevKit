@@ -51,6 +51,11 @@ export default tseslint.config(
     },
   },
   {
+    // The one audited trust boundary for innerHTML (docs/04 Change 4.6).
+    files: ["src/components/common/SafeHtml.tsx"],
+    rules: { "no-restricted-syntax": "off" },
+  },
+  {
     files: ["**/*.{mjs,ts}", "*.js"],
     languageOptions: { globals: { ...globals.node } },
   },

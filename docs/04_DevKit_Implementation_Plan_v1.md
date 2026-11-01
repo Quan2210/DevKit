@@ -438,3 +438,16 @@ Chọn **phương án A** (React Router framework mode + prerender). Đã chạy
 **Lỗi tìm thấy khi chạy thật:** vị trí lỗi JSON (trên), vùng chạm mobile < 40px.
 
 **Còn thiếu (ghi nhận):** e2e Playwright vẫn chưa có nên SD-7 (không request ngoài), SD-9 (localStorage tắt) và hydration chỉ được kiểm tay và bằng test đơn vị; CodeEditor trong test là textarea giả nên hành vi `goTo` và CRLF của CodeMirror chỉ kiểm tay; hiệu năng chưa đo (M7).
+
+## Phụ lục B (tiếp) — M4 Markdown Preview đã triển khai (nhánh `feat/m4-markdown-preview`)
+
+**Đã làm (Change 4.1–4.7c):** pipeline `unified` đúng thứ tự System Design §3.4 (`remark-parse` + `remark-gfm` → `remark-rehype` (bỏ HTML thô) → `rehype-sanitize` (allowlist: link `http/https/mailto`, ảnh `data:` ba loại raster) → chính sách link (`target=_blank`, `rel=noopener noreferrer`) → chính sách ảnh (ảnh ngoài thành placeholder **không có `src`**, không để lại URL trong DOM) → highlight (`lowlight`, nạp ngữ pháp theo nhu cầu, chạy **sau** sanitize) → id tiêu đề `md-*` → stringify). `SafeHtml` là nơi duy nhất đặt innerHTML (ESLint cấm nơi khác). Runner dùng Web Worker khi >200.000 ký tự, hủy worker cũ khi có việc mới, timeout 60 giây. UI: Soạn/Chia đôi/Xem (nhớ lựa chọn), mở file ≤5 MB UTF-8 và kéo thả, Copy và Tải `.md`/`.html`, mục lục, chiều rộng tài liệu, banner riêng tư, bản nháp opt-in ≤1 MB, ảnh ngoài chỉ sau hộp thoại xác nhận (DeviceStatus chuyển cảnh báo), Copy từng code block, thống kê từ/ký tự/phút đọc.
+
+**Lỗi và giới hạn tìm thấy khi chạy thật:**
+1. **Worker chết khi tải trong trình duyệt thật** dù test với worker giả đều đạt: gói `decode-named-character-reference` có export `browser` dùng `document.createElement`, mà Web Worker không có `document`. Đã alias sang bản không dùng DOM trong `vite.config.ts` và thêm kiểm tra vào `check:bundle` (chunk worker không được gọi `document.createElement`). Bài học: e2e với worker thật cần có (M7).
+2. **Parser của micromark chậm theo cấp bình phương với danh sách** (250 KB toàn danh sách khoảng 1,5 giây, 1 MB khoảng 26 giây; văn xuôi, tiêu đề, code chỉ ~0,3 giây mỗi 250 KB). Không sửa được ở tầng này, nên: render chạy trong worker (UI không đơ), debounce tăng theo kích thước, hủy việc cũ, hiển thị "Đang cập nhật…" và ghi giới hạn. Đo trong trình duyệt: tài liệu 250 KB văn xuôi + code (2.632 tiêu đề) render xong trong khoảng 1 giây.
+3. Dán 300 KB trực tiếp vào CodeMirror bằng `execCommand` làm treo tab (chi phí của trình soạn thảo, không phải pipeline); mở file lớn qua ô chọn file thì ổn. Cần đo ở M7.
+
+**Kiểm tra bảo mật:** 45 vector XSS (script, handler `on*`, `javascript:`/`vbscript:`/`data:`, SVG/MathML, iframe/object/embed, style/`@import`, form, srcset/picture, clobbering id, mutation XSS qua noscript/CDATA/comment...) và toàn bộ fixture, mỗi cái ở cả hai chế độ ảnh, đều qua kiểm tra **cấu trúc trên DOM thật** (không phần tử cấm, không thuộc tính `on*`/`style`/`srcset`, không URL nguy hiểm, mọi `id`/`name` có tiền tố, chỉ `<a href>` được trỏ ra ngoài) chứ không chỉ so chuỗi. Trên trình duyệt thật: không `<script>`, `__pwned` không được đặt, 0 request ngoài origin, worker chạy dưới CSP.
+
+**Chưa làm:** đồng bộ cuộn editor và preview; gom nút phụ vào menu "…" trên mobile; e2e Playwright.
