@@ -57,9 +57,12 @@ export default function CodeEditorImpl({
   const view = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
 
+  const latestValue = useRef(value);
+
   useEffect(() => {
     onChangeRef.current = onChange;
-  }, [onChange]);
+    latestValue.current = value;
+  });
 
   useImperativeHandle(handleRef, () => ({
     focus: () => view.current?.focus(),
@@ -83,7 +86,7 @@ export default function CodeEditorImpl({
       created = new EditorView({
         parent: host.current,
         state: EditorState.create({
-          doc: value,
+          doc: latestValue.current, // not `value`: it may have changed while the language chunk loaded
           extensions: [
             basicSetup,
             languageExt,
@@ -108,7 +111,6 @@ export default function CodeEditorImpl({
       view.current = null;
     };
     // `value` is intentionally omitted: later changes go through the sync effect below.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language, readOnly, ariaLabel, placeholder]);
 
   useEffect(() => {

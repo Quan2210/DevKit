@@ -142,8 +142,13 @@ export function findErrorOffset(text: string): number | undefined {
 
 /** Scanner first (same answer in every browser), then whatever position the engine reported. */
 function positionOf(text: string, detail: string): ToolError["position"] {
-  const offset = findErrorOffset(text);
-  return offset === undefined ? extractPosition(detail, text) : locate(text, offset);
+  try {
+    const offset = findErrorOffset(text);
+    if (offset !== undefined) return locate(text, offset);
+  } catch {
+    // The scanner recurses; absurdly deep nesting overflows the stack. Fall back to the engine.
+  }
+  return extractPosition(detail, text);
 }
 
 export function parseJson(text: string): Result<unknown, ToolError> {
@@ -161,25 +166,46 @@ export function parseJson(text: string): Result<unknown, ToolError> {
   }
 }
 
+/** `JSON.stringify` recurses, so a valid but absurdly deep document throws RangeError. */
+function stringify(value: unknown, indent?: JsonIndent): Result<string, ToolError> {
+  try {
+    return ok(JSON.stringify(value, null, indent));
+  } catch {
+    return fail({ kind: "processing", message: t("json.tooDeep") });
+  }
+}
+
 /** Parse and pretty-print. Values are preserved; number spelling is normalised (1.0 becomes 1). */
 export function formatJson(text: string, indent: JsonIndent): Result<string, ToolError> {
   const parsed = parseJson(text);
-  return parsed.ok ? ok(JSON.stringify(parsed.value, null, indent)) : parsed;
+  return parsed.ok ? stringify(parsed.value, indent) : parsed;
 }
 
 export function minifyJson(text: string): Result<string, ToolError> {
   const parsed = parseJson(text);
-  return parsed.ok ? ok(JSON.stringify(parsed.value)) : parsed;
+  return parsed.ok ? stringify(parsed.value) : parsed;
 }
 
 const NUMBER = /-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
-const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
+
+/** Canonical "<sign><digits>e<exponent>" so two spellings of one decimal compare equal. */
+function canonical(literal: string): string {
+  const match = /^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(literal);
+  if (!match) return literal;
+  const [, sign, whole, fraction = "", exponent = "0"] = match;
+  const digits = (whole + fraction).replace(/^0+/, "");
+  if (digits === "") return "0";
+  const trimmed = digits.replace(/0+$/, "");
+  return `${sign}${trimmed}e${Number(exponent) - fraction.length + (digits.length - trimmed.length)}`;
+}
 
 /**
- * Integer literals outside strings that JSON.parse cannot represent exactly. Formatting such a
- * document would silently change them, so the UI warns instead (PRD 3.1 limit, risk R6).
+ * Number literals outside strings that JSON.parse cannot represent exactly (too many significant
+ * digits, or beyond the 64-bit float range such as 1e999). Formatting such a document would
+ * silently change them, so the UI warns instead (PRD 3.1 limit, risk R6). Spelling-only changes
+ * (1.0, 1e3) are not warnings because the value is the same.
  */
-export function findUnsafeIntegers(text: string): string[] {
+export function findLossyNumbers(text: string): string[] {
   const found: string[] = [];
   let inString = false;
   for (let i = 0; i < text.length; i += 1) {
@@ -196,9 +222,8 @@ export function findUnsafeIntegers(text: string): string[] {
       const literal = NUMBER.exec(text)?.[0];
       if (!literal) continue;
       i += literal.length - 1;
-      if (/^-?\d+$/.test(literal)) {
-        const magnitude = BigInt(literal.replace("-", ""));
-        if (magnitude > MAX_SAFE && !found.includes(literal)) found.push(literal);
+      if (canonical(literal) !== canonical(String(Number(literal))) && !found.includes(literal)) {
+        found.push(literal);
       }
     }
   }

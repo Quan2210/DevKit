@@ -107,3 +107,14 @@ describe("describeTimes", () => {
     expect(times.expiry).toBe("none");
   });
 });
+
+describe("decodeJwt with a very deep payload (review finding 1)", () => {
+  it("decodes without throwing and falls back to the original text", () => {
+    const deep = `{"a":${"[".repeat(10_000)}${"]".repeat(10_000)}}`;
+    const token = `${Buffer.from('{"alg":"none"}').toString("base64url")}.${Buffer.from(deep).toString("base64url")}.`;
+    expect(() => decodeJwt(token)).not.toThrow();
+    const result = decodeJwt(token);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.payloadJson).toBe(deep);
+  });
+});

@@ -417,3 +417,24 @@ Chọn **phương án A** (React Router framework mode + prerender). Đã chạy
 **Kiểm tra:** 153 test (12 file) đạt; typecheck, lint, build, `check:seo`, `check:bundle` đạt.
 
 **Lưu ý:** XML, Markdown và JWT trong corpus mới được kiểm ở mức "corpus đúng"; hành vi của từng tool được kiểm ở M3–M5.
+
+## Phụ lục B (tiếp) — M3 Tool P0 đã triển khai (nhánh `feat/m3-p0-tools`)
+
+**Đã làm (Change 3.1–3.4):** JSON Formatter, Base64, JWT Decoder, UUID Generator (lõi `core/`, UI trên `ToolShell`, route có `ErrorBoundary`, hướng dẫn có cấu trúc trong `src/i18n/guides/vi.ts`); registry chuyển 4 tool sang `ready`.
+
+**Quyết định kỹ thuật đáng ghi:**
+* **Vị trí lỗi JSON:** V8 hiện nay thường không kèm vị trí ("... is not valid JSON"), nên `findErrorOffset` (bộ quét cú pháp chặt) cho cùng dòng/cột ở mọi trình duyệt, vị trí của engine chỉ là dự phòng. Kiểm chứng bằng test so khớp `JSON.parse` (600 chuỗi biến đổi trong repo; reviewer chạy thêm 300.000 chuỗi, không lệch).
+* **Số mất chính xác:** `findLossyNumbers` so dạng chuẩn hóa của literal với `String(Number(literal))` nên bắt cả số nguyên lớn, số thập phân quá nhiều chữ số và `1e999`; không cảnh báo khi chỉ đổi cách viết (`1.0`, `1e3`).
+* **JSON lồng rất sâu** (>~3.800 cấp): bộ quét và `JSON.stringify` đệ quy nên tràn stack; đã bọc try/catch và báo lỗi thay vì sập tool. JWT dùng văn bản gốc khi không định dạng được.
+* **Giữ kết quả cũ (SD-10):** JSON, Base64, JWT đều giữ kết quả hợp lệ gần nhất kèm nhãn "(trước đó)"; Base64 không hiện kết quả của chế độ/bảng chữ cái khác.
+* **Base64 Đổi chiều / Ctrl+Enter** dùng input hiện tại (không phải bản đã debounce) nên dán rồi bấm ngay không làm mất nội dung.
+* **JSON > 200.000 ký tự:** không tự cập nhật; hiện `Notice` "bấm Format", ẩn huy hiệu hợp lệ và gắn nhãn "Kết quả trước đó".
+* **UUID:** `crypto.randomUUID`, dự phòng `getRandomValues` (đặt bit version/variant), không bao giờ `Math.random`.
+
+**Cổng QA và review độc lập:**
+* `qa-engineer`: verdict ban đầu FAIL (3 lỗi: JWT mất kết quả cũ; Base64 hiện kết quả của chế độ cũ; Base64 thiếu nhãn "trước đó"); đã sửa; thêm 46 test độc lập (`tools.qa.test.tsx`).
+* `tech-lead-reviewer`: APPROVE WITH MINOR FIXES. MEDIUM: JSON lồng sâu làm sập tool; Base64 Swap/Ctrl+Enter có thể xóa nội dung vừa dán; JSON lớn hiện kết quả cũ như hiện tại; test "hostile input" chỉ kiểm giá trị đầu. LOW: CodeEditor có thể mở rỗng nếu `value` đổi khi chunk ngôn ngữ đang tải; số vượt phạm vi/độ chính xác thập phân; sai khác thiết kế chưa ghi. Tất cả đã xử lý (sai khác thiết kế ghi ở Design System §12, chờ duyệt).
+
+**Lỗi tìm thấy khi chạy thật:** vị trí lỗi JSON (trên), vùng chạm mobile < 40px.
+
+**Còn thiếu (ghi nhận):** e2e Playwright vẫn chưa có nên SD-7 (không request ngoài), SD-9 (localStorage tắt) và hydration chỉ được kiểm tay và bằng test đơn vị; CodeEditor trong test là textarea giả nên hành vi `goTo` và CRLF của CodeMirror chỉ kiểm tay; hiệu năng chưa đo (M7).

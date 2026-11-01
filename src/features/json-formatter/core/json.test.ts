@@ -8,7 +8,7 @@ import {
 import {
   extractPosition,
   findErrorOffset,
-  findUnsafeIntegers,
+  findLossyNumbers,
   formatJson,
   locate,
   minifyJson,
@@ -119,27 +119,37 @@ describe("error position across engines", () => {
   });
 });
 
-describe("findUnsafeIntegers (R6)", () => {
+describe("findLossyNumbers (R6)", () => {
   it.each(unsafeIntegerJson)("flags: $name", ({ input }) => {
-    expect(findUnsafeIntegers(input).length).toBeGreaterThan(0);
+    expect(findLossyNumbers(input).length).toBeGreaterThan(0);
   });
 
   it.each(safeIntegerJson)("does not flag: $name", ({ input }) => {
-    expect(findUnsafeIntegers(input)).toEqual([]);
+    expect(findLossyNumbers(input)).toEqual([]);
   });
 
   it("returns the literals as written, once each, including negatives", () => {
     expect(
-      findUnsafeIntegers("[12345678901234567890, -9007199254740993, 12345678901234567890]"),
+      findLossyNumbers("[12345678901234567890, -9007199254740993, 12345678901234567890]"),
     ).toEqual(["12345678901234567890", "-9007199254740993"]);
   });
 
   it("ignores digits inside strings, even with escaped quotes", () => {
-    expect(findUnsafeIntegers('{"k":"a\\"12345678901234567890"}')).toEqual([]);
+    expect(findLossyNumbers('{"k":"a\\"12345678901234567890"}')).toEqual([]);
   });
 
-  it("does not flag decimals or exponents that merely look long", () => {
-    expect(findUnsafeIntegers("[12345678901234567890.5, 1e999]")).toEqual([]);
+  it("flags decimals with too many digits and numbers beyond the float range", () => {
+    expect(findLossyNumbers("[12345678901234567890.5, 1e999, 0.1234567890123456789]")).toEqual([
+      "12345678901234567890.5",
+      "1e999",
+      "0.1234567890123456789",
+    ]);
+  });
+
+  it("does not flag spelling-only changes or exactly representable numbers", () => {
+    expect(
+      findLossyNumbers("[1.0, 1e3, 0.1, 3.141592653589793, -0, 0, 1E+2, 2.50, 9007199254740991]"),
+    ).toEqual([]);
   });
 });
 
@@ -219,5 +229,29 @@ describe("findErrorOffset (engine-independent error location)", () => {
     }
     expect(valid).toBeGreaterThan(20); // the mutations must exercise both outcomes
     expect(invalid).toBeGreaterThan(100);
+  });
+});
+
+describe("very deep nesting does not crash (review finding 1)", () => {
+  const deepValid = "[".repeat(10_000) + "]".repeat(10_000);
+  const deepInvalid = "[".repeat(10_000);
+
+  it("reports a clear processing error instead of throwing when formatting a valid document", () => {
+    for (const run of [() => formatJson(deepValid, 2), () => minifyJson(deepValid)]) {
+      expect(run).not.toThrow();
+      const result = run();
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.kind).toBe("processing");
+        expect(result.error.message).toContain("lồng quá sâu");
+      }
+    }
+  });
+
+  it("reports invalid deeply nested input without throwing", () => {
+    expect(() => parseJson(deepInvalid)).not.toThrow();
+    const result = parseJson(deepInvalid);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.kind).toBe("validation");
   });
 });

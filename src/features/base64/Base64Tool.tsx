@@ -47,9 +47,12 @@ export function Base64Tool() {
   const error = !result.ok && source !== "" ? result.error : null;
   const position = error?.position;
 
+  // Uses the current input, not the debounced one: pasting then pressing Ctrl+Enter must never wipe the paste.
   const swap = () => {
-    if (!result.ok) return;
-    setInput(result.value);
+    if (input === "") return;
+    const current = convert(input, mode, urlSafe);
+    if (!current.ok) return;
+    setInput(current.value);
     setMode(encoding ? "decode" : "encode");
   };
   const clear = () => {

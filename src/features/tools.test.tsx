@@ -82,7 +82,11 @@ describe("JSON Formatter", () => {
   it("warns about integers that lose precision", async () => {
     renderTool(<JsonFormatter />);
     type("Ô nhập JSON", '{"id": 12345678901234567890}');
-    expect(await screen.findByText(/mất độ chính xác: 12345678901234567890/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        /mất độ chính xác hoặc vượt phạm vi khi định dạng: 12345678901234567890/,
+      ),
+    ).toBeInTheDocument();
   });
 
   it("Clear offers Undo instead of asking for confirmation", async () => {
@@ -134,12 +138,14 @@ describe("Base64 tool", () => {
   it("labels the two sides by mode so input and output are never confused", async () => {
     const user = userEvent.setup();
     renderTool(<Base64Tool />);
-    expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toEqual(
-      expect.arrayContaining(["Văn bản", "Base64"]),
-    );
+    const sides = () =>
+      screen
+        .getAllByRole("heading", { level: 2 })
+        .slice(0, 2)
+        .map((heading) => heading.textContent);
+    expect(sides()).toEqual(["Văn bản", "Base64"]);
     await user.click(screen.getByRole("radio", { name: "Giải mã" }));
-    const headings = screen.getAllByRole("region").map((r) => r.getAttribute("aria-labelledby"));
-    expect(headings.length).toBeGreaterThan(1);
+    expect(sides()).toEqual(["Base64", "Văn bản"]);
   });
 
   it("reports invalid Base64 with its position and does not crash", async () => {

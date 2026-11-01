@@ -381,5 +381,10 @@ Skill `frontend-design` thiên về thiết kế có cá tính, tránh "mặc đ
 | 2026-11-01 | Interaction | Phím tắt `/`, `Ctrl/Cmd+Enter`, `Ctrl/Cmd+Shift+C` (D4) | Quy trình nhanh cho dev | Đã duyệt (2026-11-01) |
 | 2026-11-01 | Visual | Giữ Inter + indigo (D5) | Đã duyệt trước đó; có thể đổi sau | Đã duyệt |
 | 2026-11-01 | Scope | Bỏ Feedback entry point khỏi tool page (Feedback hoãn) | Quyết định Q1 | Đã duyệt |
+| 2026-11-01 | Interaction | Bỏ phím tắt `Ctrl/Cmd+Shift+C` (copy output) ở D4 | Trùng phím chọn phần tử của DevTools trên Chrome, Edge, Firefox; thiết kế yêu cầu kiểm xung đột trước khi chốt. Giữ `Ctrl/Cmd+Enter` và `/` | Chờ duyệt |
+| 2026-11-01 | Layout | JWT: ô token là `Textarea` 4 dòng, chưa tô màu 3 phần (layouts.md §4.3) | Đủ dùng và tránh trộn màu với nội dung; tô màu 3 phần để M7 nếu cần | Chờ duyệt |
+| 2026-11-01 | Layout | UUID: không ảo hóa danh sách khi >200 dòng (layouts.md §4.4, plan 3.4) | 1.000 dòng nhẹ, hiệu năng chấp nhận được; sẽ đo ở M7 và thêm ảo hóa nếu cần | Chờ duyệt |
+| 2026-11-01 | Components | Thêm `Checkbox`, `Notice` (cảnh báo/thông tin thường trực), `SplitWorkspace` | `Notice` cho cảnh báo JWT, số mất độ chính xác, tài liệu lớn; `SplitWorkspace` là bố cục Input\|Output dùng chung | Chờ duyệt |
+| 2026-11-01 | Behaviour | JSON trên 200.000 ký tự không tự cập nhật; hiện thông báo "bấm Format" và nhãn "Kết quả trước đó" | Tránh đơ UI; làm rõ kết quả đang cũ (review M3) | Chờ duyệt |
 
 *(Bổ sung dòng mới cho mỗi sai khác trong quá trình thiết kế/implement.)*

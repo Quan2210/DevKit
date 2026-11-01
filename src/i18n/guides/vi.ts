@@ -10,7 +10,7 @@ export const viGuides: Record<string, GuideBlock[]> = {
     {
       type: "ul",
       items: [
-        "Dán JSON vào ô bên trái, kết quả tự cập nhật sau khi bạn ngừng gõ.",
+        "Dán JSON vào ô bên trái, kết quả tự cập nhật sau khi bạn ngừng gõ (với tài liệu trên 200.000 ký tự, hãy bấm Format hoặc Minify).",
         "Chọn Format để làm đẹp (2 hoặc 4 dấu cách) hoặc Minify để nén thành một dòng.",
         "Khi JSON sai, thông báo lỗi nêu vị trí dòng và cột; bấm vào vị trí để nhảy tới đó.",
         "Ctrl+Enter (hoặc Cmd+Enter) chạy lại thao tác đang chọn.",
@@ -20,7 +20,8 @@ export const viGuides: Record<string, GuideBlock[]> = {
     {
       type: "ul",
       items: [
-        "Số nguyên lớn hơn 9007199254740991 không biểu diễn chính xác được bằng JSON.parse; công cụ sẽ cảnh báo thay vì âm thầm làm tròn.",
+        "Số có quá nhiều chữ số có nghĩa hoặc vượt phạm vi số thực 64-bit (ví dụ 12345678901234567890 hoặc 1e999) không biểu diễn chính xác được; công cụ cảnh báo thay vì âm thầm làm tròn.",
+        "JSON lồng nhau hơn khoảng 4.000 cấp có thể không định dạng được; công cụ báo lỗi thay vì treo.",
         "Cách viết số được chuẩn hóa (1.0 thành 1, 1e3 thành 1000); giá trị không đổi.",
         "Nếu có hai key trùng tên trong một đối tượng, chỉ giá trị cuối cùng được giữ.",
         "Dữ liệu được xử lý ngay trong trình duyệt, không gửi đi đâu.",

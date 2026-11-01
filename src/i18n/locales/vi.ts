@@ -111,8 +111,11 @@ export const vi = {
   "json.empty": "Chưa có JSON để xử lý.",
   "json.invalid": "JSON không hợp lệ.",
   "json.location": "Dòng {line}, cột {column}",
-  "json.unsafeInteger":
-    "Số nguyên quá lớn nên có thể mất độ chính xác: {numbers}. JSON.parse chỉ giữ chính xác tới 9007199254740991.",
+  "json.lossyNumber":
+    "Số có thể mất độ chính xác hoặc vượt phạm vi khi định dạng: {numbers}. JSON.parse chỉ giữ chính xác số biểu diễn được bằng số thực 64-bit.",
+  "json.largeNotice":
+    "Tài liệu lớn (trên 200.000 ký tự): bấm Format hoặc Minify để cập nhật kết quả.",
+  "json.tooDeep": "Không định dạng được: JSON lồng quá sâu.",
   "json.sample":
     '{"name":"DevKit","tools":["json","jwt","base64","uuid"],"private":true,"version":1.5}',
 

@@ -16,7 +16,7 @@ import { getGuide } from "../../i18n";
 import { formatNumber } from "../../i18n/format";
 import { useT } from "../../i18n/useT";
 import { getTool } from "../../registry/tools.meta";
-import { findUnsafeIntegers, formatJson, minifyJson, type JsonIndent } from "./core/json";
+import { findLossyNumbers, formatJson, minifyJson, type JsonIndent } from "./core/json";
 
 /** Above this size the result only updates when the user presses a button (docs/04 §7.1). */
 const AUTO_LIMIT = 200_000;
@@ -38,12 +38,17 @@ export function JsonFormatter() {
   // A button press applies the current text at once; otherwise small inputs follow typing after a pause.
   const source = manual === input ? input : input.length <= AUTO_LIMIT ? debounced : (manual ?? "");
   const blank = source.trim() === "";
+  // Large inputs only update on a button press, so after an edit the shown result is out of date.
+  const pending = input.length > AUTO_LIMIT && manual !== input;
 
   const result = useMemo(
     () => (blank ? null : mode === "format" ? formatJson(source, indent) : minifyJson(source)),
     [blank, source, mode, indent],
   );
-  const unsafe = useMemo(() => (blank ? [] : findUnsafeIntegers(source)), [blank, source]);
+  const lossy = useMemo(
+    () => (blank || pending ? [] : findLossyNumbers(source)),
+    [blank, pending, source],
+  );
 
   // Keep the last valid output while the input is broken; drop it when the input is emptied.
   if (result?.ok && result.value !== lastGood) setLastGood(result.value);
@@ -68,7 +73,9 @@ export function JsonFormatter() {
 
   useHotkeys([{ key: "Enter", mod: true, allowInInput: true, handler: () => run(mode) }]);
 
-  const error = result && !result.ok ? result.error : null;
+  const current = pending ? null : result;
+  const error = current && !current.ok ? current.error : null;
+  const previous = (error !== null || pending) && lastGood !== "";
   const position = error?.position;
 
   return (
@@ -95,7 +102,10 @@ export function JsonFormatter() {
           <Segmented<"2" | "4">
             label={t("json.indent")}
             value={String(indent) as "2" | "4"}
-            onChange={(value) => setIndent(Number(value) as JsonIndent)}
+            onChange={(value) => {
+              setIndent(Number(value) as JsonIndent);
+              setManual(input);
+            }}
             options={[
               { value: "2", label: t("json.indent2") },
               { value: "4", label: t("json.indent4") },
@@ -110,7 +120,7 @@ export function JsonFormatter() {
         </>
       }
       notice={
-        error || cleared !== null || unsafe.length > 0 ? (
+        error || cleared !== null || lossy.length > 0 || pending ? (
           <div className="space-y-2">
             {error ? (
               <ErrorBanner
@@ -126,9 +136,10 @@ export function JsonFormatter() {
                 }
               />
             ) : null}
-            {unsafe.length > 0 ? (
+            {pending ? <Notice tone="info">{t("json.largeNotice")}</Notice> : null}
+            {lossy.length > 0 ? (
               <Notice tone="warning">
-                {t("json.unsafeInteger", { numbers: unsafe.slice(0, 3).join(", ") })}
+                {t("json.lossyNumber", { numbers: lossy.slice(0, 3).join(", ") })}
               </Notice>
             ) : null}
             {cleared !== null ? (
@@ -143,9 +154,9 @@ export function JsonFormatter() {
       }
       status={
         <>
-          {result ? (
-            <StatusBadge tone={result.ok ? "success" : "danger"}>
-              {result.ok ? t("status.valid") : t("status.invalid")}
+          {current ? (
+            <StatusBadge tone={current.ok ? "success" : "danger"}>
+              {current.ok ? t("status.valid") : t("status.invalid")}
             </StatusBadge>
           ) : null}
           <span className="tabular-nums">
@@ -169,7 +180,7 @@ export function JsonFormatter() {
         }
         right={
           <Panel
-            title={error && lastGood ? t("json.outputPrevious") : t("json.output")}
+            title={previous ? t("json.outputPrevious") : t("json.output")}
             actions={<CopyButton text={lastGood} disabled={lastGood === ""} />}
           >
             <CodeEditor

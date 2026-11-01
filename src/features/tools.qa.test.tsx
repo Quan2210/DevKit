@@ -73,8 +73,10 @@ describe("QA JSON Formatter (PRD 3.1)", () => {
     expect(container.querySelector("img")).toBeNull();
   });
 
-  it("TC-J4 does not crash on every kind of garbage and always shows text, not only colour (AC 3.1-2, 4.3)", async () => {
+  it("TC-J4 does not crash on every kind of garbage and always shows text, not only colour (AC 3.1-2, 4.3)", () => {
+    vi.useFakeTimers();
     renderTool(<JsonFormatter />);
+    const settle = () => act(() => void vi.advanceTimersByTime(400));
     for (const bad of [
       "{",
       "}",
@@ -87,9 +89,14 @@ describe("QA JSON Formatter (PRD 3.1)", () => {
       "\\",
       '"abc',
     ]) {
+      // Empty first so the previous value's alert cannot satisfy the assertion for this one.
+      type("Ô nhập JSON", "");
+      settle();
+      expect(screen.queryByRole("alert"), `before ${JSON.stringify(bad)}`).toBeNull();
       type("Ô nhập JSON", bad);
-      const alert = await screen.findByRole("alert");
-      expect(alert.textContent).toMatch(/JSON không hợp lệ/);
+      settle();
+      const alert = screen.getByRole("alert");
+      expect(alert.textContent, JSON.stringify(bad)).toMatch(/JSON không hợp lệ/);
       expect(screen.getByText("Không hợp lệ")).toBeInTheDocument();
     }
   });
@@ -254,10 +261,11 @@ describe("QA Base64 (PRD 3.3)", () => {
     }
   }, 30000);
 
-  it("TC-B2 invalid Base64 never crashes for hostile inputs (AC 3.3-2)", async () => {
-    const user = userEvent.setup();
+  it("TC-B2 invalid Base64 never crashes for hostile inputs (AC 3.3-2)", () => {
+    vi.useFakeTimers();
     renderTool(<Base64Tool />);
-    await user.click(screen.getByRole("radio", { name: "Giải mã" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Giải mã" }));
+    const settle = () => act(() => void vi.advanceTimersByTime(400));
     for (const bad of [
       "A",
       "====",
@@ -268,8 +276,12 @@ describe("QA Base64 (PRD 3.3)", () => {
       "/w==/w==",
       "AAAA\u0000",
     ]) {
+      type("Ô nhập", "");
+      settle();
+      expect(screen.queryByRole("alert"), `before ${JSON.stringify(bad)}`).toBeNull();
       type("Ô nhập", bad);
-      await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
+      settle();
+      expect(screen.getByRole("alert"), JSON.stringify(bad)).toBeInTheDocument();
       expect(screen.getByText("Không hợp lệ")).toBeInTheDocument();
     }
   });
@@ -635,5 +647,40 @@ describe("QA privacy (SD-7, PRD 4.2) across all four tools", () => {
     }
     for (const call of setItem.mock.calls) expect(JSON.stringify(call)).not.toContain(secret);
     vi.unstubAllGlobals();
+  });
+});
+
+describe("review regressions", () => {
+  it("Base64 Ctrl+Enter right after a change swaps the current text and never wipes it (finding 2)", async () => {
+    renderTool(<Base64Tool />);
+    type("Ô nhập", "foo");
+    await waitFor(() => expect(field("Kết quả").value).toBe("Zm9v"));
+    type("Ô nhập", "bar"); // within the debounce window
+    fireEvent.keyDown(document, { key: "Enter", ctrlKey: true });
+    expect(field("Ô nhập").value).toBe("YmFy"); // encoding of "bar", the newest input
+    expect(screen.getByRole("radio", { name: "Giải mã" })).toBeChecked();
+  });
+
+  it("Base64 Ctrl+Enter on a fresh page with just-pasted text keeps the text (finding 2)", () => {
+    renderTool(<Base64Tool />);
+    type("Ô nhập", "pasted");
+    fireEvent.keyDown(document, { key: "Enter", ctrlKey: true });
+    expect(field("Ô nhập").value).toBe("cGFzdGVk");
+  });
+
+  it("JSON over 200k characters does not show a stale valid badge after an edit (finding 3)", async () => {
+    const user = userEvent.setup();
+    renderTool(<JsonFormatter />);
+    const big = JSON.stringify({ filler: "x".repeat(200_100) });
+    type("Ô nhập JSON", big);
+    expect(screen.getByRole("note")).toHaveTextContent("Tài liệu lớn");
+    expect(screen.queryByText("Hợp lệ")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Format" }));
+    expect(screen.getByText("Hợp lệ")).toBeInTheDocument();
+    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+    type("Ô nhập JSON", big.slice(0, -1)); // now invalid, but nothing re-ran yet
+    expect(screen.queryByText("Hợp lệ")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Kết quả trước đó" })).toBeInTheDocument();
+    expect(screen.getByRole("note")).toHaveTextContent("Tài liệu lớn");
   });
 });

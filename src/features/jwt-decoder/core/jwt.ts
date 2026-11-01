@@ -19,7 +19,10 @@ export interface DecodedJwt {
 const failure = (key: MessageKey, params?: MessageParams, detail?: string) =>
   fail<ToolError>({ kind: "validation", message: t(key, params), detail });
 
-function decodePart(segment: string, part: JwtPart): Result<Record<string, unknown>, ToolError> {
+function decodePart(
+  segment: string,
+  part: JwtPart,
+): Result<{ value: Record<string, unknown>; text: string }, ToolError> {
   const label = t(part === "header" ? "jwt.header" : "jwt.payload");
   const text = decode(segment, { urlSafe: true });
   if (!text.ok) return failure("jwt.invalidPart", { part: label }, text.error.message);
@@ -37,7 +40,16 @@ function decodePart(segment: string, part: JwtPart): Result<Record<string, unkno
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     return failure("jwt.notObject", { part: label });
   }
-  return ok(value as Record<string, unknown>);
+  return ok({ value: value as Record<string, unknown>, text: text.value });
+}
+
+/** Pretty JSON, or the original text when the value is too deeply nested for JSON.stringify. */
+function pretty(value: unknown, original: string): string {
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return original;
+  }
 }
 
 /** Decode a compact JWT (three dot-separated parts). Decoding only: the signature is not checked. */
@@ -51,11 +63,11 @@ export function decodeJwt(token: string): Result<DecodedJwt, ToolError> {
   if (!payload.ok) return payload;
 
   return ok({
-    header: header.value,
-    payload: payload.value,
+    header: header.value.value,
+    payload: payload.value.value,
     signature: parts[2]!,
-    headerJson: JSON.stringify(header.value, null, 2),
-    payloadJson: JSON.stringify(payload.value, null, 2),
+    headerJson: pretty(header.value.value, header.value.text),
+    payloadJson: pretty(payload.value.value, payload.value.text),
   });
 }
 
