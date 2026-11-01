@@ -1,0 +1,7 @@
+build
+stage
+.react-router
+docs
+package-lock.json
+CLAUDE.md
+DevKit_Requirements_and_Design_System_v1.md

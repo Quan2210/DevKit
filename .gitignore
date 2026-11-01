@@ -1,7 +1,12 @@
-﻿node_modules/
+node_modules/
 dist/
+build/
+stage/
+.react-router/
 .env
 .env.*
+!.env.example
 .DS_Store
 Thumbs.db
-
+playwright-report/
+test-results/

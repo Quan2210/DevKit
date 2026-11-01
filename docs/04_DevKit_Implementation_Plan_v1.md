@@ -380,3 +380,9 @@ Xác minh từ mã nguồn thật `react-router@8.5.1`/`@react-router/dev@8.5.1`
 # Phụ lục B — Kết quả spike M0.1 (2026-11-01)
 
 Chọn **phương án A** (React Router framework mode + prerender). Đã chạy thật trên bộ phiên bản của plan (`react-router@8.5.1`, `vite@8.3.5`, `typescript@6.0.3`); CSP dạng `<meta>` và dạng header đều hydrate sạch, đối chứng âm (không hash) xác nhận F-1. Phát hiện kéo theo: bước ghép `stage` (1.14d), `BASE_URL` cho theme-init, `base`=`basename`, rủi ro K11, ghi chú Git Bash trên Windows. Chi tiết và giới hạn của spike: `docs/design/ssg-spike.md`.
+
+## Phụ lục B (tiếp) — M0.2/M0.3 đã triển khai (nhánh `feat/m0-scaffold`)
+
+* Đã tạo: `package.json` (npm, `engines.node >=22.22.0`), `tsconfig.json` (strict), `vite.config.ts`, `react-router.config.ts`, `config/env.mjs` (`getBase()` dùng chung cho Vite, React Router và script build), `eslint.config.js` (ESLint 9 + typescript-eslint + react-hooks + jsx-a11y; cấm `eval`/`new Function`), `.prettierrc`, `vitest.config.ts` (jsdom), `playwright.config.ts`, `.env.example`, `.nvmrc`, `.gitignore`, `scripts/stage.mjs`, `scripts/gen-csp.mjs` (sinh luôn `_headers`; bỏ CSP header và dùng `X-Frame-Options` khi vượt 1.900 ký tự, theo K11), app tối thiểu (`root.tsx`, Home và 404 placeholder, `theme-init.js`) và `.github/workflows/ci.yml`.
+* CI hiện chạy: `npm ci` → typecheck → lint → test → build (`VITE_BASE=/DevKit/`). **Chưa có** `check:seo`, `check:bundle`, e2e Playwright, `buildUrl`, registry: thuộc M1 (Change 1.4b, 1.14).
+* Rủi ro mới **K12**: ESLint 9 đã hết hỗ trợ chính thức (npm báo deprecated) nhưng ESLint 10 chưa dùng được vì `eslint-plugin-jsx-a11y` chỉ hỗ trợ ≤ 9. Theo dõi: nâng lên 10 khi plugin hỗ trợ, hoặc thay bằng cấu hình tương đương.
