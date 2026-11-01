@@ -451,3 +451,11 @@ Chọn **phương án A** (React Router framework mode + prerender). Đã chạy
 **Kiểm tra bảo mật:** 45 vector XSS (script, handler `on*`, `javascript:`/`vbscript:`/`data:`, SVG/MathML, iframe/object/embed, style/`@import`, form, srcset/picture, clobbering id, mutation XSS qua noscript/CDATA/comment...) và toàn bộ fixture, mỗi cái ở cả hai chế độ ảnh, đều qua kiểm tra **cấu trúc trên DOM thật** (không phần tử cấm, không thuộc tính `on*`/`style`/`srcset`, không URL nguy hiểm, mọi `id`/`name` có tiền tố, chỉ `<a href>` được trỏ ra ngoài) chứ không chỉ so chuỗi. Trên trình duyệt thật: không `<script>`, `__pwned` không được đặt, 0 request ngoài origin, worker chạy dưới CSP.
 
 **Chưa làm:** đồng bộ cuộn editor và preview; gom nút phụ vào menu "…" trên mobile; e2e Playwright.
+
+**Code review độc lập (tech-lead-reviewer): REQUEST CHANGES, đã xử lý.** Không có lỗ hổng XSS hay rò rỉ mạng. Các phát hiện và cách sửa:
+- **F-1 (cao):** tài liệu ≤200.000 ký tự render trên main thread (đo 0,75 s ở 199 KB; đầu vào bệnh lý treo tab hàng chục giây). Đã hạ `WORKER_THRESHOLD` xuống 5.000 và dùng lại worker khi rảnh (chỉ terminate khi có render đang chạy). Đã kiểm tra trên trình duyệt thật: tài liệu ~20 KB chạy qua worker dưới CSP.
+- **F-2:** Copy HTML / Tải .html luôn render trên main thread, không bắt lỗi. Nay dùng lại kết quả preview nếu còn mới, nếu không thì render bằng worker riêng (`renderNow`); lỗi hiện thông báo `markdown.exportFailed`.
+- **F-3:** checkbox task-list không có tên truy cập. Thêm `rehypeTaskLabels` (đặt `aria-label` = chữ của mục, sau sanitize) + test.
+- **L-1:** thêm nút "Xóa bản nháp". **L-2:** timer thông báo được dọn khi unmount và khi copy liên tiếp.
+- **Ghi nhận sai khác kế hoạch F-12:** `clobberPrefix: ""` ở sanitize (footnote vẫn có tiền tố `user-content-` từ remark-rehype) để liên kết chú thích không bị tiền tố đôi; mọi `id` đều do hệ thống sinh nên không clobber được DOM global.
+- **Để lại, theo dõi:** L-3 (mở rộng lint `innerHTML` ra ngoài `*.tsx` và kiểm tra worker bằng smoke test e2e ở M7), L-4 (đọc/parse bản nháp localStorage mỗi lần render khi bật nháp), HTML xuất ra chưa có `.sr-only` nên tiêu đề "Chú thích" hiện thấy.

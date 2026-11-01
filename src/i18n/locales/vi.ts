@@ -215,6 +215,7 @@ export const vi = {
   "markdown.fileNotText": "File không phải văn bản UTF-8.",
   "markdown.fileReadFailed": "Không đọc được file.",
   "markdown.renderFailed": "Không hiển thị được bản xem trước.",
+  "markdown.exportFailed": "Không xuất được HTML. Hãy thử với nội dung ngắn hơn.",
   "markdown.imageBlocked": "Ảnh bị chặn: {alt}",
   "markdown.imageBlockedNoAlt": "Ảnh bị chặn",
   "markdown.externalTitle": "Tải ảnh từ URL ngoài?",

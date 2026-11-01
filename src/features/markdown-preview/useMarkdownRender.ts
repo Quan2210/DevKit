@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDebounced } from "../../hooks/useDebounced";
+import type { RenderResult } from "./core/pipeline";
 import type { HeadingEntry } from "./core/plugins";
 import { RenderCancelled, createRenderer } from "./core/renderer";
 
@@ -11,6 +12,8 @@ export interface MarkdownRenderState {
   failed: boolean;
   /** The shown preview is older than the current input. */
   pending: boolean;
+  /** Render outside the preview cycle (used by export when the preview is not current). */
+  renderNow: (source: string, allowExternalImages: boolean) => Promise<RenderResult>;
 }
 
 interface Rendered {
@@ -45,9 +48,12 @@ export function useMarkdownRender(
 ): MarkdownRenderState {
   const debounced = useDebounced(source, debounceFor(source.length));
   const [renderer] = useState(createRenderer);
+  // Export renders on its own worker so it never cancels the preview's render.
+  const [exporter] = useState(createRenderer);
   const [rendered, setRendered] = useState<Rendered>(EMPTY);
 
   useEffect(() => () => renderer.dispose(), [renderer]);
+  useEffect(() => () => exporter.dispose(), [exporter]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -87,5 +93,6 @@ export function useMarkdownRender(
     droppedHtml: rendered.droppedHtml,
     failed: rendered.failed,
     pending: enabled && !upToDate,
+    renderNow: (text, allow) => exporter.render(text, { allowExternalImages: allow }),
   };
 }

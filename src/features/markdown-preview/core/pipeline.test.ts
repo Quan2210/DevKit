@@ -342,4 +342,10 @@ describe("robustness", () => {
     const source = "# a\n\n```js\nlet x\n```\n\n[l](https://e.com)";
     expect((await renderMarkdown(source)).html).toBe((await renderMarkdown(source)).html);
   });
+
+  it("names task-list checkboxes after their item text", async () => {
+    const { html } = await renderMarkdown("- [ ] buy milk\n- [x] call **Ann**\n");
+    expect(html).toContain('aria-label="buy milk"');
+    expect(html).toContain('aria-label="call Ann"');
+  });
 });

@@ -129,6 +129,27 @@ describe("createRenderer", () => {
     await expect(second).resolves.toMatchObject({ html: "<p>2</p>" });
   });
 
+  it("reuses an idle worker and sends anything beyond a few KB to it", async () => {
+    vi.stubGlobal("Worker", FakeWorker);
+    const renderer = createRenderer();
+    const medium = "# t\n\n" + "word ".repeat(2_000); // ~10 KB, far below the old 200,000 limit
+    const first = renderer.render(medium);
+    FakeWorker.instances[0]!.reply({
+      id: 1,
+      ok: true,
+      result: { html: "<p>1</p>", headings: [], droppedHtml: false },
+    });
+    await first;
+    const second = renderer.render(medium + "x");
+    expect(FakeWorker.instances).toHaveLength(1);
+    FakeWorker.instances[0]!.reply({
+      id: 2,
+      ok: true,
+      result: { html: "<p>2</p>", headings: [], droppedHtml: false },
+    });
+    await expect(second).resolves.toMatchObject({ html: "<p>2</p>" });
+  });
+
   it("cancel() stops in-flight work and dispose() is safe to repeat", async () => {
     vi.stubGlobal("Worker", FakeWorker);
     const renderer = createRenderer();
@@ -148,7 +169,7 @@ describe("createRenderer", () => {
     expect(await failed).toBeInstanceOf(Error);
 
     const crashed = renderer.render(big).catch((error: unknown) => error);
-    FakeWorker.instances[1]!.onerror?.();
+    FakeWorker.instances[0]!.onerror?.();
     expect(await crashed).toBeInstanceOf(Error);
   });
 

@@ -1,8 +1,11 @@
 import type { WorkerRequest, WorkerResponse } from "./markdown.worker";
 import { renderMarkdown, type RenderOptions, type RenderResult } from "./pipeline";
 
-/** Above this size the pipeline runs in a Web Worker so typing never waits on a render (docs/04 §7.1). */
-export const WORKER_THRESHOLD = 200_000;
+/**
+ * Above this size the pipeline runs in a Web Worker so typing never waits on a render (docs/04 §7.1).
+ * Rendering cost is roughly 4 ms per KB, so anything beyond a few KB would be a visible stall.
+ */
+export const WORKER_THRESHOLD = 5_000;
 /** Give up on a render that takes longer than this; the previous preview stays. */
 export const RENDER_TIMEOUT_MS = 60_000;
 
@@ -26,9 +29,10 @@ interface Pending {
 }
 
 /**
- * Small inputs render on the main thread. Large ones go to a worker, created lazily; starting a
- * new large render or calling `cancel()` terminates the old worker, because a render in progress
- * cannot be interrupted any other way and a stale one would delay the current one.
+ * Tiny inputs render on the main thread. Everything else goes to a worker, created lazily and reused
+ * while idle. Starting a render or calling `cancel()` while one is in flight terminates that worker,
+ * because a render in progress cannot be interrupted any other way and a stale one would delay the
+ * current one.
  */
 export function createRenderer(): Renderer {
   let worker: Worker | null = null;
@@ -74,9 +78,9 @@ export function createRenderer(): Renderer {
       if (source.length <= WORKER_THRESHOLD) return renderMarkdown(source, options);
       if (typeof Worker === "undefined") return fallback(source, options);
 
-      stop(new RenderCancelled());
+      if (pending.size > 0) stop(new RenderCancelled());
       try {
-        worker = start();
+        worker ??= start();
       } catch {
         // Construction can throw (blocked module workers, CSP). Never let that escape into React.
         worker = null;

@@ -25,7 +25,6 @@ import { STORAGE_KEYS } from "../../lib/storage";
 import { textStats } from "../../lib/text/stats";
 import { getTool } from "../../registry/tools.meta";
 import { buildHtmlDocument } from "./core/exportHtml";
-import { renderMarkdown } from "./core/pipeline";
 import { checkFileSize, decodeMarkdownFile } from "./core/readFile";
 import { PreviewPane } from "./PreviewPane";
 import { useMarkdownRender } from "./useMarkdownRender";
@@ -71,6 +70,7 @@ export function MarkdownPreview() {
   const [dragging, setDragging] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const effectiveView: View = narrow && view === "split" ? "edit" : view;
   const showEditor = effectiveView !== "preview";
@@ -102,8 +102,10 @@ export function MarkdownPreview() {
 
   const flashMessage = (message: string) => {
     setFlash(message);
-    setTimeout(() => setFlash(null), 1500);
+    clearTimeout(flashTimer.current);
+    flashTimer.current = setTimeout(() => setFlash(null), 1500);
   };
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
 
   const toggleDraft = (enabled: boolean) => {
     clearTimeout(draftSaver.current);
@@ -137,9 +139,18 @@ export function MarkdownPreview() {
     edit("");
   };
 
+  /** Reuses the preview when it is current; otherwise renders off the main thread. Null on failure. */
   const exportHtml = async () => {
-    const result = await renderMarkdown(input, { allowExternalImages: allowExternal });
-    return { body: result.html, title: result.headings[0]?.text ?? t("markdown.htmlTitle") };
+    try {
+      const result =
+        showPreview && !rendered.pending && !rendered.failed
+          ? rendered
+          : await rendered.renderNow(input, allowExternal);
+      return { body: result.html, title: result.headings[0]?.text ?? t("markdown.htmlTitle") };
+    } catch {
+      flashMessage(t("markdown.exportFailed"));
+      return null;
+    }
   };
 
   const viewOptions = [
@@ -186,8 +197,11 @@ export function MarkdownPreview() {
           {
             label: t("markdown.copyHtml"),
             onSelect: async () => {
-              const { body } = await exportHtml();
-              flashMessage((await copyText(body)) ? t("action.copied") : t("action.copyFailed"));
+              const exported = await exportHtml();
+              if (!exported) return;
+              flashMessage(
+                (await copyText(exported.body)) ? t("action.copied") : t("action.copyFailed"),
+              );
             },
           },
         ]}
@@ -203,10 +217,11 @@ export function MarkdownPreview() {
           {
             label: t("markdown.downloadHtml"),
             onSelect: async () => {
-              const { body, title } = await exportHtml();
+              const exported = await exportHtml();
+              if (!exported) return;
               downloadText(
                 "document.html",
-                buildHtmlDocument(body, title),
+                buildHtmlDocument(exported.body, exported.title),
                 "text/html;charset=utf-8",
               );
             },
@@ -231,6 +246,18 @@ export function MarkdownPreview() {
         checked={draftEnabled}
         onChange={(event) => toggleDraft(event.target.checked)}
       />
+      {draftEnabled ? (
+        <Button
+          variant="ghost"
+          onClick={() => {
+            clearTimeout(draftSaver.current);
+            setTyped(input); // keep what is on screen, forget only the stored copy
+            removeDraft();
+          }}
+        >
+          {t("markdown.draftClear")}
+        </Button>
+      ) : null}
       <Button variant="ghost" onClick={() => edit(t("markdown.sample"))}>
         {t("action.sample")}
       </Button>

@@ -97,6 +97,31 @@ export function rehypeImagePolicy(options: { allowExternalImages: boolean }) {
   };
 }
 
+/** A disabled task-list checkbox has no label of its own; name it after the item text (generated, so safe). */
+export function rehypeTaskLabels() {
+  return (tree: HastRoot) => {
+    visit(tree, "element", (node: Element) => {
+      if (node.tagName !== "li") return;
+      const box = node.children.find(
+        (child): child is Element =>
+          child.type === "element" &&
+          child.tagName === "input" &&
+          child.properties?.type === "checkbox",
+      );
+      if (!box) return;
+      const text = node.children
+        .filter(
+          (child) =>
+            child !== box && !(child.type === "element" && /^(ul|ol)$/.test(child.tagName)),
+        )
+        .map((child) => toString(child as Element))
+        .join("")
+        .trim();
+      if (text) box.properties = { ...box.properties, ariaLabel: text };
+    });
+  };
+}
+
 /** Heading ids are generated here after sanitizing (safe by construction) with an `md-` prefix, and collected for the TOC. */
 export function rehypeHeadings(state: { headings: HeadingEntry[] }) {
   return (tree: HastRoot) => {

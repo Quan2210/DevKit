@@ -11,6 +11,7 @@ import {
   rehypeImagePolicy,
   rehypeLinkPolicy,
   rehypeNormalizeSchemes,
+  rehypeTaskLabels,
   remarkCountRawHtml,
   type HeadingEntry,
 } from "./plugins";
@@ -57,6 +58,7 @@ export async function renderMarkdown(
     .use(rehypeNormalizeSchemes)
     .use(rehypeSanitize, sanitizeSchema)
     .use(rehypeLinkPolicy)
+    .use(rehypeTaskLabels)
     .use(rehypeImagePolicy, { allowExternalImages })
     .use(rehypeHighlight)
     .use(rehypeHeadings, state)
