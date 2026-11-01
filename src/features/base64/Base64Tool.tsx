@@ -26,13 +26,20 @@ export function Base64Tool() {
   const [mode, setMode] = useState<Base64Mode>("encode");
   const [urlSafe, setUrlSafe] = useState(false);
   const [cleared, setCleared] = useState<string | null>(null);
-  const [lastGood, setLastGood] = useState("");
+  const [kept, setKept] = useState({ value: "", mode: "encode" as Base64Mode, urlSafe: false });
   const editor = useRef<CodeEditorHandle>(null);
   const debounced = useDebounced(input, 200);
   const source = input === "" ? "" : debounced;
 
   const result = useMemo(() => convert(source, mode, urlSafe), [source, mode, urlSafe]);
-  if (result.ok && result.value !== lastGood) setLastGood(result.value);
+  if (
+    result.ok &&
+    (result.value !== kept.value || kept.mode !== mode || kept.urlSafe !== urlSafe)
+  ) {
+    setKept({ value: result.value, mode, urlSafe });
+  }
+  // Output from another mode or alphabet is a different kind of text (QA BUG-2), so it is never shown.
+  const lastGood = kept.mode === mode && kept.urlSafe === urlSafe ? kept.value : "";
 
   const encoding = mode === "encode";
   const inputTitle = encoding ? t("base64.text") : t("base64.base64");
@@ -49,7 +56,7 @@ export function Base64Tool() {
     if (input === "") return;
     setCleared(input);
     setInput("");
-    setLastGood("");
+    setKept({ value: "", mode, urlSafe });
   };
 
   // Ctrl/Cmd+Enter has nothing to run here (conversion is live); swap is the primary action instead.
@@ -152,7 +159,9 @@ export function Base64Tool() {
         }
         right={
           <Panel
-            title={outputTitle}
+            title={
+              error && lastGood !== "" ? t("common.previous", { title: outputTitle }) : outputTitle
+            }
             actions={<CopyButton text={lastGood} disabled={lastGood === ""} />}
           >
             <CodeEditor

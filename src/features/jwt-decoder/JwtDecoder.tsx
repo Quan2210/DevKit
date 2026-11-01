@@ -14,7 +14,7 @@ import { getGuide } from "../../i18n";
 import { formatDateTime, formatRelative } from "../../i18n/format";
 import { useT } from "../../i18n/useT";
 import { getTool } from "../../registry/tools.meta";
-import { decodeJwt, describeTimes, type TimeClaim } from "./core/jwt";
+import { decodeJwt, describeTimes, type DecodedJwt, type TimeClaim } from "./core/jwt";
 import { SAMPLE_TOKEN } from "./sample";
 
 const CLAIM_LABEL = {
@@ -32,12 +32,21 @@ export function JwtDecoder() {
 
   const blank = token.trim() === "";
   const decoded = useMemo(() => (blank ? null : decodeJwt(token)), [blank, token]);
-  const times = useMemo(
-    () => (decoded?.ok ? describeTimes(decoded.value.payload, Math.floor(now / 1000)) : null),
-    [decoded, now],
-  );
   const error = decoded && !decoded.ok ? decoded.error : null;
-  const value = decoded?.ok ? decoded.value : null;
+  const fresh = decoded?.ok ? decoded.value : null;
+
+  // Keep the last good decode while the token is broken (SD-10); it is always labelled "(trước đó)".
+  const [lastGood, setLastGood] = useState<DecodedJwt | null>(null);
+  if (fresh && fresh !== lastGood) setLastGood(fresh);
+  if (blank && lastGood) setLastGood(null);
+  const value = fresh ?? lastGood;
+  const stale = fresh === null && value !== null;
+  const label = (title: string) => (stale ? t("common.previous", { title }) : title);
+
+  const times = useMemo(
+    () => (value ? describeTimes(value.payload, Math.floor(now / 1000)) : null),
+    [value, now],
+  );
 
   const clear = () => {
     if (token === "") return;
@@ -105,7 +114,7 @@ export function JwtDecoder() {
           <>
             <div className="grid gap-4 lg:grid-cols-2">
               <Panel
-                title={t("jwt.header")}
+                title={label(t("jwt.header"))}
                 actions={<CopyButton text={value.headerJson} label={t("jwt.copyHeader")} />}
                 className="h-72"
               >
@@ -117,7 +126,7 @@ export function JwtDecoder() {
                 />
               </Panel>
               <Panel
-                title={t("jwt.payload")}
+                title={label(t("jwt.payload"))}
                 actions={<CopyButton text={value.payloadJson} label={t("jwt.copyPayload")} />}
                 className="h-72"
               >
@@ -131,7 +140,7 @@ export function JwtDecoder() {
             </div>
 
             {times ? (
-              <Panel title={t("jwt.times")}>
+              <Panel title={label(t("jwt.times"))}>
                 <div className="space-y-3 p-3 text-sm">
                   <div className="flex flex-wrap gap-2">
                     {times.expiry === "none" ? (

@@ -94,6 +94,7 @@ export const vi = {
   "common.output": "Kết quả",
   "common.chars": "{count} ký tự",
   "common.mode": "Chế độ",
+  "common.previous": "{title} (trước đó)",
 
   "json.input": "JSON đầu vào",
   "json.output": "Kết quả",
