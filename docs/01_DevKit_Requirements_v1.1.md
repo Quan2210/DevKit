@@ -2,8 +2,8 @@
 
 **Tài liệu:** Product Requirements Document
 **Phiên bản:** 1.1 (tách từ `DevKit_Requirements_and_Design_System_v1`)
-**Trạng thái:** Draft for implementation
-**Phạm vi:** DevKit v1 — Frontend-only, tích hợp Feedback Service
+**Trạng thái:** Approved (2026-11-01) — nguồn sự thật cho System Design và UI/UX Design
+**Phạm vi:** DevKit v1 — Frontend-only (Feedback Service hoãn sang bản sau, quyết định 2026-11-01)
 **Tài liệu liên quan:** [`02_DevKit_Design_System_v1.1.md`](./02_DevKit_Design_System_v1.1.md) (design tokens, component spec, UI/UX workflow)
 
 > PRD này chỉ mô tả **cái gì** cần xây (chức năng, phi chức năng, kiến trúc, kiểm thử, kế hoạch). Mọi quyết định về giao diện, token, component và quy trình thiết kế UI nằm trong Design System.
@@ -168,7 +168,7 @@ Không bắt buộc mọi tool phải có đủ hai cột Input/Output; chọn b
 
 ## 3.8. Color Contrast Checker — P1
 
-**Yêu cầu:** chọn foreground/background; nhập màu theo định dạng hỗ trợ; preview text; tính Contrast Ratio; đánh giá AA Normal 4.5:1, AA Large 3:1, AAA Normal 7:1, AAA Large 4.5:1; đổi foreground/background; gợi ý màu gần nhất đạt ngưỡng (nếu không làm tăng scope đáng kể).
+**Yêu cầu:** chọn foreground/background; nhập màu theo định dạng hỗ trợ; preview text; **hỗ trợ alpha** (quyết định 2026-11-01: foreground/background có alpha < 1 được trộn thành màu đặc trước khi tính; nền trong suốt mặc định tính trên nền trắng, hiển thị rõ ghi chú và màu hiệu dụng, cho đổi nền giả định); tính Contrast Ratio; đánh giá AA Normal 4.5:1, AA Large 3:1, AAA Normal 7:1, AAA Large 4.5:1; đổi foreground/background; gợi ý màu gần nhất đạt ngưỡng (nếu không làm tăng scope đáng kể).
 
 **Acceptance Criteria:**
 - Dùng công thức luminance/contrast của WCAG, không dùng khoảng cách RGB.
@@ -260,6 +260,10 @@ Không bắt buộc mọi tool phải có đủ hai cột Input/Output; chọn b
 - Mobile: một cột, controls dễ thao tác, editor không tràn viewport.
 - Navigation/sidebar có phương án thu gọn trên màn hình nhỏ.
 
+## 4.4b. Ngôn ngữ & i18n *(bổ sung 2026-11-01)*
+- v1 chỉ có giao diện tiếng Việt (`lang="vi"`).
+- Kiến trúc sẵn sàng thêm ngôn ngữ: mọi chuỗi UI, nội dung hướng dẫn và metadata tool dùng khóa dịch; số/ngày định dạng qua `Intl`; thêm ngôn ngữ mới không phải sửa logic tool. Việc thêm ngôn ngữ thứ hai (routing, prerender theo locale) nằm ngoài v1.
+
 ## 4.5. Browser support
 - Chrome, Edge, Firefox, Safari phiên bản hiện đại.
 - Clipboard, Web Crypto, LocalStorage, File API cần fallback hoặc thông báo khi không khả dụng.
@@ -303,7 +307,9 @@ Bố cục tool page (breadcrumb, title, toolbar, workspace, status, help, feedb
 
 ---
 
-# 6. Feedback Service Integration
+# 6. Feedback Service Integration — HOÃN khỏi v1
+
+> **Quyết định 2026-11-01:** Feedback Service sẽ được làm và tích hợp sau. DevKit v1 **không** có form, entry point hay mã gọi Feedback. Nội dung dưới đây giữ làm yêu cầu cho bản tích hợp sau; không thuộc DoD của v1.
 
 **Mục tiêu:** cho phép người dùng gửi góp ý/báo lỗi.
 
@@ -434,11 +440,11 @@ Thực hiện theo *UI/UX Design Workflow* trong Design System §2: dùng skill 
 
 **Phase 3 — P1 tools:** XML, **Markdown Preview**, Color Picker, Palette, Contrast, Gradient.
 
-**Phase 4 — Integration & polish:** Feedback Service; empty/loading/error/success; SEO metadata; responsive + accessibility pass.
+**Phase 4 — Polish:** *(Feedback Service: hoãn)* empty/loading/error/success; SEO metadata; responsive + accessibility pass.
 
 **Phase 5 — Validation & deploy:** functional tests; build/lint/typecheck; smoke test route; deploy static.
 
-**P2:** SQL Formatter chỉ khi P0/P1, feedback, testing, deploy đã xong.
+**P2:** SQL Formatter chỉ khi P0/P1, testing, deploy đã xong.
 
 > Lưu ý quy mô: thêm Markdown Preview (P1) làm tăng khối lượng Week 1. Nếu bị chặn tiến độ, thứ tự cắt giảm đề xuất: SQL Formatter → các tùy chọn nâng cao của Markdown Preview (TOC, sync scroll, export HTML) → gợi ý màu ở Contrast Checker.
 
@@ -455,7 +461,7 @@ Thực hiện theo *UI/UX Design Workflow* trong Design System §2: dùng skill 
 - [ ] Copy/clear/download hoạt động đúng từng tool.
 - [ ] Error/empty/success states được xử lý.
 - [ ] Markdown Preview: sanitize đạt các test bảo mật; ảnh ngoài bị chặn mặc định.
-- [ ] Feedback Service tích hợp theo contract thật.
+- [x] ~~Feedback Service tích hợp theo contract thật~~ — hoãn sang bản sau (2026-11-01), không thuộc DoD v1.
 - [ ] Không có backend/database riêng; không gửi dữ liệu tool lên server.
 - [ ] SEO metadata cơ bản đầy đủ và có trong HTML prerender của từng route (kiểm bằng `curl`, không cần JS); có sitemap.xml, robots.txt.
 - [ ] Build, typecheck, lint, test pass.
