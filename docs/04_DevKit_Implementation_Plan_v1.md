@@ -404,3 +404,16 @@ Chọn **phương án A** (React Router framework mode + prerender). Đã chạy
 4. `serve.mjs` đọc `_headers` một lần lúc khởi động nên giữ hash CSP của bản build cũ: đọc mỗi request.
 
 **Chưa làm / hoãn:** e2e Playwright (mới có file cấu hình, thư mục `tests/e2e` trống) hoãn tới M3 khi có tool đầu tiên; favicon thật (M7, hiện console có 1 lỗi 404 `favicon.ico`); `check:seo` chưa chạy với route tool vì chưa có tool `ready`.
+
+## Phụ lục B (tiếp) — M2 Shared cores đã triển khai (nhánh `feat/m2-shared-cores`)
+
+**Đã làm (Change 2.1–2.3):**
+* `src/lib/text/base64.ts`: `encode`/`encodeBytes`, `decode`/`decodeToBytes`, `toUrlSafe`/`fromUrlSafe` (dùng chung với JWT). Quy tắc: UTF-8 hai chiều (`TextDecoder` `fatal` nên byte không phải UTF-8 báo lỗi thay vì thay ký tự `�`; `ignoreBOM` nên BOM đầu chuỗi được giữ, round-trip chính xác); bỏ qua mọi khoảng trắng và xuống dòng (kiểu MIME); **chấp nhận thiếu padding**, từ chối padding sai (`=` giữa chuỗi, quá 2, độ dài không khớp) và độ dài `mod 4 = 1`; ký tự lạ báo kèm **dòng/cột 1-based**; ở chế độ chuẩn `-`/`_` là lỗi và ngược lại; mã hóa theo khối 32 KB để không tràn call stack (kiểm với 3 MB).
+* `src/lib/text/stats.ts`: từ (`Intl.Segmenter`, có fallback regex), ký tự theo **grapheme** (emoji ghép và dấu kết hợp tính 1), dòng, thời gian đọc làm tròn lên với 200 từ/phút (0 cho văn bản rỗng).
+* Thông báo lỗi Base64 nằm trong catalog i18n (`base64.*`).
+* Corpus dùng chung `tests/fixtures/` (JSON hợp lệ/không hợp lệ/số nguyên vượt an toàn, XML theo PRD 9.3, Markdown cú pháp/bảo mật/ảnh ngoài, JWT, màu và tỉ lệ tương phản WCAG, ca alpha 3.9767) kèm `fixtures.test.ts` kiểm chứng corpus bằng nguồn độc lập (`JSON.parse`, `DOMParser` của jsdom, Base64URL của Node, công thức WCAG tính lại).
+* `.gitattributes` (`* text=auto eol=lf`) để hết cảnh báo CRLF/LF trên Windows và giữ định dạng nhất quán với CI Linux.
+
+**Kiểm tra:** 153 test (12 file) đạt; typecheck, lint, build, `check:seo`, `check:bundle` đạt.
+
+**Lưu ý:** XML, Markdown và JWT trong corpus mới được kiểm ở mức "corpus đúng"; hành vi của từng tool được kiểm ở M3–M5.

@@ -85,6 +85,11 @@ export const vi = {
   "toolshell.status": "Trạng thái",
   "toolshell.toolbar": "Thanh công cụ",
 
+  "base64.invalidChar": "Ký tự không hợp lệ trong Base64: “{char}” ở dòng {line}, cột {column}.",
+  "base64.invalidLength": "Độ dài chuỗi Base64 không hợp lệ.",
+  "base64.invalidPadding": "Dấu “=” đệm không hợp lệ: chỉ được nằm ở cuối chuỗi và tối đa 2 ký tự.",
+  "base64.notUtf8": "Dữ liệu sau khi giải mã không phải văn bản UTF-8 hợp lệ.",
+
   "tool.json.title": "JSON Formatter",
   "tool.json.description": "Format, minify và kiểm tra cú pháp JSON.",
   "tool.xml.title": "XML Formatter",
