@@ -225,7 +225,7 @@ Desktop (≥1024)                         Mobile (<640)
 4. Workspace: input/output hoặc preview.
 5. Inline status / error.
 6. Help / tips ngắn.
-7. Feedback entry point dùng chung.
+7. ~~Feedback entry point dùng chung~~ (hoãn cùng Feedback Service, v1 không có).
 
 Nguyên tắc cấu trúc: đường viền, tiêu đề, nhãn chỉ dùng khi mang thông tin (ví dụ nhãn "Input"/"Output"), không dùng làm trang trí.
 
@@ -375,5 +375,11 @@ Skill `frontend-design` thiên về thiết kế có cá tính, tránh "mặc đ
 | 2026-11-01 | Dark primary | Text trên primary đổi từ trắng sang `#0B1120` | Trắng/`#818CF8` chỉ 2.98:1 | Đã duyệt (2026-11-01) |
 | 2026-11-01 | Components | Thêm Status badge, Markdown prose | Phục vụ tool mới và quy chuẩn trạng thái | Đã duyệt (2026-11-01) |
 | 2026-11-01 | Typography | Self-host font | Tránh request tới CDN bên thứ ba | Đã duyệt (2026-11-01) |
+| 2026-11-01 | Components | Thêm `DeviceStatus` (D1) | Điểm nhấn privacy, gắn hành vi thật | Đã duyệt (2026-11-01) |
+| 2026-11-01 | Components | Thêm `UndoBar` thay hộp thoại xác nhận Clear (D2) | Giảm click, không mất dữ liệu | Đã duyệt (2026-11-01) |
+| 2026-11-01 | Layout | Home dạng `ToolList` thay lưới card (D3) | Quét nhanh, tránh template | Đã duyệt (2026-11-01) |
+| 2026-11-01 | Interaction | Phím tắt `/`, `Ctrl/Cmd+Enter`, `Ctrl/Cmd+Shift+C` (D4) | Quy trình nhanh cho dev | Đã duyệt (2026-11-01) |
+| 2026-11-01 | Visual | Giữ Inter + indigo (D5) | Đã duyệt trước đó; có thể đổi sau | Đã duyệt |
+| 2026-11-01 | Scope | Bỏ Feedback entry point khỏi tool page (Feedback hoãn) | Quyết định Q1 | Đã duyệt |
 
 *(Bổ sung dòng mới cho mỗi sai khác trong quá trình thiết kế/implement.)*
