@@ -1,15 +1,18 @@
 import { Link } from "react-router";
+import { useT } from "../i18n/useT";
+import { notFoundMeta } from "../lib/seo";
 
-export function meta() {
-  return [{ title: "Không tìm thấy trang - DevKit" }];
-}
+export const meta = () => notFoundMeta();
 
-// Placeholder for the M0 scaffold; real copy comes from the i18n catalog in M1.
 export default function NotFound() {
+  const t = useT();
   return (
-    <main>
-      <h1>Không tìm thấy trang</h1>
-      <Link to="/">Về trang chủ</Link>
-    </main>
+    <div className="mx-auto w-full max-w-xl space-y-4">
+      <h1 className="text-2xl font-semibold">{t("notFound.title")}</h1>
+      <p>{t("notFound.body")}</p>
+      <Link to="/" className="inline-flex min-h-9 items-center font-medium text-primary underline">
+        {t("notFound.home")}
+      </Link>
+    </div>
   );
 }

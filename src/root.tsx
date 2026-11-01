@@ -1,4 +1,5 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { ToolErrorBoundary } from "./components/common/ToolErrorBoundary";
 import "./styles/globals.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -23,4 +24,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return <Outlet />;
+}
+
+export function ErrorBoundary() {
+  return <ToolErrorBoundary />;
 }

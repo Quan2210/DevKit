@@ -386,3 +386,21 @@ Chọn **phương án A** (React Router framework mode + prerender). Đã chạy
 * Đã tạo: `package.json` (npm, `engines.node >=22.22.0`), `tsconfig.json` (strict), `vite.config.ts`, `react-router.config.ts`, `config/env.mjs` (`getBase()` dùng chung cho Vite, React Router và script build), `eslint.config.js` (ESLint 9 + typescript-eslint + react-hooks + jsx-a11y; cấm `eval`/`new Function`), `.prettierrc`, `vitest.config.ts` (jsdom), `playwright.config.ts`, `.env.example`, `.nvmrc`, `.gitignore`, `scripts/stage.mjs`, `scripts/gen-csp.mjs` (sinh luôn `_headers`; bỏ CSP header và dùng `X-Frame-Options` khi vượt 1.900 ký tự, theo K11), app tối thiểu (`root.tsx`, Home và 404 placeholder, `theme-init.js`) và `.github/workflows/ci.yml`.
 * CI hiện chạy: `npm ci` → typecheck → lint → test → build (`VITE_BASE=/DevKit/`). **Chưa có** `check:seo`, `check:bundle`, e2e Playwright, `buildUrl`, registry: thuộc M1 (Change 1.4b, 1.14).
 * Rủi ro mới **K12**: ESLint 9 đã hết hỗ trợ chính thức (npm báo deprecated) nhưng ESLint 10 chưa dùng được vì `eslint-plugin-jsx-a11y` chỉ hỗ trợ ≤ 9. Theo dõi: nâng lên 10 khi plugin hỗ trợ, hoặc thay bằng cấu hình tương đương.
+
+## Phụ lục B (tiếp) — M1 Foundation đã triển khai (nhánh `feat/m1-foundation`)
+
+**Đã làm (theo Change 1.1–1.14d):** tokens + Tailwind (xóa bảng màu mặc định, chỉ dùng token), font self-host, `theme-init.js` + `useTheme`, registry (`tools.meta.ts`) với trạng thái `planned`/`ready`, `buildUrl`/`joinUrl`, i18n (`vi` + `translate`/`useT`/`format`), SEO helper (`buildMeta`: OG, Twitter Card, canonical), `storage` an toàn, `useClipboard`/`useHotkeys`/`useDebounced`/`useIsClient`, `latestWins`, `copyText`/`downloadText`, bộ component chung (Button, IconButton, Input/Textarea, Segmented, Panel, StatusBadge, CopyButton, ErrorBanner, UndoBar, Popover, Dialog, DeviceStatus, Skeleton, ClientOnly, ToolList, GuideContent, ToolErrorBoundary), layout (AppShell: sidebar/rail/drawer, ToolShell, ThemeSwitcher), Home và 404, `CodeEditor` (CodeMirror 6 lazy, theo token), script `gen-seo-files`, `check-seo`, `check-bundle`, `serve`, và CI chạy thêm `check:seo`, `check:bundle`. Lint cấm chữ cứng trong JSX và `dangerouslySetInnerHTML` ngoài `SafeHtml`.
+
+**Quyết định/điều chỉnh so với plan:**
+* Registry giữ **cả 11 tool ở trạng thái `planned`**; chỉ tool `ready` mới có route, nav, Home và sitemap. Vì vậy Home hiện ở trạng thái rỗng cho tới M3. Mỗi milestone tool chuyển `status` sang `ready`.
+* `routes.ts`, `react-router.config.ts` và các script Node import trực tiếp `src/registry/tools.meta.ts` (Node type stripping): file đó và `url-core.ts`, `sitemap.ts` chỉ được dùng cú pháp TypeScript xóa được (không `enum`).
+* `build.assetsInlineLimit = 0` vì CSP `font-src 'self'` chặn font nhúng base64.
+* Chưa dùng `SafeHtml` (M4), nên rule cấm `dangerouslySetInnerHTML` hiện chặn mọi nơi.
+
+**Lỗi tìm thấy nhờ chạy thật (đã sửa, có test hoặc kiểm tra khóa lại):**
+1. `CopyButton` không copy khi không truyền `onCopied` (optional chaining bỏ qua đối số `await copy()`): test `CopyButton`.
+2. `theme-init.js` gán `data-theme` bằng chuỗi JSON thô (`"dark"` có ngoặc kép) nên theme không áp dụng sau khi tải lại: test `theme.test.ts` (chạy script thật trong `vm`).
+3. Vite nhúng font nhỏ thành `data:` bị CSP chặn: `assetsInlineLimit: 0` và `check:bundle` kiểm `data:font`.
+4. `serve.mjs` đọc `_headers` một lần lúc khởi động nên giữ hash CSP của bản build cũ: đọc mỗi request.
+
+**Chưa làm / hoãn:** e2e Playwright (mới có file cấu hình, thư mục `tests/e2e` trống) hoãn tới M3 khi có tool đầu tiên; favicon thật (M7, hiện console có 1 lỗi 404 `favicon.ico`); `check:seo` chưa chạy với route tool vì chưa có tool `ready`.
