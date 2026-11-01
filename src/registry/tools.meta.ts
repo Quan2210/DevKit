@@ -59,7 +59,7 @@ export const TOOLS: ReadonlyArray<ToolMeta> = [
     descriptionKey: "tool.json.description",
     keywords: ["json", "format", "minify", "validate"],
     priority: "P0",
-    status: "planned",
+    status: "ready",
     icon: "braces",
     routeFile: "routes/tools/json-formatter.tsx",
   },
@@ -83,7 +83,7 @@ export const TOOLS: ReadonlyArray<ToolMeta> = [
     descriptionKey: "tool.jwt.description",
     keywords: ["jwt", "token", "decode", "claims"],
     priority: "P0",
-    status: "planned",
+    status: "ready",
     icon: "key",
     routeFile: "routes/tools/jwt-decoder.tsx",
   },
@@ -95,7 +95,7 @@ export const TOOLS: ReadonlyArray<ToolMeta> = [
     descriptionKey: "tool.base64.description",
     keywords: ["base64", "base64url", "encode", "decode"],
     priority: "P0",
-    status: "planned",
+    status: "ready",
     icon: "binary",
     routeFile: "routes/tools/base64.tsx",
   },
@@ -107,7 +107,7 @@ export const TOOLS: ReadonlyArray<ToolMeta> = [
     descriptionKey: "tool.uuid.description",
     keywords: ["uuid", "guid", "v4", "random"],
     priority: "P0",
-    status: "planned",
+    status: "ready",
     icon: "fingerprint",
     routeFile: "routes/tools/uuid-generator.tsx",
   },
@@ -198,4 +198,11 @@ export function listedTools(tools: ReadonlyArray<ToolMeta> = TOOLS): ToolMeta[] 
 
 export function toolPath(tool: Pick<ToolMeta, "slug">): string {
   return `/tools/${tool.slug}`;
+}
+
+/** Look up a tool by id; throws on a typo so a route can never render without metadata. */
+export function getTool(id: string): ToolMeta {
+  const tool = TOOLS.find((candidate) => candidate.id === id);
+  if (!tool) throw new Error(`Unknown tool: ${id}`);
+  return tool;
 }

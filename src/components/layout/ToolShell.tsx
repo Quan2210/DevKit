@@ -39,7 +39,7 @@ export function ToolShell({
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4">
       <nav aria-label={t("breadcrumb.label")} className="text-sm text-text-muted">
-        <Link to="/" className="underline sm:hidden">
+        <Link to="/" className="inline-flex min-h-10 items-center underline sm:hidden">
           {t("breadcrumb.back")}
         </Link>
         <ol className="hidden items-center gap-1 sm:flex">

@@ -3,6 +3,8 @@ export type ToolErrorKind = "validation" | "processing" | "unexpected";
 export interface ToolError {
   kind: ToolErrorKind;
   message: string;
+  /** Technical detail from the runtime (for example the engine's parse message), shown under the title. */
+  detail?: string;
   /** 1-based position in the input, when the runtime reports one. */
   position?: { line: number; column: number };
 }

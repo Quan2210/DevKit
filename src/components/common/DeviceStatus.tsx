@@ -19,7 +19,7 @@ export function DeviceStatus({ externalRequestsEnabled = false }: DeviceStatusPr
     <Popover
       label={t("device.title")}
       triggerClassName={cn(
-        "px-2 py-1 text-sm font-medium hover:bg-surface-muted",
+        "min-h-10 px-2 py-1 text-sm font-medium hover:bg-surface-muted sm:min-h-8",
         externalRequestsEnabled ? "text-warning-fg" : "text-info-fg",
       )}
       trigger={
