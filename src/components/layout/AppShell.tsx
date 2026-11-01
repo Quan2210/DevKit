@@ -46,7 +46,7 @@ export function AppShell({ children, tools = listedTools() }: AppShellProps) {
               icon={<Menu aria-hidden className="size-5" />}
               onClick={() => setDrawerOpen(true)}
             />
-            <Link to="/" className="font-semibold">
+            <Link to="/" className="inline-flex min-h-10 items-center font-semibold">
               {t("app.name")}
             </Link>
           </div>
