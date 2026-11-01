@@ -1,0 +1,84 @@
+/*
+ * Design tokens (docs/02_DevKit_Design_System_v1.1.md §4-§6). Light is the default,
+ * dark follows [data-theme="dark"] or, for "system", prefers-color-scheme.
+ * The Tailwind default palette is removed on purpose so colours can only come from these tokens.
+ */
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-border-strong: #8391a7;
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-on-primary: #ffffff;
+  --color-success: #16a34a;
+  --color-success-fg: #15803d;
+  --color-warning: #d97706;
+  --color-warning-fg: #b45309;
+  --color-danger: #dc2626;
+  --color-info: #0284c7;
+  --color-info-fg: #0369a1;
+
+  --font-sans: "Inter Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", Consolas, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0b1120;
+  --color-surface: #111827;
+  --color-surface-muted: #1f2937;
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+  --color-border-strong: #64748b;
+  --color-primary: #818cf8;
+  --color-primary-hover: #a5b4fc;
+  --color-on-primary: #0b1120;
+  --color-success: #4ade80;
+  --color-success-fg: #4ade80;
+  --color-warning: #fbbf24;
+  --color-warning-fg: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #38bdf8;
+  --color-info-fg: #38bdf8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+    --color-bg: #0b1120;
+    --color-surface: #111827;
+    --color-surface-muted: #1f2937;
+    --color-text: #f8fafc;
+    --color-text-muted: #94a3b8;
+    --color-border: #334155;
+    --color-border-strong: #64748b;
+    --color-primary: #818cf8;
+    --color-primary-hover: #a5b4fc;
+    --color-on-primary: #0b1120;
+    --color-success: #4ade80;
+    --color-success-fg: #4ade80;
+    --color-warning: #fbbf24;
+    --color-warning-fg: #fbbf24;
+    --color-danger: #f87171;
+    --color-info: #38bdf8;
+    --color-info-fg: #38bdf8;
+  }
+}

@@ -6,6 +6,9 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      VITE_BASE: /DevKit/
+      VITE_SITE_URL: https://quan2210.github.io
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,6 +20,5 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
-        env:
-          VITE_BASE: /DevKit/
-          VITE_SITE_URL: https://quan2210.github.io
+      - run: npm run check:seo
+      - run: npm run check:bundle

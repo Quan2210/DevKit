@@ -32,6 +32,25 @@ export default tseslint.config(
     },
   },
   {
+    // All user-visible text comes from the i18n catalog (docs/04 Change 1.13b).
+    files: ["src/components/**/*.tsx", "src/routes/**/*.tsx", "src/features/**/*.tsx"],
+    ignores: ["**/*.test.tsx"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXText[value=/\\S/]",
+          message: "Put user-visible text in src/i18n/locales/vi.ts and render it with t().",
+        },
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message:
+            "Only components/common/SafeHtml.tsx may set innerHTML (sanitized HTML from the Markdown pipeline).",
+        },
+      ],
+    },
+  },
+  {
     files: ["**/*.{mjs,ts}", "*.js"],
     languageOptions: { globals: { ...globals.node } },
   },

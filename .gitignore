@@ -10,3 +10,4 @@ stage/
 Thumbs.db
 playwright-report/
 test-results/
+.playwright-mcp/
