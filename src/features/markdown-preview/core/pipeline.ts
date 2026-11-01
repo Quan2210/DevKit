@@ -5,10 +5,12 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { rehypeHighlight } from "./highlight";
+import { DEFAULT_LOCALE, translate } from "../../../i18n";
 import {
   rehypeHeadings,
   rehypeImagePolicy,
   rehypeLinkPolicy,
+  rehypeNormalizeSchemes,
   remarkCountRawHtml,
   type HeadingEntry,
 } from "./plugins";
@@ -45,7 +47,14 @@ export async function renderMarkdown(
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkCountRawHtml, counts)
-    .use(remarkRehype)
+    // remark-rehype prefixes footnote ids and the `#` links that point to them with `user-content-`;
+    // the sanitizer must not add a second prefix to the ids only (see sanitize-schema.ts).
+    .use(remarkRehype, {
+      footnoteLabel: translate(DEFAULT_LOCALE, "markdown.footnoteLabel"),
+      footnoteBackLabel: (index: number) =>
+        translate(DEFAULT_LOCALE, "markdown.footnoteBack", { index: index + 1 }),
+    })
+    .use(rehypeNormalizeSchemes)
     .use(rehypeSanitize, sanitizeSchema)
     .use(rehypeLinkPolicy)
     .use(rehypeImagePolicy, { allowExternalImages })

@@ -49,7 +49,9 @@ function assertSafeDom(html: string, label: string, { allowExternalImages = fals
         }
       }
       if (name === "id" || name === "name") {
-        expect(attribute.value, `${label}: unprefixed ${name}`).toMatch(/^(user-content-|md-)/);
+        expect(attribute.value, `${label}: unprefixed ${name}`).toMatch(
+          /^(user-content-|md-|footnote-label$)/,
+        );
       }
     }
   }

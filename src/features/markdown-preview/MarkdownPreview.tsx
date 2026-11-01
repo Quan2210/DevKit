@@ -88,7 +88,11 @@ export function MarkdownPreview() {
   const draftSaver = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const saveDraft = (text: string) => {
     clearTimeout(draftSaver.current);
-    if (!draftEnabled || text.length > MAX_DRAFT) return;
+    if (!draftEnabled) return;
+    if (text.length > MAX_DRAFT) {
+      removeDraft(); // an older, shorter draft would otherwise come back on reload and look current
+      return;
+    }
     draftSaver.current = setTimeout(() => setDraft(text), 500);
   };
   const edit = (text: string) => {

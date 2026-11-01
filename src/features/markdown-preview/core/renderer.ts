@@ -61,13 +61,27 @@ export function createRenderer(): Renderer {
     return created;
   };
 
+  const fallback = (source: string, options: RenderOptions): Promise<RenderResult> =>
+    source.length <= MAIN_THREAD_FALLBACK_LIMIT
+      ? renderMarkdown(source, options)
+      : Promise.reject(new Error("worker unavailable"));
+
+  /** Above this size the main thread is not an acceptable fallback (the list parser is super-linear). */
+  const MAIN_THREAD_FALLBACK_LIMIT = 500_000;
+
   return {
     render(source, options = {}) {
-      if (source.length <= WORKER_THRESHOLD || typeof Worker === "undefined") {
-        return renderMarkdown(source, options);
-      }
+      if (source.length <= WORKER_THRESHOLD) return renderMarkdown(source, options);
+      if (typeof Worker === "undefined") return fallback(source, options);
+
       stop(new RenderCancelled());
-      worker = start();
+      try {
+        worker = start();
+      } catch {
+        // Construction can throw (blocked module workers, CSP). Never let that escape into React.
+        worker = null;
+        return fallback(source, options);
+      }
       const id = (nextId += 1);
       return new Promise<RenderResult>((resolve, reject) => {
         const timer = setTimeout(() => stop(new Error("render timed out")), RENDER_TIMEOUT_MS);
@@ -77,7 +91,11 @@ export function createRenderer(): Renderer {
           source,
           allowExternalImages: options.allowExternalImages ?? false,
         };
-        worker!.postMessage(request);
+        try {
+          worker!.postMessage(request);
+        } catch (error) {
+          stop(error instanceof Error ? error : new Error("worker failed"));
+        }
       });
     },
     cancel() {

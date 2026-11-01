@@ -20,6 +20,29 @@ export function remarkCountRawHtml(state: { rawHtml: number }) {
   };
 }
 
+const SCHEME = /^(\s*)([a-z][a-z0-9+.-]*)(:)/i;
+
+/**
+ * URL schemes are case-insensitive, but the sanitizer matches them literally, so `HTTP://x` would lose
+ * its link. Lower-case the scheme first. This can only make a URL stricter, never more permissive:
+ * `JAVASCRIPT:` becomes `javascript:` and is then removed like any other.
+ */
+export function rehypeNormalizeSchemes() {
+  return (tree: HastRoot) => {
+    visit(tree, "element", (node: Element) => {
+      for (const name of ["href", "src"]) {
+        const value = node.properties?.[name];
+        if (typeof value === "string" && SCHEME.test(value)) {
+          node.properties[name] = value.replace(
+            SCHEME,
+            (_m, space, scheme, colon) => space + scheme.toLowerCase() + colon,
+          );
+        }
+      }
+    });
+  };
+}
+
 /** Links that leave the site open in a new tab without giving the target a handle on this page. */
 export function rehypeLinkPolicy() {
   return (tree: HastRoot) => {
@@ -81,8 +104,10 @@ export function rehypeHeadings(state: { headings: HeadingEntry[] }) {
     visit(tree, "element", (node: Element) => {
       const match = /^h([1-6])$/.exec(node.tagName);
       if (!match) return;
+      // The footnote section heading keeps its own id (aria-describedby points at it) and is not a TOC entry.
+      if (node.properties?.id === "footnote-label") return;
       const text = toString(node);
-      const id = `md-${slugger.slug(text) || "section"}`;
+      const id = `md-${slugger.slug(text || "section")}`; // slug() de-duplicates, including the fallback
       node.properties = { ...node.properties, id };
       state.headings.push({ depth: Number(match[1]), id, text });
     });

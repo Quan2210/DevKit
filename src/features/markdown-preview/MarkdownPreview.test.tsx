@@ -247,7 +247,7 @@ describe("opt-in draft (PRD 3.10, plan O5)", () => {
     type("a".repeat(1_000_001));
     expect(await screen.findByText(/Bản nháp quá lớn/)).toBeInTheDocument();
     await act(() => new Promise((resolve) => setTimeout(resolve, 700)));
-    expect(localStorage.getItem(STORAGE_KEYS.mdDraft)).not.toContain("aaaaaaaaaa");
+    expect(localStorage.getItem(STORAGE_KEYS.mdDraft) ?? "").not.toContain("aaaaaaaaaa");
   });
 });
 

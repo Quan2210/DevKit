@@ -225,6 +225,8 @@ export const vi = {
   "markdown.dropHint": "Thả file Markdown vào đây",
   "markdown.htmlTitle": "Tài liệu Markdown",
   "markdown.updating": "Đang cập nhật…",
+  "markdown.footnoteLabel": "Chú thích",
+  "markdown.footnoteBack": "Quay lại tham chiếu {index}",
 
   "tool.json.title": "JSON Formatter",
   "tool.json.description": "Format, minify và kiểm tra cú pháp JSON.",
