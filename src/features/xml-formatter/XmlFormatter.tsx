@@ -17,7 +17,14 @@ import { formatNumber } from "../../i18n/format";
 import { useT } from "../../i18n/useT";
 import { getTool } from "../../registry/tools.meta";
 import { downloadText } from "../../lib/io/download";
-import { browserParser, formatXml, minifyXml, type XmlIndent } from "./core/xml";
+import {
+  browserParser,
+  declaredEncoding,
+  formatXml,
+  isUtf8,
+  minifyXml,
+  type XmlIndent,
+} from "./core/xml";
 
 /** Above this size the result only updates when the user presses a button (docs/04 §7.1). */
 const AUTO_LIMIT = 200_000;
@@ -74,6 +81,8 @@ export function XmlFormatter() {
   const current = pending ? null : result;
   const error = current && !current.ok ? current.error : null;
   const previous = (error !== null || pending) && lastGood !== "";
+  const encoding = blank ? undefined : declaredEncoding(source);
+  const otherEncoding = encoding !== undefined && !isUtf8(encoding) ? encoding : undefined;
   const position = error?.position;
 
   return (
@@ -118,7 +127,7 @@ export function XmlFormatter() {
         </>
       }
       notice={
-        error || cleared !== null || pending ? (
+        error || cleared !== null || pending || otherEncoding ? (
           <div className="space-y-2">
             {error ? (
               <ErrorBanner
@@ -135,6 +144,9 @@ export function XmlFormatter() {
               />
             ) : null}
             {pending ? <Notice tone="info">{t("xml.largeNotice")}</Notice> : null}
+            {otherEncoding ? (
+              <Notice tone="warning">{t("xml.encodingNotice", { encoding: otherEncoding })}</Notice>
+            ) : null}
             {cleared !== null ? (
               <UndoBar
                 message={t("undo.cleared")}
@@ -148,8 +160,16 @@ export function XmlFormatter() {
       status={
         <>
           {current ? (
-            <StatusBadge tone={current.ok ? "success" : "danger"}>
-              {current.ok ? t("status.valid") : t("status.invalid")}
+            <StatusBadge
+              tone={
+                current.ok ? "success" : current.error.kind === "unexpected" ? "warning" : "danger"
+              }
+            >
+              {current.ok
+                ? t("status.valid")
+                : current.error.kind === "unexpected"
+                  ? t("xml.notFormatted")
+                  : t("status.invalid")}
             </StatusBadge>
           ) : null}
           <span className="tabular-nums">
@@ -178,7 +198,7 @@ export function XmlFormatter() {
               <>
                 <Button
                   variant="ghost"
-                  disabled={lastGood === ""}
+                  disabled={lastGood === "" || previous}
                   onClick={() =>
                     downloadText("document.xml", lastGood, "application/xml;charset=utf-8")
                   }

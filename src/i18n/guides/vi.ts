@@ -102,6 +102,8 @@ export const viGuides: Record<string, GuideBlock[]> = {
         'Trong nội dung trộn văn bản và thẻ (ví dụ <p>Xin chào <b>bạn</b></p>) hoặc dưới xml:space="preserve", khoảng trắng là nội dung nên phần tử đó được giữ nguyên, không xuống dòng.',
         "Sau khi xử lý, công cụ phân tích lại kết quả và so với đầu vào; nếu không khớp, nó báo lỗi thay vì đưa ra kết quả sai.",
         "Nội dung phần DOCTYPE được giữ nguyên văn nhưng không được kiểm tra DTD.",
+        "File tải về luôn là UTF-8. Nếu khai báo <?xml ... encoding=...?> khác UTF-8, khai báo được giữ nguyên và công cụ cảnh báo.",
+        "Nút Tải .xml bị tắt khi XML đang lỗi hoặc kết quả đã cũ, để không lưu nhầm kết quả của lần nhập trước.",
         "Dữ liệu được xử lý ngay trong trình duyệt, không gửi đi đâu.",
       ],
     },

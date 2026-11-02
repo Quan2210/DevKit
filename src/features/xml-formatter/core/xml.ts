@@ -22,9 +22,17 @@ const PARSER_ERROR_NAMESPACES = [
   "http://www.mozilla.org/newlayout/xml/parsererror.xml",
 ];
 
+/**
+ * Firefox replaces the document with a `parsererror` root; Chrome and Safari insert one as the first
+ * child of the root element. A `parsererror` deeper in a valid document is the user's own data.
+ */
 function findParserError(doc: XmlDocument): Element | null {
+  const root = doc.documentElement;
   for (const element of doc.getElementsByTagNameNS("*", "parsererror")) {
-    if (PARSER_ERROR_NAMESPACES.includes(element.namespaceURI ?? "")) return element;
+    if (!PARSER_ERROR_NAMESPACES.includes(element.namespaceURI ?? "")) continue;
+    if (element === root || (element.parentNode === root && root.firstElementChild === element)) {
+      return element;
+    }
   }
   return null;
 }
@@ -62,7 +70,7 @@ export function validateXml(text: string, parser: XmlParser): Result<XmlDocument
   try {
     doc = parser.parseFromString(text, "application/xml");
   } catch (error) {
-    // jsdom throws instead of returning a parsererror document.
+    // Some parsers throw instead of returning a parsererror document.
     const message = error instanceof Error ? error.message : "";
     return fail({
       kind: "validation",
@@ -73,7 +81,9 @@ export function validateXml(text: string, parser: XmlParser): Result<XmlDocument
   }
   const problem = findParserError(doc);
   if (problem) {
-    const message = problem.textContent ?? "";
+    // Chrome and Safari put a fixed heading before the message; the message itself is in the <div>.
+    const message =
+      problem.getElementsByTagName("div")[0]?.textContent ?? problem.textContent ?? "";
     return fail({
       kind: "validation",
       message: t("xml.invalid"),
@@ -193,9 +203,16 @@ const XML_BLANK = /^[ \t\r\n]*$/;
 const isBlank = (node: XmlNode) => node.type === "text" && XML_BLANK.test(node.raw);
 
 function spaceMode(start: string, inherited: boolean): boolean {
-  const match = start.match(/\sxml:space\s*=\s*(?:"([^"]*)"|'([^']*)')/);
-  if (!match) return inherited;
-  return (match[1] ?? match[2]) === "preserve";
+  // Walk name="value" pairs so text that merely looks like xml:space inside a value is skipped.
+  const pair = /([^\s=/>]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
+  const afterName = start.search(/\s/);
+  if (afterName < 0) return inherited;
+  pair.lastIndex = afterName;
+  let mode = inherited;
+  for (let match = pair.exec(start); match; match = pair.exec(start)) {
+    if (match[1] === "xml:space") mode = (match[2] ?? match[3]) === "preserve";
+  }
+  return mode;
 }
 
 function verbatim(node: XmlNode): string {
@@ -308,7 +325,10 @@ function transform(text: string, unit: string, parser: XmlParser): Result<string
     return ok(output);
   } catch (error) {
     // Deeply nested documents overflow the recursive walk; say so instead of a generic failure.
-    const deep = error instanceof RangeError;
+    const deep =
+      error instanceof RangeError ||
+      (error instanceof Error &&
+        (error.name === "InternalError" || /recursion|call stack/i.test(error.message)));
     return fail({ kind: "unexpected", message: t(deep ? "xml.tooDeep" : "xml.unsupported") });
   }
 }
@@ -320,6 +340,14 @@ export function formatXml(text: string, indent: XmlIndent, parser: XmlParser): R
 export function minifyXml(text: string, parser: XmlParser): Result<string> {
   return transform(text, "", parser);
 }
+
+/** The encoding named in the XML declaration, if any (the file written by Download is always UTF-8). */
+export function declaredEncoding(text: string): string | undefined {
+  const body = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  return body.match(/^\s*<\?xml\s[^?]*?\bencoding\s*=\s*["']([^"']+)["']/)?.[1];
+}
+
+export const isUtf8 = (encoding: string): boolean => /^utf-?8$/i.test(encoding);
 
 /** The browser's parser; only call on the client. */
 export const browserParser = (): XmlParser => new DOMParser() as unknown as XmlParser;

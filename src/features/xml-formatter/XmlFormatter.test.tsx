@@ -98,4 +98,20 @@ describe("XML Formatter", () => {
     expect(screen.getByRole("button", { name: "Format" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Minify" })).toBeDisabled();
   });
+
+  it("warns when the declaration is not UTF-8", async () => {
+    renderTool();
+    type('<?xml version="1.0" encoding="ISO-8859-1"?><a/>');
+    await waitFor(() => expect(screen.getByText(/ISO-8859-1/)).toBeInTheDocument());
+  });
+
+  it("disables the download while the shown output is from an earlier input", async () => {
+    renderTool();
+    type("<a/>");
+    await waitFor(() => expect(output()).not.toBe(""));
+    expect(screen.getByRole("button", { name: "Tải .xml" })).toBeEnabled();
+    type("<a>");
+    await waitFor(() => expect(screen.getByText("XML không hợp lệ.")).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Tải .xml" })).toBeDisabled();
+  });
 });

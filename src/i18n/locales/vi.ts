@@ -136,6 +136,9 @@ export const vi = {
   "xml.invalid": "XML không hợp lệ.",
   "xml.unsupported":
     "Không định dạng được tài liệu này mà vẫn giữ nguyên nội dung, nên công cụ không đưa ra kết quả.",
+  "xml.notFormatted": "Hợp lệ, chưa định dạng được",
+  "xml.encodingNotice":
+    "Khai báo encoding là {encoding}, nhưng nội dung copy và file tải về luôn là UTF-8. Khai báo được giữ nguyên, nên hãy đổi nó nếu nơi nhận đọc theo encoding khai báo.",
   "xml.tooDeep": "Không định dạng được: XML lồng quá sâu.",
   "xml.location": "Dòng {line}, cột {column}",
   "xml.largeNotice":
