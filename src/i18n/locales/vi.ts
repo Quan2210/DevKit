@@ -136,6 +136,7 @@ export const vi = {
   "xml.invalid": "XML không hợp lệ.",
   "xml.unsupported":
     "Không định dạng được tài liệu này mà vẫn giữ nguyên nội dung, nên công cụ không đưa ra kết quả.",
+  "xml.tooDeep": "Không định dạng được: XML lồng quá sâu.",
   "xml.location": "Dòng {line}, cột {column}",
   "xml.largeNotice":
     "Tài liệu lớn (trên 200.000 ký tự): bấm Format hoặc Minify để cập nhật kết quả.",

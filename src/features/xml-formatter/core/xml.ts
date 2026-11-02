@@ -16,12 +16,17 @@ const t = (key: MessageKey, params?: MessageParams): string =>
 // Validation
 // ---------------------------------------------------------------------------------------------
 
+/** Chrome and Safari put their error in the XHTML namespace, Firefox in its own; a user's element has neither. */
+const PARSER_ERROR_NAMESPACES = [
+  "http://www.w3.org/1999/xhtml",
+  "http://www.mozilla.org/newlayout/xml/parsererror.xml",
+];
+
 function findParserError(doc: XmlDocument): Element | null {
-  return (
-    doc.getElementsByTagNameNS("*", "parsererror")[0] ??
-    doc.getElementsByTagName("parsererror")[0] ??
-    null
-  );
+  for (const element of doc.getElementsByTagNameNS("*", "parsererror")) {
+    if (PARSER_ERROR_NAMESPACES.includes(element.namespaceURI ?? "")) return element;
+  }
+  return null;
 }
 
 /**
@@ -109,7 +114,9 @@ function scanDoctype(source: string, from: number): number {
     const char = source[i]!;
     if (quote) {
       if (char === quote) quote = "";
-    } else if (char === '"' || char === "'") quote = char;
+    } else if (source.startsWith("<!--", i)) i = endOf(source, "-->", i + 4) - 1;
+    else if (source.startsWith("<?", i)) i = endOf(source, "?>", i + 2) - 1;
+    else if (char === '"' || char === "'") quote = char;
     else if (char === "[") depth += 1;
     else if (char === "]") depth -= 1;
     else if (char === ">" && depth <= 0) return i + 1;
@@ -181,7 +188,9 @@ function tokenize(source: string): XmlNode[] {
 // elements are written back verbatim; only element-only content is re-indented or compacted.
 // ---------------------------------------------------------------------------------------------
 
-const isBlank = (node: XmlNode) => node.type === "text" && node.raw.trim() === "";
+/** XML whitespace is exactly these four characters; String.trim() also strips NBSP and friends, which are content. */
+const XML_BLANK = /^[ \t\r\n]*$/;
+const isBlank = (node: XmlNode) => node.type === "text" && XML_BLANK.test(node.raw);
 
 function spaceMode(start: string, inherited: boolean): boolean {
   const match = start.match(/\sxml:space\s*=\s*(?:"([^"]*)"|'([^']*)')/);
@@ -245,7 +254,7 @@ function signature(node: Node, preserve: boolean, out: string[]): void {
         children.some((child) => child.nodeType !== 3) &&
         children.every(
           (child) =>
-            child.nodeType !== 4 && (child.nodeType !== 3 || !(child.nodeValue ?? "").trim()),
+            child.nodeType !== 4 && (child.nodeType !== 3 || XML_BLANK.test(child.nodeValue ?? "")),
         );
       for (const child of children) {
         if (!keep && onlyStructure && child.nodeType === 3) continue;
@@ -287,18 +296,21 @@ function documentSignature(doc: XmlDocument): string {
 function transform(text: string, unit: string, parser: XmlParser): Result<string> {
   const parsed = validateXml(text, parser);
   if (!parsed.ok) return parsed;
-  let output: string;
   try {
-    output = serialize(tokenize(text), unit);
-  } catch {
-    return fail({ kind: "unexpected", message: t("xml.unsupported") });
+    // A leading BOM is encoding, not content.
+    const body = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+    const output = serialize(tokenize(body), unit);
+    // Never hand back text that is not the same document (R: no silent data loss).
+    const again = validateXml(output, parser);
+    if (!again.ok || documentSignature(again.value) !== documentSignature(parsed.value)) {
+      return fail({ kind: "unexpected", message: t("xml.unsupported") });
+    }
+    return ok(output);
+  } catch (error) {
+    // Deeply nested documents overflow the recursive walk; say so instead of a generic failure.
+    const deep = error instanceof RangeError;
+    return fail({ kind: "unexpected", message: t(deep ? "xml.tooDeep" : "xml.unsupported") });
   }
-  // Never hand back text that is not the same document (R: no silent data loss).
-  const again = validateXml(output, parser);
-  if (!again.ok || documentSignature(again.value) !== documentSignature(parsed.value)) {
-    return fail({ kind: "unexpected", message: t("xml.unsupported") });
-  }
-  return ok(output);
 }
 
 export function formatXml(text: string, indent: XmlIndent, parser: XmlParser): Result<string> {
