@@ -277,7 +277,6 @@ export const vi = {
     "Trình duyệt không cho lưu lịch sử màu, nên lịch sử chỉ có tác dụng đến khi bạn tải lại trang. Công cụ vẫn hoạt động bình thường.",
   "color.preview": "Xem trước",
   "color.nativePicker": "{label}: chọn bằng bộ chọn màu",
-  "color.placeholder": "#4F46E5 hoặc rgb(79, 70, 229)",
   "color.formatHint": "HEX 3, 4, 6, 8 chữ số, rgb()/rgba() hoặc hsl()/hsla().",
 
   "palette.base": "Màu gốc",
@@ -289,6 +288,8 @@ export const vi = {
   "palette.prefix": "Tiền tố biến CSS",
   "palette.css": "CSS Variables",
   "palette.cssLabel": "CSS Variables của bảng màu",
+  "palette.copyColor": "Copy {value}",
+  "palette.copyCss": "Copy CSS Variables",
   "palette.copyAll": "Copy tất cả",
   "palette.swatches": "Bảng màu",
   "palette.swatchLabel": "Màu {index}: {value}",
@@ -320,6 +321,7 @@ export const vi = {
   "contrast.effective": "Màu hiệu dụng: chữ {fg}, nền {bg}.",
   "contrast.alphaNote":
     "Màu có độ trong suốt được trộn lên nền giả định ({assumed}) trước khi tính tỉ lệ.",
+  "contrast.alphaNoteText": "Màu chữ có độ trong suốt được trộn lên màu nền trước khi tính tỉ lệ.",
   "contrast.copyFg": "Copy màu chữ",
   "contrast.copyBg": "Copy màu nền",
   "contrast.suggestTitle": "Gợi ý màu chữ gần nhất đạt ngưỡng",
@@ -355,7 +357,6 @@ export const vi = {
   "gradient.moveDown": "Chuyển điểm {n} xuống",
   "gradient.remove": "Xóa điểm {n}",
   "gradient.minStops": "Cần ít nhất 2 điểm màu.",
-  "gradient.maxStops": "Tối đa {max} điểm màu.",
   "gradient.presets": "Mẫu có sẵn",
   "gradient.preset.sunset": "Hoàng hôn",
   "gradient.preset.ocean": "Đại dương",

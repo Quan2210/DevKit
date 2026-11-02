@@ -111,7 +111,7 @@ export function ColorPicker() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title={t("color.pickerLabel")}>
           <div className="space-y-4 p-4">
-            <div className="devkit-color-picker" aria-label={t("color.pickerLabel")}>
+            <div className="devkit-color-picker" role="group" aria-label={t("color.pickerLabel")}>
               <HexAlphaColorPicker
                 color={toHex(color).toLowerCase()}
                 onChange={(hex) => {

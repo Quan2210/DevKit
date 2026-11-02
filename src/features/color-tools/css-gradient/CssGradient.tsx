@@ -3,7 +3,6 @@ import { useId, useMemo, useState } from "react";
 import { Button } from "../../../components/common/Button";
 import { CopyButton } from "../../../components/common/CopyButton";
 import { IconButton } from "../../../components/common/IconButton";
-import { Input } from "../../../components/common/Input";
 import { Notice } from "../../../components/common/Notice";
 import { Panel } from "../../../components/common/Panel";
 import { Segmented } from "../../../components/common/Segmented";
@@ -15,6 +14,7 @@ import {
   RADIAL_POSITIONS,
   clamp,
   gradientToCss,
+  sortedStops,
   opaque,
   parseColor,
   type Color,
@@ -23,6 +23,7 @@ import {
   type RadialPosition,
 } from "../shared/color-core";
 import { ColorField } from "../shared/ColorField";
+import { NumberField } from "../shared/NumberField";
 import { PRESETS } from "./presets";
 
 const MIN_STOPS = 2;
@@ -75,13 +76,18 @@ export function CssGradient() {
       next[target] = { ...a, position: b.position };
       return next;
     });
+  // The list is kept in position order (what the gradient shows); typing a position re-sorts on blur.
+  const resort = () => setStops((list) => sortedStops(list));
   const add = () =>
     setStops((list) => {
       if (list.length >= MAX_STOPS) return list;
-      const sorted = [...list].sort((a, b) => a.position - b.position);
+      const sorted = sortedStops(list);
       const last = sorted.at(-1)!;
       const before = sorted.at(-2) ?? last;
-      return [...list, stop(last.color, Math.round((last.position + before.position) / 2))];
+      return sortedStops([
+        ...sorted,
+        stop(last.color, Math.round((last.position + before.position) / 2)),
+      ]);
     });
 
   return (
@@ -108,17 +114,12 @@ export function CssGradient() {
               />
               {kind === "linear" ? (
                 <div className="space-y-2">
-                  <Input
+                  <NumberField
                     label={t("gradient.angle")}
-                    type="number"
-                    inputMode="numeric"
                     min={0}
                     max={360}
                     value={angle}
-                    onChange={(event) => {
-                      const next = Number(event.target.value);
-                      if (Number.isFinite(next)) setAngle(clamp(next, 0, 360));
-                    }}
+                    onCommit={(next) => setAngle(clamp(next, 0, 360))}
                   />
                   <input
                     type="range"
@@ -208,18 +209,13 @@ export function CssGradient() {
                       onChange={(color) => update(item.id, { color })}
                     />
                     <div className="w-24">
-                      <Input
+                      <NumberField
                         label={t("gradient.stopPosition", { n })}
-                        type="number"
-                        inputMode="numeric"
                         min={0}
                         max={100}
                         value={item.position}
-                        onChange={(event) => {
-                          const next = Number(event.target.value);
-                          if (Number.isFinite(next))
-                            update(item.id, { position: clamp(next, 0, 100) });
-                        }}
+                        onCommit={(next) => update(item.id, { position: clamp(next, 0, 100) })}
+                        onBlur={resort}
                       />
                     </div>
                     <div className="flex">

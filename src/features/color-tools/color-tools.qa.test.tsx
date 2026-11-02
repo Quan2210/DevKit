@@ -265,11 +265,11 @@ describe("QA Color Palette (AC 3.7)", () => {
     expect(css).not.toMatch(/[;:]\s*display|body\s*\{/);
     expect(css.match(/[{}]/g)).toHaveLength(2);
   });
-  // BUG-2 (Minor): the number box keeps the requested 2 while 4 swatches are shown.
-  it("count box shows the effective count after mode switch (BUG-2)", async () => {
+  it("count box shows the effective count after mode switch", async () => {
     const user = userEvent.setup();
     renderTool(<ColorPalette />);
     fireEvent.change(screen.getByLabelText("Số lượng màu"), { target: { value: "2" } });
+    fireEvent.blur(screen.getByLabelText("Số lượng màu"));
     await user.click(screen.getByRole("radio", { name: "Tứ giác" }));
     expect(items()).toHaveLength(4);
     expect((screen.getByLabelText("Số lượng màu") as HTMLInputElement).value).toBe("4");
@@ -495,11 +495,64 @@ describe("QA CSS Gradient (AC 3.9)", () => {
     expect(screen.getByRole("slider", { name: /Thanh trượt góc|góc/i })).toBeInTheDocument();
   });
 
-  it("clearing a number box (BUG-3, Minor, documents current behaviour)", () => {
+  it("an emptied number box stays empty while typing and leaves the stop alone", () => {
     renderTool(<CssGradient />);
     const pos = screen.getByLabelText("Vị trí điểm 2 (%)") as HTMLInputElement;
     fireEvent.change(pos, { target: { value: "" } });
-    // BUG-3 (Minor): an emptied box is coerced to 0, which moves the stop to 0 while the user is typing.
-    expect(css()).toContain("#EC4899 0%");
+    expect(pos.value).toBe("");
+    expect(css()).toContain("#EC4899 100%");
+    fireEvent.change(pos, { target: { value: "75" } });
+    expect(css()).toContain("#EC4899 75%");
+    fireEvent.blur(pos);
+    expect(pos.value).toBe("75");
+  });
+});
+
+describe("Review fixes: gradient list order, harmony, notes, names", () => {
+  const css = () => screen.getByLabelText("Mã CSS của gradient").textContent!;
+  const colorsInList = () =>
+    screen
+      .getAllByRole("textbox")
+      .filter((el) =>
+        document.querySelector(`label[for="${el.id}"]`)?.textContent?.startsWith("Màu điểm"),
+      )
+      .map((el) => (el as HTMLInputElement).value);
+  const cssColors = () => [...css().matchAll(/#[0-9A-F]{6}/g)].map((match) => match[0]);
+
+  it("keeps the list in the order the gradient shows after add, edit and move", async () => {
+    const user = userEvent.setup();
+    renderTool(<CssGradient />);
+    await user.click(screen.getByRole("button", { name: "Thêm điểm màu" }));
+    fireEvent.change(screen.getByLabelText("Màu điểm 2"), { target: { value: "#00FF00" } });
+    expect(colorsInList()).toEqual(cssColors());
+    expect(colorsInList()).toEqual(["#4F46E5", "#00FF00", "#EC4899"]);
+    await user.click(screen.getByRole("button", { name: "Chuyển điểm 2 xuống" }));
+    expect(colorsInList()).toEqual(cssColors());
+    expect(colorsInList()).toEqual(["#4F46E5", "#EC4899", "#00FF00"]);
+    await user.click(screen.getByRole("button", { name: "Chuyển điểm 3 lên" }));
+    expect(colorsInList()).toEqual(cssColors());
+  });
+
+  it("re-sorts the list after a position is typed and the box loses focus", () => {
+    renderTool(<CssGradient />);
+    const first = screen.getByLabelText("Vị trí điểm 1 (%)");
+    fireEvent.change(first, { target: { value: "100" } });
+    fireEvent.change(screen.getByLabelText("Vị trí điểm 2 (%)"), { target: { value: "0" } });
+    fireEvent.blur(first);
+    expect(colorsInList()).toEqual(cssColors());
+  });
+
+  it("the transparency note names the background only when the background is translucent", () => {
+    renderTool(<ColorContrast />);
+    typeInto("Màu chữ", "#00000080");
+    typeInto("Màu nền", "#000000");
+    expect(screen.getAllByText(/trộn lên màu nền trước khi tính/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/nền giả định \(#/)).not.toBeInTheDocument();
+  });
+
+  it("copy buttons for swatches say which color they copy", () => {
+    renderTool(<ColorPalette />);
+    expect(screen.getByRole("button", { name: "Copy #4F46E5" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy CSS Variables" })).toBeInTheDocument();
   });
 });

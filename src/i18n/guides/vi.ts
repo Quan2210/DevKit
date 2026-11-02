@@ -193,7 +193,7 @@ export const viGuides: Record<string, GuideBlock[]> = {
     {
       type: "ul",
       items: [
-        "Chuyển lên hoặc xuống đổi chỗ cả vị trí của hai điểm, để thứ tự trong danh sách khớp thứ tự trong gradient.",
+        "Danh sách luôn xếp theo vị trí trong gradient (điểm mới được chèn đúng chỗ; gõ xong một vị trí thì danh sách tự sắp lại), và chuyển lên hoặc xuống đổi chỗ cả vị trí của hai điểm liền kề.",
         "Mã CSS dùng màu HEX (kèm alpha 8 chữ số khi trong suốt) và các điểm luôn được sắp theo vị trí.",
         "Chưa hỗ trợ conic-gradient, lặp (repeating) và điểm dừng giữa hai màu.",
       ],

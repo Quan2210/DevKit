@@ -90,9 +90,12 @@ export function generateHarmony(base: Color, mode: HarmonyMode, requested: numbe
   for (let level = 1; lightnessShifts.length < 10; level += 1) {
     lightnessShifts.push(level * LIGHTNESS_STEP, -level * LIGHTNESS_STEP);
   }
+  // Only shifts that stay inside the lightness range, so extras never pile up on white or black.
+  const usable = lightnessShifts.filter((shift) => l + shift >= 5 && l + shift <= 95);
+  const shifts = usable.length > 0 ? usable : [0];
   for (let j = 0; result.length < count; j += 1) {
     const offset = offsets[j % offsets.length]!;
-    const shift = lightnessShifts[Math.floor(j / offsets.length)]!;
+    const shift = shifts[Math.floor(j / offsets.length) % shifts.length]!;
     result.push({ color: colorOf(h + offset, s, l + shift, alpha), isBase: false });
   }
   return result;

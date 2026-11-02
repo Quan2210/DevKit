@@ -23,6 +23,7 @@ import {
   type HarmonyMode,
 } from "../shared/color-core";
 import { ColorField } from "../shared/ColorField";
+import { NumberField } from "../shared/NumberField";
 import { Swatch } from "../shared/Swatch";
 
 const START: Color = opaque(79, 70, 229);
@@ -80,20 +81,14 @@ export function ColorPalette() {
         <Panel title={t("palette.base")}>
           <div className="grid gap-4 p-4 sm:grid-cols-2">
             <ColorField label={t("palette.base")} value={base} onChange={setBase} />
-            <Input
+            <NumberField
               label={t("palette.count")}
-              type="number"
-              inputMode="numeric"
               min={range.min}
               max={range.max}
               step={1}
-              value={requested}
+              value={count}
               hint={t("palette.countHint", { min: range.min, max: range.max })}
-              onChange={(event) => {
-                const next = Number(event.target.value);
-                if (Number.isFinite(next)) setRequested(next);
-              }}
-              onBlur={() => setRequested(count)}
+              onCommit={(next) => setRequested(Math.round(next))}
             />
           </div>
         </Panel>
@@ -120,14 +115,20 @@ export function ColorPalette() {
                       <p className="text-xs text-text-muted">{t("palette.baseTag")}</p>
                     ) : null}
                   </div>
-                  <CopyButton text={toHex(entry.color)} />
+                  <CopyButton
+                    text={toHex(entry.color)}
+                    aria-label={t("palette.copyColor", { value: toHex(entry.color) })}
+                  />
                 </div>
               </li>
             ))}
           </ul>
         </Panel>
 
-        <Panel title={t("palette.css")} actions={<CopyButton text={css} />}>
+        <Panel
+          title={t("palette.css")}
+          actions={<CopyButton text={css} aria-label={t("palette.copyCss")} />}
+        >
           <div className="space-y-3 p-3">
             <div className="max-w-xs">
               <Input

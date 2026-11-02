@@ -474,3 +474,16 @@ describe("QA gradient css", () => {
     expect(el.style.backgroundImage).toBe("");
   });
 });
+
+describe("harmony extras stay distinct for very light and very dark bases", () => {
+  it("never repeats a color because lightness hit the ends", () => {
+    for (const hex of ["#DAF0FB", "#F8FAFC", "#0B1120", "#0A0520"]) {
+      const base = parseColor(hex);
+      if (!base.ok) throw new Error(hex);
+      for (const mode of ["complementary", "triadic", "tetradic"] as const) {
+        const colors = generateHarmony(base.value, mode, 10).map((entry) => toHex(entry.color));
+        expect(new Set(colors).size, `${hex} ${mode}`).toBeGreaterThanOrEqual(9);
+      }
+    }
+  });
+});

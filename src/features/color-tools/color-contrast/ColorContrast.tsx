@@ -78,9 +78,9 @@ export function ColorContrast() {
       notice={
         result.hasAlpha ? (
           <Notice tone="info">
-            {t("contrast.alphaNote", {
-              assumed: toHex(assumedColor),
-            })}{" "}
+            {background.a < 1
+              ? t("contrast.alphaNote", { assumed: toHex(assumedColor) })
+              : t("contrast.alphaNoteText")}{" "}
             {t("contrast.effective", {
               fg: toHex(result.foreground),
               bg: toHex(result.background),
