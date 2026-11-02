@@ -119,6 +119,33 @@ export const vi = {
   "json.sample":
     '{"name":"DevKit","tools":["json","jwt","base64","uuid"],"private":true,"version":1.5}',
 
+  "xml.input": "XML đầu vào",
+  "xml.output": "Kết quả",
+  "xml.outputPrevious": "Kết quả trước đó",
+  "xml.format": "Format",
+  "xml.minify": "Minify",
+  "xml.indent": "Thụt lề",
+  "xml.indent2": "2 dấu cách",
+  "xml.indent4": "4 dấu cách",
+  "xml.download": "Tải .xml",
+  "xml.placeholder": "Dán XML vào đây hoặc bấm “Mẫu”…",
+  "xml.outputPlaceholder": "Kết quả sẽ hiện ở đây.",
+  "xml.inputLabel": "Ô nhập XML",
+  "xml.outputLabel": "Kết quả XML",
+  "xml.empty": "Chưa có XML để xử lý.",
+  "xml.invalid": "XML không hợp lệ.",
+  "xml.unsupported":
+    "Không định dạng được tài liệu này mà vẫn giữ nguyên nội dung, nên công cụ không đưa ra kết quả.",
+  "xml.notFormatted": "Hợp lệ, chưa định dạng được",
+  "xml.encodingNotice":
+    "Khai báo encoding là {encoding}, nhưng nội dung copy và file tải về luôn là UTF-8. Khai báo được giữ nguyên, nên hãy đổi nó nếu nơi nhận đọc theo encoding khai báo.",
+  "xml.tooDeep": "Không định dạng được: XML lồng quá sâu.",
+  "xml.location": "Dòng {line}, cột {column}",
+  "xml.largeNotice":
+    "Tài liệu lớn (trên 200.000 ký tự): bấm Format hoặc Minify để cập nhật kết quả.",
+  "xml.sample":
+    '<?xml version="1.0" encoding="UTF-8"?>\n<catalog xmlns:dk="urn:devkit"><!-- ví dụ --><tool id="xml" dk:kind="data"><name>XML Formatter</name><note>Giữ nguyên <b>văn bản</b> trộn thẻ</note><raw><![CDATA[a < b && c]]></raw><empty/></tool></catalog>',
+
   "base64.encode": "Mã hóa",
   "base64.decode": "Giải mã",
   "base64.urlSafe": "URL-safe (Base64URL)",

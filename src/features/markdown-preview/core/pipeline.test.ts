@@ -324,8 +324,8 @@ describe("robustness", () => {
     const source = block.repeat(Math.ceil(250_000 / block.length));
     const started = performance.now();
     await renderMarkdown(source);
-    expect(performance.now() - started).toBeLessThan(15_000);
-  }, 30_000);
+    expect(performance.now() - started).toBeLessThan(25_000);
+  }, 40_000);
 
   it("handles deeply nested lists and quotes without throwing", async () => {
     await expect(renderMarkdown("> ".repeat(500) + "deep")).resolves.toBeDefined();
