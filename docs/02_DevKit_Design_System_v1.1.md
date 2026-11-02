@@ -390,5 +390,9 @@ Skill `frontend-design` thiên về thiết kế có cá tính, tránh "mặc đ
 | 2026-11-01 | Layout | Markdown Preview: thanh công cụ tự xuống dòng trên mobile, chưa gom nút phụ vào menu "…" (design §9.3) | Giữ đơn giản; tinh chỉnh ở M7 | Chờ duyệt |
 | 2026-11-01 | Scope | Markdown Preview: chưa làm đồng bộ cuộn giữa editor và preview | Là hạng mục tách rời, cắt được theo PRD §10; TOC, xuất HTML, chiều rộng tài liệu, banner, copy từng code block đã có | Chờ duyệt |
 | 2026-11-01 | Behaviour | Raw HTML trong Markdown bị bỏ hẳn, kèm thông báo "HTML thô đã bị bỏ qua" | Đúng System Design §3.4; minh bạch thay vì bỏ im lặng | Chờ duyệt |
+| 2026-11-02 | Component | Color tools: ô chọn màu trong Contrast/Palette/Gradient dùng hộp chọn màu gốc của trình duyệt (không có alpha; alpha nhập bằng chữ), chỉ Color Picker dùng `react-colorful` | Nhẹ, truy cập tốt, tránh nhiều popover; alpha vẫn nhập được ở ô văn bản | Chờ duyệt |
+| 2026-11-02 | Component | Color tools: thêm `ColorField` (ô nhập màu có validate + hộp chọn) và `Swatch` (nền caro cho alpha) dùng chung | Tái sử dụng giữa 4 tool; caro dùng token `surface`/`surface-muted` | Chờ duyệt |
+| 2026-11-02 | Scope | CSS Gradient: chưa làm kéo-thả stop (đã có nút lên/xuống dùng bằng bàn phím) | Kéo-thả là tùy chọn theo kế hoạch 6.5 | Chờ duyệt |
+| 2026-11-02 | Layout | CSS Gradient: bản xem trước chưa dính (sticky) ở đầu trang trên mobile (layouts §4.9) | Chưa làm; xem lại ở M7 cùng rà responsive | Chờ duyệt |
 
 *(Bổ sung dòng mới cho mỗi sai khác trong quá trình thiết kế/implement.)*
