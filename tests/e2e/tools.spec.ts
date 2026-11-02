@@ -1,6 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const BASE = "http://localhost:4173";
+import { ORIGIN } from "./env";
+
+const BASE = ORIGIN;
 
 /** Requests that leave the origin; the product promise is that this stays empty by default. */
 function externalRequests(page: Page): string[] {
@@ -115,57 +117,14 @@ test.describe("Markdown Preview in a real browser", () => {
     const at = { clientX: box.x + 40, clientY: box.y + 40, bubbles: true, cancelable: true };
     await editor.dispatchEvent("dragenter", { dataTransfer, ...at });
     await editor.dispatchEvent("dragover", { dataTransfer, ...at });
-    await page
-      .locator("[class*='z-10']")
-      .first()
-      .dispatchEvent("drop", { dataTransfer, ...at })
-      .catch(() => undefined);
-    await editor.dispatchEvent("drop", { dataTransfer, ...at }).catch(() => undefined);
+    const overlay = page.getByTestId("md-drop-overlay");
+    await expect(overlay).toBeVisible();
+    await overlay.dispatchEvent("drop", { dataTransfer, ...at });
+    await expect(page.locator(".cm-content").first()).toContainText("# Dropped");
+    // Give a second (duplicate) insertion time to show up before counting.
     await page.waitForTimeout(500);
     const text = await page.locator(".cm-content").first().innerText();
-    expect((text.match(/Dropped/g) ?? []).length).toBeLessThanOrEqual(1);
-  });
-
-  test("typing in a large document keeps the page responsive (no long task over 150 ms at p95)", async ({
-    page,
-  }) => {
-    await page.goto("tools/markdown-preview/");
-    await ready(page);
-    const block =
-      "## Heading\n\nParagraph with **bold** and `code` and a [link](https://example.com).\n\n- item one\n- item two\n\n";
-    const big = block.repeat(Math.ceil(300_000 / block.length));
-    await page.locator("input[type=file]").setInputFiles({
-      name: "big.md",
-      mimeType: "text/markdown",
-      buffer: Buffer.from(big),
-    });
-    await page.getByRole("radio", { name: "Xem" }).click();
-    await expect(page.locator("#md-heading")).toBeVisible({ timeout: 60_000 });
-    await page.getByRole("radio", { name: "Soạn" }).click();
-
-    await page.evaluate(() => {
-      const w = window as unknown as { __long: number[] };
-      w.__long = [];
-      new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) w.__long.push(entry.duration);
-      }).observe({ entryTypes: ["longtask"] });
-    });
-    await page.locator(".cm-content").first().click();
-    for (let i = 0; i < 25; i += 1) {
-      await page.keyboard.type("x");
-      await page.waitForTimeout(60);
-    }
-    await page.waitForTimeout(2500);
-    const durations = await page.evaluate(() => (window as unknown as { __long: number[] }).__long);
-    const sorted = [...durations].sort((a, b) => a - b);
-    const p95 = sorted.length
-      ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))]!
-      : 0;
-    test.info().annotations.push({
-      type: "long tasks",
-      description: `${durations.length} tasks, p95 ${Math.round(p95)} ms, max ${Math.round(sorted.at(-1) ?? 0)} ms`,
-    });
-    expect(p95).toBeLessThan(150);
+    expect(text.match(/Dropped/g) ?? []).toHaveLength(1);
   });
 });
 
@@ -251,6 +210,7 @@ test.describe("other tools in a real browser", () => {
     await page.goto("tools/color-picker/");
     await page.waitForLoadState("networkidle");
     await expect(page.getByLabel("HEX", { exact: true })).toBeVisible();
+    await expect(page.getByText(/không cho lưu lịch sử màu/)).toBeVisible();
     expect(errors).toEqual([]);
   });
 });

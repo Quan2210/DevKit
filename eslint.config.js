@@ -51,6 +51,25 @@ export default tseslint.config(
     },
   },
   {
+    // Every way of turning a string into markup, in .ts as well as .tsx (docs/04 Appendix B M4 L-3).
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}", "src/components/common/SafeHtml.tsx"],
+    rules: {
+      "no-restricted-properties": [
+        "error",
+        ...["innerHTML", "outerHTML", "insertAdjacentHTML"].map((property) => ({
+          property,
+          message: "Only components/common/SafeHtml.tsx may write markup (sanitized HTML).",
+        })),
+        {
+          object: "document",
+          property: "write",
+          message: "document.write is not allowed.",
+        },
+      ],
+    },
+  },
+  {
     // The one audited trust boundary for innerHTML (docs/04 Change 4.6).
     files: ["src/components/common/SafeHtml.tsx"],
     rules: { "no-restricted-syntax": "off" },

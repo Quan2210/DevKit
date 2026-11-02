@@ -2,7 +2,10 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { routableTools, toolPath } from "../../src/registry/tools.meta";
 
-const BASE = "http://localhost:4173";
+import { ORIGIN } from "./env";
+import { DEFAULT_LOCALE, translate } from "../../src/i18n";
+
+const BASE = ORIGIN;
 const pages = ["/", ...routableTools().map((tool) => toolPath(tool))];
 
 /** Collects what must stay empty on every page: console errors, uncaught errors, requests off the origin. */
@@ -71,18 +74,24 @@ for (const path of pages) {
   });
 }
 
-test("an unknown URL shows the not-found page, not a blank screen", async ({ page }) => {
+test("an unknown URL is a real 404 with the not-found page and a clean console", async ({
+  page,
+}) => {
+  const problems = watch(page);
   const response = await page.goto("tools/does-not-exist/");
   await settle(page);
-  expect(response?.status()).toBeLessThan(500);
+  expect(response?.status()).toBe(404);
   await expect(page.locator("h1")).toHaveCount(1);
+  await expect(page.locator("h1")).toHaveText(translate(DEFAULT_LOCALE, "notFound.title"));
+  // The 404 status itself is reported by the browser as a failed resource; nothing else may be.
+  expect(problems.filter((problem) => !/status of 404/.test(problem))).toEqual([]);
 });
 
-test("the theme choice survives a reload and is applied before first paint", async ({ page }) => {
+test("the theme choice survives a reload and is set when the document loads", async ({ page }) => {
   await page.goto("");
   await settle(page);
   await page.getByRole("radio", { name: /tối/i }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });

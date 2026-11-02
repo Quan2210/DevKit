@@ -128,7 +128,7 @@ export function CssGradient() {
                     value={angle}
                     aria-label={t("gradient.angleSlider")}
                     onChange={(event) => setAngle(Number(event.target.value))}
-                    className="w-full accent-primary"
+                    className="h-10 w-full accent-primary sm:h-5"
                   />
                 </div>
               ) : (

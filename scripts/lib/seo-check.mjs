@@ -47,6 +47,22 @@ export function checkSeo(root, { pages, expectedUrl, sitemapPaths }) {
       if (!metaContent(html, "property", property)) at(`missing ${property}`);
     }
     if (!metaContent(html, "name", "twitter:card")) at("missing twitter:card");
+    // The social image must resolve to a real file under the deploy folder (a trailing slash would 404).
+    const homeUrl = expectedUrl("/");
+    for (const [attr, name] of [
+      ["property", "og:image"],
+      ["name", "twitter:image"],
+    ]) {
+      const image = metaContent(html, attr, name);
+      if (!image) {
+        if (name === "og:image") continue; // already reported as missing
+        at(`missing ${name}`);
+      } else if (!image.startsWith(homeUrl) || image.endsWith("/")) {
+        at(`${name} ${image} is not a file URL under ${homeUrl}`);
+      } else if (!existsSync(join(root, image.slice(homeUrl.length)))) {
+        at(`${name} ${image} does not exist in the build`);
+      }
+    }
 
     const canonical = html.match(/<link rel="canonical" href="([^"]*)"/)?.[1];
     const expected = expectedUrl(path);

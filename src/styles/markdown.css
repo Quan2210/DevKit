@@ -3,6 +3,12 @@
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
+/* A large document has thousands of blocks; skipping layout and paint for those off screen keeps the
+   swap after an edit short. The intrinsic size reserves room so the scrollbar stays steady. */
+.md-prose > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 3rem;
+}
 .md-prose > :first-child {
   margin-top: 0;
 }
@@ -75,7 +81,7 @@
   background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 0.9rem 1rem;
+  padding: 2.4rem 1rem 0.9rem; /* room for the Copy button above the first line */
   font-size: 13.5px;
   line-height: 1.6;
 }
