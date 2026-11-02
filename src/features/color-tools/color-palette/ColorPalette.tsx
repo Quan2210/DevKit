@@ -58,7 +58,10 @@ export function ColorPalette() {
           <Segmented<HarmonyMode>
             label={t("palette.rule")}
             value={mode}
-            onChange={setMode}
+            onChange={(next) => {
+              setMode(next);
+              setRequested((current) => clampCount(next, current));
+            }}
             options={HARMONY_MODES.map((value) => ({
               value,
               label: t(`palette.mode.${value}`),
@@ -90,6 +93,7 @@ export function ColorPalette() {
                 const next = Number(event.target.value);
                 if (Number.isFinite(next)) setRequested(next);
               }}
+              onBlur={() => setRequested(count)}
             />
           </div>
         </Panel>

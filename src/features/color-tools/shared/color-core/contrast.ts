@@ -103,17 +103,26 @@ export function suggestForeground(
     g: foreground.g / 255,
     b: foreground.b / 255,
   });
-  const search = (goal: number): Color | null => {
-    const end = fromOklch(goal, start.c, start.h);
+  // A saturated color is gamut-clipped at the lightness extremes, so when the endpoint with the
+  // original chroma misses the target, retry with less chroma (down to pure black or white).
+  const searchAt = (goal: number, chroma: number): Color | null => {
+    const end = fromOklch(goal, chroma, start.h);
     if (contrastRatio(end, background) < target) return null;
     let near = start.l;
     let far = goal;
     for (let i = 0; i < 24; i += 1) {
       const middle = (near + far) / 2;
-      if (contrastRatio(fromOklch(middle, start.c, start.h), background) >= target) far = middle;
+      if (contrastRatio(fromOklch(middle, chroma, start.h), background) >= target) far = middle;
       else near = middle;
     }
-    return fromOklch(far, start.c, start.h);
+    return fromOklch(far, chroma, start.h);
+  };
+  const search = (goal: number): Color | null => {
+    for (const factor of [1, 0.5, 0]) {
+      const found = searchAt(goal, start.c * factor);
+      if (found) return found;
+    }
+    return null;
   };
   const darker = search(0);
   const lighter = search(1);
