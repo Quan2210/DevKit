@@ -119,7 +119,7 @@ export const TOOLS: ReadonlyArray<ToolMeta> = [
     descriptionKey: "tool.markdown.description",
     keywords: ["markdown", "md", "preview", "gfm"],
     priority: "P1",
-    status: "planned",
+    status: "ready",
     icon: "file-text",
     routeFile: "routes/tools/markdown-preview.tsx",
   },

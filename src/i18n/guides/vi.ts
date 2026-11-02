@@ -83,6 +83,36 @@ export const viGuides: Record<string, GuideBlock[]> = {
       text: "Vì sao token hợp lệ vẫn báo lỗi? Token cần đúng ba phần cách nhau bởi dấu chấm, và header cùng payload phải là JSON dạng đối tượng.",
     },
   ],
+  markdown: [
+    { type: "h2", text: "Cách dùng" },
+    {
+      type: "ul",
+      items: [
+        "Viết hoặc dán Markdown ở ô soạn và xem kết quả ngay bên cạnh. Trên màn hình nhỏ, dùng nút Soạn/Xem để chuyển.",
+        "Hỗ trợ CommonMark và GFM: tiêu đề, danh sách, danh sách việc cần làm, bảng, gạch ngang chữ, đoạn mã có tô màu, trích dẫn, liên kết, chú thích cuối trang.",
+        "Mở file .md từ máy hoặc kéo thả vào ô soạn; file được đọc ngay trong trình duyệt, không tải lên đâu cả.",
+        "Copy hoặc tải về Markdown và HTML. HTML xuất ra đã được làm sạch.",
+      ],
+    },
+    { type: "h2", text: "An toàn và riêng tư" },
+    {
+      type: "ul",
+      items: [
+        "HTML thô trong tài liệu bị bỏ qua, và mọi nội dung được làm sạch trước khi hiển thị, nên mã độc trong Markdown không chạy được.",
+        "Ảnh từ URL ngoài bị chặn theo mặc định vì mỗi ảnh sẽ khiến trình duyệt gửi request tới máy chủ khác. Chỉ ảnh nhúng sẵn (data URI png, jpeg, gif, webp) hiển thị được. Bạn có thể bật tải ảnh ngoài khi cần.",
+        "Nội dung không được lưu, trừ khi bạn tự bật tùy chọn nhớ bản nháp trên thiết bị này.",
+      ],
+    },
+    { type: "h2", text: "Giới hạn" },
+    {
+      type: "ul",
+      items: [
+        "File mở từ máy tối đa 5 MB và phải là văn bản UTF-8.",
+        "Chưa hỗ trợ công thức toán, sơ đồ Mermaid và xuất PDF.",
+        "Tài liệu rất lớn (trên khoảng 200.000 ký tự) được xử lý trong luồng nền nên có thể cập nhật chậm hơn một chút.",
+      ],
+    },
+  ],
   uuid: [
     { type: "h2", text: "Cách dùng" },
     {
