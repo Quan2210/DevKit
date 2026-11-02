@@ -459,3 +459,10 @@ Chọn **phương án A** (React Router framework mode + prerender). Đã chạy
 - **L-1:** thêm nút "Xóa bản nháp". **L-2:** timer thông báo được dọn khi unmount và khi copy liên tiếp.
 - **Ghi nhận sai khác kế hoạch F-12:** `clobberPrefix: ""` ở sanitize (footnote vẫn có tiền tố `user-content-` từ remark-rehype) để liên kết chú thích không bị tiền tố đôi; mọi `id` đều do hệ thống sinh nên không clobber được DOM global.
 - **Để lại, theo dõi:** L-3 (mở rộng lint `innerHTML` ra ngoài `*.tsx` và kiểm tra worker bằng smoke test e2e ở M7), L-4 (đọc/parse bản nháp localStorage mỗi lần render khi bật nháp), HTML xuất ra chưa có `.sr-only` nên tiêu đề "Chú thích" hiện thấy.
+
+## Phụ lục B (tiếp) — M5 XML Formatter (nhánh `feat/m5-xml-formatter`)
+
+* **Spike 5a:** chọn tokenizer + serializer riêng thay vì `xml-formatter` (lý do và thiết kế ở `docs/design/xml-spike.md`). Tokenizer chạy trên văn bản đã được `DOMParser` xác nhận hợp lệ và giữ nguyên văn từng mảnh (dấu nháy, thứ tự attribute, entity, DOCTYPE, khai báo XML). Chỉ nội dung "chỉ có phần tử" mới được thụt lề/nén; nội dung trộn, `xml:space="preserve"` và giá trị chỉ có khoảng trắng giữ nguyên.
+* **Lưới an toàn:** kết quả được parse lại và so chữ ký DOM với đầu vào; lệch thì báo lỗi `xml.unsupported`, không đưa ra văn bản.
+* UI sao theo JSON Formatter (cùng `SplitWorkspace`, Undo xóa, Ctrl+Enter, ngưỡng 200.000 ký tự) cộng nút "Tải .xml". Không thêm component mới, không có sai khác Design System.
+* Test: 46 (corpus PRD 9.3: đơn giản, lồng, attribute + namespace, comment, CDATA, Unicode + entity, rỗng, PI, trộn, preserve, DOCTYPE, lỗi; idempotent; round trip).

@@ -71,7 +71,7 @@ export const TOOLS: ReadonlyArray<ToolMeta> = [
     descriptionKey: "tool.xml.description",
     keywords: ["xml", "format", "minify", "validate"],
     priority: "P1",
-    status: "planned",
+    status: "ready",
     icon: "code",
     routeFile: "routes/tools/xml-formatter.tsx",
   },

@@ -83,6 +83,29 @@ export const viGuides: Record<string, GuideBlock[]> = {
       text: "Vì sao token hợp lệ vẫn báo lỗi? Token cần đúng ba phần cách nhau bởi dấu chấm, và header cùng payload phải là JSON dạng đối tượng.",
     },
   ],
+  xml: [
+    { type: "h2", text: "Cách dùng" },
+    {
+      type: "ul",
+      items: [
+        "Dán XML vào ô bên trái, kết quả tự cập nhật sau khi bạn ngừng gõ (với tài liệu trên 200.000 ký tự, hãy bấm Format hoặc Minify).",
+        "Chọn Format để thụt lề (2 hoặc 4 dấu cách) hoặc Minify để bỏ khoảng trắng thừa.",
+        "Khi XML sai, thông báo lỗi nêu vị trí dòng và cột (nếu trình duyệt cung cấp); bấm vào vị trí để nhảy tới đó. Công cụ không tự sửa XML lỗi.",
+        "Dùng Copy hoặc Tải .xml để lấy kết quả.",
+      ],
+    },
+    { type: "h2", text: "Giới hạn" },
+    {
+      type: "ul",
+      items: [
+        "Chỉ khoảng trắng dùng để thụt lề mới bị thay đổi. Văn bản, thuộc tính (giữ nguyên dấu nháy và thứ tự), namespace, comment, CDATA, processing instruction và entity được giữ nguyên.",
+        'Trong nội dung trộn văn bản và thẻ (ví dụ <p>Xin chào <b>bạn</b></p>) hoặc dưới xml:space="preserve", khoảng trắng là nội dung nên phần tử đó được giữ nguyên, không xuống dòng.',
+        "Sau khi xử lý, công cụ phân tích lại kết quả và so với đầu vào; nếu không khớp, nó báo lỗi thay vì đưa ra kết quả sai.",
+        "Nội dung phần DOCTYPE được giữ nguyên văn nhưng không được kiểm tra DTD.",
+        "Dữ liệu được xử lý ngay trong trình duyệt, không gửi đi đâu.",
+      ],
+    },
+  ],
   markdown: [
     { type: "h2", text: "Cách dùng" },
     {
