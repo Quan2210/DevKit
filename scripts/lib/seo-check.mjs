@@ -43,7 +43,7 @@ export function checkSeo(root, { pages, expectedUrl, sitemapPaths }) {
       titles.set(title, file);
     }
     if (!metaContent(html, "name", "description")) at("missing meta description");
-    for (const property of ["og:title", "og:description", "og:url"]) {
+    for (const property of ["og:title", "og:description", "og:url", "og:image"]) {
       if (!metaContent(html, "property", property)) at(`missing ${property}`);
     }
     if (!metaContent(html, "name", "twitter:card")) at("missing twitter:card");

@@ -393,6 +393,6 @@ Skill `frontend-design` thiên về thiết kế có cá tính, tránh "mặc đ
 | 2026-11-02 | Component | Color tools: ô chọn màu trong Contrast/Palette/Gradient dùng hộp chọn màu gốc của trình duyệt (không có alpha; alpha nhập bằng chữ), chỉ Color Picker dùng `react-colorful` | Nhẹ, truy cập tốt, tránh nhiều popover; alpha vẫn nhập được ở ô văn bản | Chờ duyệt |
 | 2026-11-02 | Component | Color tools: thêm `ColorField` (ô nhập màu có validate + hộp chọn) và `Swatch` (nền caro cho alpha) dùng chung | Tái sử dụng giữa 4 tool; caro dùng token `surface`/`surface-muted` | Chờ duyệt |
 | 2026-11-02 | Scope | CSS Gradient: chưa làm kéo-thả stop (đã có nút lên/xuống dùng bằng bàn phím) | Kéo-thả là tùy chọn theo kế hoạch 6.5 | Chờ duyệt |
-| 2026-11-02 | Layout | CSS Gradient: bản xem trước chưa dính (sticky) ở đầu trang trên mobile (layouts §4.9) | Chưa làm; xem lại ở M7 cùng rà responsive | Chờ duyệt |
+| 2026-11-02 | Layout | CSS Gradient: bản xem trước dính (sticky) ở đầu trang trên mobile đã làm ở M7 (layouts §4.9) | Đúng thiết kế; ghi lại vì M6 từng chưa có | Đã xử lý |
 
 *(Bổ sung dòng mới cho mỗi sai khác trong quá trình thiết kế/implement.)*

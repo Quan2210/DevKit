@@ -16,7 +16,7 @@ const page = (overrides: { canonical?: string; h1?: number; title?: string } = {
   const url = overrides.canonical ?? "https://x.dev/DevKit/";
   return `<!DOCTYPE html><html lang="vi"><head>${CSP}<title>${overrides.title ?? "DevKit"}</title>
 <meta name="description" content="d"/><meta property="og:title" content="t"/>
-<meta property="og:description" content="d"/><meta property="og:url" content="${url}"/>
+<meta property="og:description" content="d"/><meta property="og:url" content="${url}"/><meta property="og:image" content="${url}og.png"/>
 <meta name="twitter:card" content="summary"/><link rel="canonical" href="${url}"/></head>
 <body>${"<h1>x</h1>".repeat(overrides.h1 ?? 1)}</body></html>`;
 };

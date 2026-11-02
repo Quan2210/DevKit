@@ -33,6 +33,8 @@ const tokenTheme = EditorView.theme({
   },
   ".cm-activeLine, .cm-activeLineGutter": { backgroundColor: "transparent" },
   ".cm-cursor": { borderLeftColor: "var(--color-text)" },
+  // CodeMirror's default placeholder grey fails AA on the surface colour.
+  ".cm-placeholder": { color: "var(--color-text-muted)" },
   ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": {
     backgroundColor: "color-mix(in srgb, var(--color-primary) 25%, transparent)",
   },
