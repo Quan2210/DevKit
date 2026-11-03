@@ -92,6 +92,7 @@ export const viGuides: Record<string, GuideBlock[]> = {
         "Chọn Format để thụt lề (2 hoặc 4 dấu cách) hoặc Minify để bỏ khoảng trắng thừa.",
         "Khi XML sai, thông báo lỗi nêu vị trí dòng và cột (nếu trình duyệt cung cấp); bấm vào vị trí để nhảy tới đó. Công cụ không tự sửa XML lỗi.",
         "Dùng Copy hoặc Tải .xml để lấy kết quả.",
+        "Ctrl+Enter (hoặc Cmd+Enter) chạy lại thao tác đang chọn.",
       ],
     },
     { type: "h2", text: "Giới hạn" },
@@ -225,7 +226,7 @@ export const viGuides: Record<string, GuideBlock[]> = {
       items: [
         "File mở từ máy tối đa 5 MB và phải là văn bản UTF-8.",
         "Chưa hỗ trợ công thức toán, sơ đồ Mermaid và xuất PDF.",
-        "Tài liệu rất lớn (trên khoảng 200.000 ký tự) được xử lý trong luồng nền nên có thể cập nhật chậm hơn một chút.",
+        "Tài liệu trên khoảng 5.000 ký tự được xử lý trong luồng nền để việc gõ không bị khựng, nên bản xem trước có thể cập nhật chậm hơn một chút sau khi bạn ngừng gõ.",
       ],
     },
   ],

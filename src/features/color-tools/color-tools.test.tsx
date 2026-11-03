@@ -144,8 +144,7 @@ describe("Color Palette", () => {
 
   it("exports valid CSS variables with a sanitized prefix", () => {
     renderTool(<ColorPalette />);
-    const css = () =>
-      (screen.getByLabelText("CSS Variables của bảng màu") as HTMLTextAreaElement).value;
+    const css = () => screen.getByLabelText("CSS Variables của bảng màu").textContent!;
     expect(css()).toContain(":root {");
     expect(css()).toContain("--color-1: #4F46E5;");
     typeInto("Tiền tố biến CSS", "My Brand");

@@ -5,7 +5,6 @@ import { CopyButton } from "../../../components/common/CopyButton";
 import { Input } from "../../../components/common/Input";
 import { Panel } from "../../../components/common/Panel";
 import { Segmented } from "../../../components/common/Segmented";
-import { CodeEditor } from "../../../components/editors/CodeEditor";
 import { ToolShell } from "../../../components/layout/ToolShell";
 import { getGuide } from "../../../i18n";
 import { useT } from "../../../i18n/useT";
@@ -108,9 +107,9 @@ export function ColorPalette() {
                   className="h-20 w-full"
                   label={t("palette.swatchLabel", { index: index + 1, value: toHex(entry.color) })}
                 />
-                <div className="flex items-center justify-between gap-1">
+                <div className="flex flex-wrap items-center justify-between gap-1">
                   <div className="min-w-0">
-                    <p className="truncate font-mono text-sm">{toHex(entry.color)}</p>
+                    <p className="font-mono text-sm">{toHex(entry.color)}</p>
                     {entry.isBase ? (
                       <p className="text-xs text-text-muted">{t("palette.baseTag")}</p>
                     ) : null}
@@ -139,7 +138,12 @@ export function ColorPalette() {
               />
             </div>
             <div className="h-48">
-              <CodeEditor language="css" readOnly value={css} ariaLabel={t("palette.cssLabel")} />
+              <pre
+                aria-label={t("palette.cssLabel")}
+                className="h-full overflow-auto rounded-md bg-surface-muted p-3 font-mono text-sm"
+              >
+                {css}
+              </pre>
             </div>
           </div>
         </Panel>

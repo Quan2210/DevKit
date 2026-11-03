@@ -260,7 +260,7 @@ describe("QA Color Palette (AC 3.7)", () => {
   it("css variables: one per swatch, valid syntax, hostile prefix cannot inject", () => {
     renderTool(<ColorPalette />);
     typeInto("Tiền tố biến CSS", "x;}body{display:none");
-    const css = (screen.getByLabelText("CSS Variables của bảng màu") as HTMLTextAreaElement).value;
+    const css = screen.getByLabelText("CSS Variables của bảng màu").textContent!;
     expect(css.match(/^ {2}--[a-z][a-z0-9-]*-\d+: #[0-9A-F]{6}([0-9A-F]{2})?;$/gm)).toHaveLength(5);
     expect(css).not.toMatch(/[;:]\s*display|body\s*\{/);
     expect(css.match(/[{}]/g)).toHaveLength(2);

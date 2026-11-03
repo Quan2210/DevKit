@@ -47,6 +47,12 @@ export function UuidGenerator() {
               max={MAX_UUIDS}
               value={count}
               onChange={(event) => setCount(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  generate();
+                }
+              }}
               hint={t("uuid.countHint")}
             />
           </div>

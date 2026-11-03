@@ -482,7 +482,10 @@ function MarkdownWorkspace({
         </div>
       ))}
       {dragging ? (
-        <div className="absolute inset-0 z-10 grid place-items-center rounded-lg border-2 border-dashed border-primary bg-surface/90 text-lg font-medium">
+        <div
+          data-testid="md-drop-overlay"
+          className="absolute inset-0 z-10 grid place-items-center rounded-lg border-2 border-dashed border-primary bg-surface/90 text-lg font-medium"
+        >
           {t("markdown.dropHint")}
         </div>
       ) : null}

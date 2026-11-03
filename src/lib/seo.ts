@@ -1,7 +1,7 @@
 import { translate, DEFAULT_LOCALE, type MessageKey } from "../i18n";
 import type { ToolMeta } from "../registry/tools.meta";
 import { toolPath } from "../registry/tools.meta";
-import { buildUrl } from "./url";
+import { buildAssetUrl, buildUrl } from "./url";
 
 export interface PageSeo {
   title: string;
@@ -28,7 +28,11 @@ export function buildMeta({ title, description, path }: PageSeo): MetaDescriptor
     { property: "og:url", content: url },
     { property: "og:locale", content: "vi_VN" },
     { property: "og:site_name", content: translate(DEFAULT_LOCALE, "app.name") },
-    { name: "twitter:card", content: "summary" },
+    { property: "og:image", content: buildAssetUrl("og-default.png") },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:image", content: buildAssetUrl("og-default.png") },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
     { tagName: "link", rel: "canonical", href: url },

@@ -2,6 +2,10 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import { ToolErrorBoundary } from "./components/common/ToolErrorBoundary";
 import "./styles/globals.css";
 
+export const links = () => [
+  { rel: "icon", type: "image/svg+xml", href: `${import.meta.env.BASE_URL}favicon.svg` },
+];
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">

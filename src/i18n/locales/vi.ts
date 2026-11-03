@@ -8,13 +8,11 @@ export const vi = {
 
   "nav.skip": "Bỏ qua điều hướng",
   "nav.openMenu": "Mở menu",
-  "nav.closeMenu": "Đóng menu",
   "nav.main": "Điều hướng chính",
   "nav.search": "Tìm công cụ",
   "nav.searchPlaceholder": "Tìm: json, jwt, màu…",
   "nav.noResults": "Không có công cụ nào khớp “{query}”.",
   "nav.empty": "Chưa có công cụ nào được phát hành.",
-  "nav.home": "Trang chủ",
 
   "breadcrumb.label": "Đường dẫn",
   "breadcrumb.tools": "Công cụ",
@@ -56,19 +54,15 @@ export const vi = {
   "action.copyFailed": "Không copy được. Hãy chọn nội dung và nhấn Ctrl+C.",
   "action.clear": "Xóa",
   "action.sample": "Mẫu",
-  "action.download": "Tải xuống",
   "action.swap": "Đổi chiều",
   "action.undo": "Hoàn tác",
   "action.close": "Đóng",
   "action.cancel": "Hủy",
-  "action.confirm": "Xác nhận",
 
   "undo.cleared": "Đã xóa.",
 
   "status.valid": "Hợp lệ",
   "status.invalid": "Không hợp lệ",
-  "status.pass": "Đạt",
-  "status.fail": "Không đạt",
 
   "device.local": "Xử lý trên thiết bị",
   "device.external": "Ảnh ngoài đang bật: trang gửi request tới máy chủ khác",
@@ -90,8 +84,6 @@ export const vi = {
   "base64.invalidPadding": "Dấu “=” đệm không hợp lệ: chỉ được nằm ở cuối chuỗi và tối đa 2 ký tự.",
   "base64.notUtf8": "Dữ liệu sau khi giải mã không phải văn bản UTF-8 hợp lệ.",
 
-  "common.input": "Đầu vào",
-  "common.output": "Kết quả",
   "common.chars": "{count} ký tự",
   "common.mode": "Chế độ",
   "common.previous": "{title} (trước đó)",
@@ -182,7 +174,6 @@ export const vi = {
   "jwt.notYetValid": "Chưa có hiệu lực, bắt đầu {relative}",
   "jwt.invalidClaims": "Claim thời gian không phải số: {claims}.",
   "jwt.empty": "Dán một JWT để xem nội dung.",
-  "jwt.invalid": "Không đọc được JWT.",
   "jwt.invalidParts": "JWT cần đúng 3 phần ngăn cách bằng dấu chấm (header.payload.signature).",
   "jwt.invalidPart": "Phần {part} không phải Base64URL hợp lệ.",
   "jwt.notJson": "Phần {part} không phải JSON hợp lệ.",

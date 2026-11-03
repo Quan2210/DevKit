@@ -1,6 +1,9 @@
 name: Deploy to GitHub Pages
+# Deploys only what CI has already verified (typecheck, lint, unit tests, build checks, e2e) on main.
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 permissions:
@@ -9,15 +12,24 @@ permissions:
   id-token: write
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   build:
+    # A manual run is allowed from main only; an automatic run needs a green CI on a push to main.
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     env:
       VITE_BASE: /DevKit/
       VITE_SITE_URL: https://quan2210.github.io
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The commit CI verified, not whatever main points at by now.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22

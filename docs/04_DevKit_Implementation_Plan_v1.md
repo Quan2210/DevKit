@@ -1,7 +1,7 @@
 # DevKit — Implementation Plan
 
 **Phiên bản:** 1.3
-**Trạng thái:** v1.3 (M0.1 spike đã chạy, chọn A; xem `docs/design/ssg-spike.md` và Phụ lục B) — đã sửa theo review độc lập lần 1 (REQUEST CHANGES) và re-review lần 2 (APPROVE WITH MINOR FIXES, đã áp dụng; xem Phụ lục A); đã chốt O1–O7; chờ `I APPROVE`. **Chưa có code nào được viết.**
+**Trạng thái:** v1.3 (M0.1 spike đã chạy, chọn A; xem `docs/design/ssg-spike.md` và Phụ lục B) — đã sửa theo review độc lập lần 1 (REQUEST CHANGES) và re-review lần 2 (APPROVE WITH MINOR FIXES, đã áp dụng; xem Phụ lục A); đã chốt O1–O7; chờ `I APPROVE`. **Đã triển khai M0–M7 (xem Phụ lục B); M8 triển khai thử đang chạy trên GitHub Pages.**
 **Nguồn:** [PRD v1.1](./01_DevKit_Requirements_v1.1.md) · [Design System v1.1](./02_DevKit_Design_System_v1.1.md) · [System Design v1](./03_DevKit_System_Design_v1.md) · [UI Direction / Layouts / Components](./design/ui-direction.md)
 **Ngày kiểm tra phiên bản thư viện:** 2026-11-01 bằng `npm view` (chỉ kiểm tra metadata/peer, **chưa cài thử**; spike M0 sẽ xác nhận bằng cài thật).
 
@@ -330,7 +330,7 @@ Không còn câu hỏi mở. Khi bắt đầu M8, mình hỏi lại riêng việ
 
 # 12. Approval
 
-**Implementation has not started.** Không có file code, cấu hình, dependency hay commit nào được tạo bởi plan này (chỉ tài liệu).
+*(Ghi chú lịch sử: đoạn này viết khi plan vừa duyệt; code đã được triển khai theo các nhánh `feat/m*`, xem Phụ lục B.)*
 
 Đã chạy review độc lập lần 1 (REQUEST CHANGES) và re-review lần 2 (APPROVE WITH MINOR FIXES); mọi thay đổi bắt buộc đã áp dụng ở v1.2. Bước tiếp theo: bạn nhắn:
 
@@ -481,3 +481,13 @@ Chọn **phương án A** (React Router framework mode + prerender). Đã chạy
 * **QA (PASS WITH KNOWN ISSUES, đã sửa):** gợi ý màu trả `null` với màu bão hòa cao dù đen/trắng đạt → thử lại với chroma giảm dần; ô số lượng của Palette không phản ánh số màu thực.
 * **Code review (APPROVE WITH MINOR FIXES, đã xử lý):** MEDIUM — danh sách điểm màu của Gradient không theo thứ tự vị trí nên nút lên/xuống ngược với những gì người dùng thấy → danh sách luôn sắp theo vị trí (chèn đúng chỗ, sắp lại khi rời ô vị trí). LOW — Harmony không còn lặp màu với nền rất sáng/tối (chỉ dùng các bước độ sáng nằm trong 5–95%); ghi chú alpha đúng khi chỉ chữ trong suốt; ô số cho phép để trống khi gõ (`NumberField`); tên nút Copy nói rõ màu; nhóm bộ chọn có `role="group"`. **Còn lại, ghi nhận:** bản xem trước Gradient chưa dính trên mobile (đã ghi §12); tên slider tiếng Anh của `react-colorful`; `culori` nạp từ entry đầy đủ (16 KB gzip) có thể thu nhỏ bằng `culori/fn`; hiển thị tỉ lệ cắt có thể thiếu 0,01 với một số giá trị đúng hai chữ số (không ảnh hưởng đạt/không đạt).
 * Test: 247 (lõi + UI + QA). Gợi ý "Copy" của `Contrast` sao chép màu đã nhập (kèm alpha), không phải màu đã trộn.
+
+## Phụ lục B (tiếp) — M7 Polish và QA (nhánh `feat/m7-polish`, dựng trên nhánh M6)
+
+* **E2E Playwright thật** (`tests/e2e/routes.spec.ts`, `tools.spec.ts`; CI cài Chromium và chạy `npm run test:e2e` trên bản build; cục bộ chạy `PW_CHANNEL=msedge npm run test:e2e`): mọi route (Home + 10 tool) × (tải không lỗi console/pageerror và **0 request ngoài origin**, đúng 1 H1) × axe WCAG 2.0/2.1 A+AA ở **sáng và tối** × không cuộn ngang ở **375/768/1024/1440 px**; trang 404; theme giữ sau reload; Markdown: worker chạy dưới CSP, payload XSS không thực thi và không gửi request, footnote trỏ đúng id, mở/thả file chỉ chèn một lần, **gõ trong tài liệu ~300 KB: long task p95 < 150 ms**; XML lỗi trên parser thật; JSON, Base64, UUID, Contrast, Recent Colors giữ sau reload, ứng dụng vẫn chạy khi localStorage bị chặn.
+* **Lỗi axe thật đã sửa:** nhãn Segmented chưa chọn thiếu tương phản ở giao diện sáng (đổi sang `text-text`, mục đang chọn có nền + viền); chữ placeholder của CodeMirror xám mặc định không đạt AA (dùng `--color-text-muted`). Favicon thiếu (404 ở Home) → thêm `favicon.svg` + link. Ghi §12.
+* **SEO:** ảnh OG mặc định 1200×630 (`public/og-default.png`, sinh bằng `scripts/gen-og-image.mjs`), `og:image`, `twitter:card=summary_large_image`; `check:seo` bắt buộc `og:image`.
+* **Mobile:** xem trước CSS Gradient dính ở đầu trang (đã làm, §12).
+* **Hiệu năng Markdown (đo trong Edge, Split view, tài liệu ~1 MB nhiều tiêu đề/danh sách/code):** độ trễ mỗi phím gõ ~10–60 ms; sau khi ngừng gõ, worker dựng lại (hàng chục giây với tài liệu danh sách nặng, không chặn UI) rồi một lần thay DOM. Lần thay DOM đó trước đây là một long task 190–680 ms; thêm `content-visibility: auto` cho các khối của `.md-prose` để bỏ qua layout phần ngoài màn hình, test `tests/e2e/perf.spec.ts` (tắt trace vì trace chụp DOM làm sai số đo) yêu cầu p95 độ trễ phím < 150 ms (đã gồm overhead Playwright) và long task dài nhất < 500 ms. **Sai khác so với kế hoạch 4.7c (long task p95 ≤ 100 ms):** mỗi lần chỉ có 1–2 long task nên p95 không có ý nghĩa; ngưỡng thực dùng là mức dài nhất < 500 ms. Ngưỡng này cần bạn xác nhận.
+* **Chưa làm / ghi nhận:** Firefox và Safari chưa chạy e2e (Playwright cần `playwright install firefox webkit`); gom nút phụ của Markdown vào menu "…" trên mobile (§12 chờ duyệt); đồng bộ cuộn Markdown (§12 chờ duyệt); kiểm thử màn hình đọc thủ công.
+* **Cổng chất lượng 2 (QA toàn sản phẩm + review toàn bộ diff) — đã xử lý:** `og:image`/`twitter:image` có dấu `/` cuối nên 404 (nay dùng `buildAssetUrl`, `check:seo` kiểm file tồn tại); deploy Pages chỉ chạy sau CI xanh (`workflow_run`) trên đúng commit đã kiểm; CI có `permissions`, `concurrency`, lưu báo cáo e2e khi lỗi; e2e đọc origin/base từ `tests/e2e/env.ts`; Palette: mã màu không còn bị cắt ở 375 px, khối CSS dùng `<pre>` thay CodeMirror (nhẹ ~130 kB gzip); UUID: Enter trong ô số lượng tạo UUID; nút "Copy mã" không còn che dòng đầu của code block; slider góc Gradient cao 40 px trên mobile; hướng dẫn Markdown/XML đúng; xóa 9 khóa i18n thừa; lint cấm `innerHTML`/`outerHTML`/`insertAdjacentHTML`/`document.write` cả ở file `.ts`. **Còn lại, ghi nhận:** copy thất bại chưa tự bôi đen nội dung (§12, có test `test.fail`); `XmlFormatter` lặp phần lớn logic của `JsonFormatter` (nên gom thành hook chung); Firefox/WebKit chưa chạy; test e2e đọc nội dung file tải về và ErrorBoundary cách ly tool lỗi chưa viết; CSP vẫn cho `img-src https:` (cần cho ảnh ngoài bật chủ động) và `style-src 'unsafe-inline'`.

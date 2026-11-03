@@ -82,7 +82,9 @@ export function Segmented<V extends string>({
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
               "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-sm px-3 text-sm font-medium transition-colors sm:min-h-8",
-              selected ? "bg-surface text-text shadow-sm" : "text-text-muted hover:text-text",
+              selected
+                ? "bg-surface text-text shadow-sm ring-1 ring-border-strong"
+                : "text-text hover:bg-surface",
             )}
           >
             {option.icon}

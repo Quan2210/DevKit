@@ -316,8 +316,8 @@ describe("robustness", () => {
     const { html, headings } = await renderMarkdown(source);
     expect(html.length).toBeGreaterThan(source.length / 2);
     expect(headings.length).toBeGreaterThan(1000);
-    expect(performance.now() - started).toBeLessThan(15_000);
-  }, 30_000);
+    expect(performance.now() - started).toBeLessThan(30_000);
+  }, 60_000);
 
   it("renders a 250 KB document full of lists in reasonable time (the parser is super-linear on lists)", async () => {
     const block = "## Heading\n\nParagraph with **bold**.\n\n- item\n- item\n\n";

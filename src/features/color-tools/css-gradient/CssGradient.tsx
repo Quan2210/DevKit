@@ -96,7 +96,7 @@ export function CssGradient() {
         <div
           role="img"
           aria-label={t("gradient.previewLabel")}
-          className="h-48 w-full rounded-lg border border-border-strong sm:h-64"
+          className="h-40 w-full rounded-lg border border-border-strong max-sm:sticky max-sm:top-2 max-sm:z-10 sm:h-64"
           style={{ backgroundImage: css }}
         />
 
@@ -128,7 +128,7 @@ export function CssGradient() {
                     value={angle}
                     aria-label={t("gradient.angleSlider")}
                     onChange={(event) => setAngle(Number(event.target.value))}
-                    className="w-full accent-primary"
+                    className="h-10 w-full accent-primary sm:h-5"
                   />
                 </div>
               ) : (
