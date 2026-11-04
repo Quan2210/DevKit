@@ -69,6 +69,7 @@ export function Base64Tool() {
     <ToolShell
       tool={tool}
       guide={getGuide("vi", tool.id)}
+      fill
       notice={
         error || cleared !== null ? (
           <div className="space-y-2">
