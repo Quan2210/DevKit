@@ -7,7 +7,7 @@ import { Notice } from "../../components/common/Notice";
 import { IconButton } from "../../components/common/IconButton";
 import { StatusBadge } from "../../components/common/StatusBadge";
 import type { CodeEditorHandle } from "../../components/editors/CodeEditor";
-import { SplitWorkspace } from "../../components/layout/SplitWorkspace";
+import { SplitAction, SplitWorkspace } from "../../components/layout/SplitWorkspace";
 import { ToolShell } from "../../components/layout/ToolShell";
 import { useDebounced } from "../../hooks/useDebounced";
 import { useHotkeys } from "../../hooks/useHotkeys";
@@ -290,33 +290,39 @@ export function DualPaneTool({ tool, adapter, labels, extraNotice }: DualPaneToo
       <SplitWorkspace
         actions={
           <>
-            {group(t("action.copy"), [arrow("left", "copy"), arrow("right", "copy")])}
-            {group(t(transformable ? "json.transform" : "json.format"), [
-              arrow("left", "format"),
-              arrow("right", "format"),
-            ])}
+            <SplitAction>
+              {group(t("action.copy"), [arrow("left", "copy"), arrow("right", "copy")])}
+            </SplitAction>
+            <SplitAction>
+              {group(t(transformable ? "json.transform" : "json.format"), [
+                arrow("left", "format"),
+                arrow("right", "format"),
+              ])}
+            </SplitAction>
             {adapter.compare ? (
-              <div className="flex flex-col items-center gap-1.5">
-                <Checkbox
-                  label={t("compare.label")}
-                  checked={compare}
-                  onChange={(event) => toggleCompare(event.target.checked)}
-                />
-                {compare && diff && diff.count > 0 ? (
-                  <div className="flex gap-1.5">
-                    <IconButton
-                      label={t("json.prevDiff")}
-                      icon={<ChevronUp aria-hidden className={ICON} />}
-                      onClick={() => stepDiff(-1)}
-                    />
-                    <IconButton
-                      label={t("json.nextDiff")}
-                      icon={<ChevronDown aria-hidden className={ICON} />}
-                      onClick={() => stepDiff(1)}
-                    />
-                  </div>
-                ) : null}
-              </div>
+              <SplitAction>
+                <div className="flex flex-col items-center gap-1.5">
+                  <Checkbox
+                    label={t("compare.label")}
+                    checked={compare}
+                    onChange={(event) => toggleCompare(event.target.checked)}
+                  />
+                  {compare && diff && diff.count > 0 ? (
+                    <div className="flex gap-1.5">
+                      <IconButton
+                        label={t("json.prevDiff")}
+                        icon={<ChevronUp aria-hidden className={ICON} />}
+                        onClick={() => stepDiff(-1)}
+                      />
+                      <IconButton
+                        label={t("json.nextDiff")}
+                        icon={<ChevronDown aria-hidden className={ICON} />}
+                        onClick={() => stepDiff(1)}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              </SplitAction>
             ) : null}
           </>
         }

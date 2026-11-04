@@ -20,6 +20,14 @@ const clampRatio = (value: number) => Math.min(MAX, Math.max(MIN, value));
  * it (ToolShell `fill`). The middle strip is a drag handle (and a separator for the keyboard) that
  * resizes the two sides; it starts below the controls, which sit near the top.
  */
+/**
+ * One control (or one labelled group) in the middle column. Every block is as wide as the column and
+ * centres what is inside, so the controls line up whatever their own width is.
+ */
+export function SplitAction({ children }: { children: ReactNode }) {
+  return <div className="flex min-h-10 items-center justify-center lg:w-full">{children}</div>;
+}
+
 export function SplitWorkspace({ left, right, actions }: SplitWorkspaceProps) {
   const t = useT();
   const grid = useRef<HTMLDivElement>(null);
@@ -79,7 +87,7 @@ export function SplitWorkspace({ left, right, actions }: SplitWorkspaceProps) {
           <div
             role="toolbar"
             aria-label={t("toolshell.actions")}
-            className="relative flex flex-row flex-wrap items-start justify-center gap-4 lg:mt-[12dvh] lg:flex-col lg:flex-nowrap lg:items-stretch"
+            className="relative flex flex-row flex-wrap items-start justify-center gap-x-4 gap-y-3 lg:mt-[12dvh] lg:w-28 lg:flex-col lg:flex-nowrap lg:items-stretch"
           >
             {actions}
           </div>
