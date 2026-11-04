@@ -8,7 +8,7 @@ import { Panel } from "../../components/common/Panel";
 import { Segmented } from "../../components/common/Segmented";
 import { StatusBadge } from "../../components/common/StatusBadge";
 import { UndoBar } from "../../components/common/UndoBar";
-import { SplitWorkspace } from "../../components/layout/SplitWorkspace";
+import { SplitAction, SplitWorkspace } from "../../components/layout/SplitWorkspace";
 import { ToolShell } from "../../components/layout/ToolShell";
 import { CodeEditor, type CodeEditorHandle } from "../../components/editors/CodeEditor";
 import { useDebounced } from "../../hooks/useDebounced";
@@ -69,6 +69,7 @@ export function Base64Tool() {
     <ToolShell
       tool={tool}
       guide={getGuide("vi", tool.id)}
+      fill
       notice={
         error || cleared !== null ? (
           <div className="space-y-2">
@@ -115,48 +116,60 @@ export function Base64Tool() {
       <SplitWorkspace
         actions={
           <>
-            <Segmented<Base64Mode>
-              label={t("common.mode")}
-              iconOnly
-              value={mode}
-              onChange={setMode}
-              options={[
-                {
-                  value: "encode",
-                  label: t("base64.encode"),
-                  icon: <span aria-hidden>{"Aa"}</span>,
-                },
-                {
-                  value: "decode",
-                  label: t("base64.decode"),
-                  icon: <span aria-hidden>{"64"}</span>,
-                },
-              ]}
-            />
-            <Checkbox
-              label={t("base64.urlSafe")}
-              shortLabel="URL"
-              checked={urlSafe}
-              onChange={(e) => setUrlSafe(e.target.checked)}
-            />
-            <IconButton
-              variant="primary"
-              label={t("action.swap")}
-              icon={<ArrowLeftRight aria-hidden className="size-4" />}
-              onClick={swap}
-              disabled={!result.ok || lastGood === ""}
-            />
-            <IconButton
-              label={t("action.sample")}
-              icon={<FileText aria-hidden className="size-4" />}
-              onClick={() => setInput(t(encoding ? "base64.sampleEncode" : "base64.sampleDecode"))}
-            />
-            <IconButton
-              label={t("action.clear")}
-              icon={<Eraser aria-hidden className="size-4" />}
-              onClick={clear}
-              disabled={input === ""}
-            />
+            <SplitAction>
+              <Segmented<Base64Mode>
+                label={t("common.mode")}
+                iconOnly
+                value={mode}
+                onChange={setMode}
+                options={[
+                  {
+                    value: "encode",
+                    label: t("base64.encode"),
+                    icon: <span aria-hidden>{"Aa"}</span>,
+                  },
+                  {
+                    value: "decode",
+                    label: t("base64.decode"),
+                    icon: <span aria-hidden>{"64"}</span>,
+                  },
+                ]}
+              />
+            </SplitAction>
+            <SplitAction>
+              <Checkbox
+                label={t("base64.urlSafe")}
+                shortLabel="URL"
+                checked={urlSafe}
+                onChange={(e) => setUrlSafe(e.target.checked)}
+              />
+            </SplitAction>
+            <SplitAction>
+              <IconButton
+                variant="primary"
+                label={t("action.swap")}
+                icon={<ArrowLeftRight aria-hidden className="size-4" />}
+                onClick={swap}
+                disabled={!result.ok || lastGood === ""}
+              />
+            </SplitAction>
+            <SplitAction>
+              <IconButton
+                label={t("action.sample")}
+                icon={<FileText aria-hidden className="size-4" />}
+                onClick={() =>
+                  setInput(t(encoding ? "base64.sampleEncode" : "base64.sampleDecode"))
+                }
+              />
+            </SplitAction>
+            <SplitAction>
+              <IconButton
+                label={t("action.clear")}
+                icon={<Eraser aria-hidden className="size-4" />}
+                onClick={clear}
+                disabled={input === ""}
+              />
+            </SplitAction>
           </>
         }
         left={

@@ -1,10 +1,13 @@
-import { BookOpen } from "lucide-react";
-import type { ReactNode } from "react";
+import { CircleQuestionMark } from "lucide-react";
+import { useState, type ReactNode } from "react";
 import type { GuideBlock } from "../../i18n";
 import { useT } from "../../i18n/useT";
 import type { ToolMeta } from "../../registry/tools.meta";
+import { cn } from "../../lib/cn";
 import { DeviceStatus } from "../common/DeviceStatus";
+import { Dialog } from "../common/Dialog";
 import { GuideContent } from "../common/GuideContent";
+import { IconButton } from "../common/IconButton";
 
 export interface ToolShellProps {
   tool: ToolMeta;
@@ -18,13 +21,18 @@ export interface ToolShellProps {
   externalRequestsEnabled?: boolean;
   /** Help, limits and FAQ as structured content; also the page's SEO text. */
   guide?: ReadonlyArray<GuideBlock>;
+  /**
+   * From lg the page is exactly one screen tall and the workspace takes what the toolbar, notices and
+   * status bar leave, so only the editors scroll, never the page.
+   */
+  fill?: boolean;
   /** The workspace (editors, previews). */
   children: ReactNode;
 }
 
 /**
  * Page template every tool uses (docs/design/layouts.md §3). The breadcrumb lives in the top nav;
- * the title is kept for assistive tech and SEO only. Guide is a collapsed section at the bottom.
+ * the title is kept for assistive tech and SEO only. The guide opens from the ? in the status bar.
  */
 export function ToolShell({
   tool,
@@ -33,12 +41,20 @@ export function ToolShell({
   status,
   externalRequestsEnabled = false,
   guide,
+  fill = false,
   children,
 }: ToolShellProps) {
   const t = useT();
+  const [guideOpen, setGuideOpen] = useState(false);
 
   return (
-    <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-3">
+    <div
+      className={cn(
+        "mx-auto flex w-full max-w-[1800px] flex-col gap-3",
+        // main has py-3, hence the 1.5rem
+        fill && "lg:h-[calc(100dvh-var(--topnav-h,3rem)-1.5rem)]",
+      )}
+    >
       <h1 className="sr-only">{t(tool.titleKey)}</h1>
       <p className="sr-only">{t(tool.descriptionKey)}</p>
 
@@ -54,26 +70,38 @@ export function ToolShell({
 
       {notice}
 
-      <div className="min-h-[60dvh] sm:min-h-[420px]">{children}</div>
+      <div className={cn("min-h-[60dvh] sm:min-h-[420px]", fill && "lg:min-h-0 lg:flex-1")}>
+        {children}
+      </div>
 
       <div
         aria-label={t("toolshell.status")}
         className="flex min-h-10 flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface px-3 text-sm"
       >
         <div className="flex flex-wrap items-center gap-3">{status}</div>
-        <DeviceStatus externalRequestsEnabled={externalRequestsEnabled} />
+        <div className="flex items-center gap-1">
+          {guide && guide.length > 0 ? (
+            <IconButton
+              label={t("toolshell.guide")}
+              aria-haspopup="dialog"
+              icon={<CircleQuestionMark aria-hidden className="size-4" />}
+              onClick={() => setGuideOpen(true)}
+            />
+          ) : null}
+          <DeviceStatus externalRequestsEnabled={externalRequestsEnabled} />
+        </div>
       </div>
 
       {guide && guide.length > 0 ? (
-        <details className="group rounded-lg border border-border bg-surface">
-          <summary className="flex min-h-10 cursor-pointer items-center gap-2 px-3 text-sm font-medium">
-            <BookOpen aria-hidden className="size-4" />
-            {t("toolshell.guide")}
-          </summary>
-          <div className="border-t border-border px-4 pb-4">
-            <GuideContent blocks={guide} />
-          </div>
-        </details>
+        // Always in the page (closed it is display:none), so the guide text stays in the prerendered HTML.
+        <Dialog
+          open={guideOpen}
+          onClose={() => setGuideOpen(false)}
+          title={t("toolshell.guide")}
+          placement="right"
+        >
+          <GuideContent blocks={guide} />
+        </Dialog>
       ) : null}
     </div>
   );

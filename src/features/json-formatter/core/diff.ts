@@ -1,8 +1,11 @@
 /**
  * Structural JSON comparison. Objects compare by key (order is ignored), arrays by index.
- * Each difference carries the path, so the UI can mark the matching line in either text.
+ * Each difference carries the path, so the UI can mark the matching node in either tree.
  */
-export type DiffKind = "added" | "removed" | "changed";
+import { ancestorIds, idOfPath } from "../../data-tools/model";
+import type { DiffKind, DiffMarks } from "../../data-tools/types";
+
+export type { DiffKind };
 
 export interface JsonDiff {
   /** Path segments from the root; numbers are array indexes. */
@@ -43,105 +46,21 @@ export function diffJson(left: unknown, right: unknown): JsonDiff[] {
   return out;
 }
 
-const keyOf = (path: ReadonlyArray<string | number>): string => JSON.stringify(path);
-
-/**
- * 1-based line where each value (and each object key) starts in `text`. The text must be valid JSON;
- * paths missing from the map simply have no line to mark.
- */
-export function indexLines(text: string): Map<string, number> {
-  const lines = new Map<string, number>();
-  let i = 0;
-  let line = 1;
-  const skip = () => {
-    while (i < text.length && " \t\n\r".includes(text[i]!)) {
-      if (text[i] === "\n") line += 1;
-      i += 1;
-    }
+/** Marks for the Tree view of each side. A value missing on one side is marked only on the other. */
+export function treeMarks(diffs: ReadonlyArray<JsonDiff>): { left: DiffMarks; right: DiffMarks } {
+  const side = (): { marks: Map<string, DiffKind>; containers: Set<string> } => ({
+    marks: new Map(),
+    containers: new Set(),
+  });
+  const left = side();
+  const right = side();
+  const put = (target: ReturnType<typeof side>, path: JsonDiff["path"], kind: DiffKind) => {
+    target.marks.set(idOfPath(path), kind);
+    for (const id of ancestorIds(path)) target.containers.add(id);
   };
-  const string = (): string => {
-    const start = i;
-    i += 1;
-    while (i < text.length && text[i] !== '"') i += text[i] === "\\" ? 2 : 1;
-    i += 1;
-    return JSON.parse(text.slice(start, i)) as string;
-  };
-  const value = (path: Array<string | number>, at: number): void => {
-    skip();
-    lines.set(keyOf(path), at === 0 ? line : at);
-    const char = text[i];
-    if (char === "{") {
-      i += 1;
-      skip();
-      if (text[i] === "}") {
-        i += 1;
-        return;
-      }
-      for (;;) {
-        skip();
-        const keyLine = line;
-        const key = string();
-        skip();
-        i += 1; // colon
-        value([...path, key], keyLine);
-        skip();
-        if (text[i] === ",") i += 1;
-        else {
-          i += 1; // closing brace
-          return;
-        }
-      }
-    } else if (char === "[") {
-      i += 1;
-      skip();
-      if (text[i] === "]") {
-        i += 1;
-        return;
-      }
-      for (let index = 0; ; index += 1) {
-        value([...path, index], 0);
-        skip();
-        if (text[i] === ",") i += 1;
-        else {
-          i += 1; // closing bracket
-          return;
-        }
-      }
-    } else if (char === '"') {
-      string();
-    } else {
-      while (i < text.length && !",]} \t\n\r".includes(text[i]!)) i += 1;
-    }
-  };
-  try {
-    value([], 0);
-  } catch {
-    return lines;
-  }
-  return lines;
-}
-
-export interface LineMark {
-  line: number;
-  kind: DiffKind;
-}
-
-/** Lines to highlight in each text; a value missing on one side is marked only on the other. */
-export function markLines(
-  diffs: ReadonlyArray<JsonDiff>,
-  leftText: string,
-  rightText: string,
-): { left: LineMark[]; right: LineMark[] } {
-  const leftLines = indexLines(leftText);
-  const rightLines = indexLines(rightText);
-  const left: LineMark[] = [];
-  const right: LineMark[] = [];
   for (const diff of diffs) {
-    const key = keyOf(diff.path);
-    const l = leftLines.get(key);
-    const r = rightLines.get(key);
-    if (diff.kind !== "added" && l !== undefined) left.push({ line: l, kind: diff.kind });
-    if (diff.kind !== "removed" && r !== undefined) right.push({ line: r, kind: diff.kind });
+    if (diff.kind !== "added") put(left, diff.path, diff.kind);
+    if (diff.kind !== "removed") put(right, diff.path, diff.kind);
   }
   return { left, right };
 }

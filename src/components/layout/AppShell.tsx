@@ -87,7 +87,7 @@ export function AppShell({ children, tools = listedTools() }: AppShellProps) {
               </Link>
             )}
           </nav>
-          <div className="flex min-w-0 flex-1 justify-center">
+          <div className="flex min-w-0 flex-1 justify-end">
             <QuickSearch tools={tools} />
           </div>
           <ThemeSwitcher />

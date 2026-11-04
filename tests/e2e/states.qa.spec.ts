@@ -45,16 +45,14 @@ test.describe("copy feedback and clipboard failure", () => {
     await page.goto("tools/json-formatter/");
     await settle(page);
     await page.getByRole("button", { name: "Mẫu", exact: true }).first().click();
-    const copy = page.getByRole("button", { name: /^(Copy|Đã copy)$/ }).first();
-    const widthBefore = (await copy.boundingBox())!.width;
-    await copy.click();
-    await expect(copy).toHaveAttribute("aria-label", "Đã copy"); // icon-only: the label is the name and tooltip
-    const widthDuring = (await copy.boundingBox())!.width;
-    expect(Math.abs(widthDuring - widthBefore), "button must not resize on feedback").toBeLessThan(
-      2,
-    );
+    // The JSON pane's Copy is a menu: "Copy nội dung" copies the text as it is.
+    const copyMenu = page.getByRole("button", { name: "Copy", exact: true }).first();
+    const copied = page.getByRole("status").filter({ hasText: "Đã copy" });
+    await copyMenu.click();
+    await page.getByRole("menuitem", { name: "Copy nội dung" }).click();
+    await expect(copied.first()).toBeAttached();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('"DevKit"');
-    await expect(copy).not.toHaveAttribute("aria-label", "Đã copy", { timeout: 4000 });
+    await expect(copied).toHaveCount(0, { timeout: 4000 });
 
     await page.evaluate(() => {
       Object.defineProperty(navigator, "clipboard", {
@@ -63,7 +61,8 @@ test.describe("copy feedback and clipboard failure", () => {
       });
       document.execCommand = () => false; // the legacy fallback must fail too
     });
-    await copy.click();
+    await copyMenu.click();
+    await page.getByRole("menuitem", { name: "Copy nội dung" }).click();
     await expect(page.getByText(/Không copy được/).first()).toBeVisible();
   });
 });
@@ -80,10 +79,8 @@ test("JSON clipboard failure pre-selects the content (components.md 2.5)", async
     });
     document.execCommand = () => false;
   });
-  await page
-    .getByRole("button", { name: /^(Copy|Đã copy)$/ })
-    .first()
-    .click();
+  await page.getByRole("button", { name: "Copy", exact: true }).first().click();
+  await page.getByRole("menuitem", { name: "Copy nội dung" }).click();
   await expect(page.getByText(/Không copy được/).first()).toBeVisible();
   // components.md 2.5: on failure the content is pre-selected so Ctrl+C works.
   const selected = await page.evaluate(() => window.getSelection()?.toString() ?? "");
@@ -95,7 +92,7 @@ test.describe("invalid input keeps the previous output and labels it", () => {
     await page.goto("tools/json-formatter/");
     await settle(page);
     await typeCm(page, '{"ok":1}');
-    await page.getByRole("button", { name: "Format sang ô phải" }).click();
+    await page.getByRole("button", { name: "Transform sang ô phải" }).click();
     await expect(cm(page, 1)).toContainText('"ok"');
     await typeCm(page, '{"ok":');
     await expect(page.getByText("JSON không hợp lệ.")).toBeVisible();

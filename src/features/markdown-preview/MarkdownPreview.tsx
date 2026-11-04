@@ -391,6 +391,7 @@ export function MarkdownPreview() {
       notice={notice}
       status={status}
       externalRequestsEnabled={allowExternal}
+      fill
     >
       <MarkdownWorkspace
         enabled={client}
@@ -450,7 +451,7 @@ export function MarkdownPreview() {
             return <SplitWorkspace left={editorPanel} right={previewPanel} />;
           }
           return (
-            <div className="h-[70dvh] lg:h-[calc(100dvh-var(--topnav-h,3rem)-6.5rem)] lg:min-h-[24rem] [&>section]:h-full">
+            <div className="h-[70dvh] lg:h-full lg:min-h-[24rem] [&>section]:h-full">
               {effectiveView === "edit" ? editorPanel : previewPanel}
             </div>
           );
@@ -538,7 +539,7 @@ function MarkdownWorkspace({
   if (!enabled) return <div className="h-[60dvh] rounded-lg bg-surface-muted" />;
 
   return (
-    <div ref={node} className="relative grid">
+    <div ref={node} className="relative grid lg:h-full">
       {children}
       {dragging ? (
         <div

@@ -17,10 +17,22 @@ export interface MenuButtonProps {
   disabled?: boolean;
   /** Shown instead of the list when there are no items. */
   emptyLabel?: string;
+  /** Icon with a tooltip instead of a labelled button (compact headers). */
+  iconOnly?: boolean;
+  /** Align the menu to the right edge of the button (buttons near the right of a panel). */
+  alignEnd?: boolean;
 }
 
 /** Button that opens a menu. Esc and outside click close it; arrows move between entries. */
-export function MenuButton({ label, items, icon, disabled, emptyLabel }: MenuButtonProps) {
+export function MenuButton({
+  label,
+  items,
+  icon,
+  disabled,
+  emptyLabel,
+  iconOnly = false,
+  alignEnd = false,
+}: MenuButtonProps) {
   const [open, setOpen] = useState(false);
   const menuId = useId();
   const root = useRef<HTMLDivElement>(null);
@@ -66,19 +78,29 @@ export function MenuButton({ label, items, icon, disabled, emptyLabel }: MenuBut
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         disabled={disabled}
+        aria-label={iconOnly ? label : undefined}
+        title={iconOnly ? label : undefined}
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-border-strong bg-surface px-3.5 py-2 text-sm font-medium transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-9"
+        className={cn(
+          "inline-flex items-center transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50",
+          iconOnly
+            ? "h-10 gap-0.5 rounded-md px-2 sm:h-9"
+            : "min-h-10 gap-1.5 rounded-md border border-border-strong bg-surface px-3.5 py-2 text-sm font-medium sm:min-h-9",
+        )}
       >
         {icon}
-        {label}
-        <ChevronDown aria-hidden className="size-4" />
+        {iconOnly ? null : label}
+        <ChevronDown aria-hidden className={iconOnly ? "size-3" : "size-4"} />
       </button>
       {open ? (
         <div
           id={menuId}
           role="menu"
           aria-label={label}
-          className="absolute top-full left-0 z-20 mt-1 max-h-80 min-w-48 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-lg border border-border bg-surface p-1 shadow-lg"
+          className={cn(
+            "absolute top-full z-20 mt-1 max-h-80 min-w-48 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-lg border border-border bg-surface p-1 shadow-lg",
+            alignEnd ? "right-0" : "left-0",
+          )}
         >
           {items.length === 0 ? (
             <p className="px-3 py-2 text-sm text-text-muted">{emptyLabel}</p>

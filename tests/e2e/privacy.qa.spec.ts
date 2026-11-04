@@ -58,7 +58,7 @@ test.describe("privacy: no off-origin requests and no stored user input", () => 
     await page.goto("tools/json-formatter/");
     await ready(page);
     await typeCm(page, `{"${MARK}":[1,2,3]}`);
-    await page.getByRole("button", { name: "Format sang ô phải" }).click();
+    await page.getByRole("button", { name: "Transform sang ô phải" }).click();
     await page.getByRole("button", { name: "Copy sang ô phải" }).click();
     await page.getByRole("button", { name: /^Copy/ }).first().click();
     await page.getByRole("button", { name: "Xóa" }).first().click();
