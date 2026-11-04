@@ -2,6 +2,7 @@
 export const STORAGE_KEYS = {
   theme: "devkit:v1:theme",
   recentColors: "devkit:v1:recent-colors",
+  sidebarExpanded: "devkit:v1:sidebar-expanded",
   mdView: "devkit:v1:md-view",
   mdDocWidth: "devkit:v1:md-doc-width",
   mdBannerDismissed: "devkit:v1:md-banner-dismissed",

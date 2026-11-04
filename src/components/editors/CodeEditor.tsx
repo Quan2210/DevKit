@@ -4,7 +4,7 @@ import { ClientOnly } from "../common/ClientOnly";
 import { Skeleton } from "../common/Skeleton";
 import type { CodeEditorHandle, CodeEditorProps } from "./types";
 
-export type { CodeEditorHandle, CodeEditorLanguage, CodeEditorProps } from "./types";
+export type { CodeEditorHandle, CodeEditorLanguage, CodeEditorProps, LineHighlight } from "./types";
 
 // CodeMirror is a separate chunk: Home and tools that do not edit code never download it (SD-11).
 const CodeEditorImpl = lazy(() => import("./CodeEditorImpl"));

@@ -2,6 +2,7 @@ import { Shuffle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { HexAlphaColorPicker } from "react-colorful";
 import { Button } from "../../../components/common/Button";
+import { IconButton } from "../../../components/common/IconButton";
 import { CopyButton } from "../../../components/common/CopyButton";
 import { Input } from "../../../components/common/Input";
 import { Notice } from "../../../components/common/Notice";
@@ -22,6 +23,7 @@ import {
   type Color,
 } from "../shared/color-core";
 import { Swatch } from "../shared/Swatch";
+import { ImageColorPanel } from "./ImageColorPanel";
 import { useRecentColors } from "../shared/useRecentColors";
 
 const START: Color = opaque(79, 70, 229);
@@ -95,12 +97,11 @@ export function ColorPicker() {
       tool={tool}
       guide={getGuide("vi", tool.id)}
       toolbar={
-        <Button
+        <IconButton
+          label={t("color.random")}
           icon={<Shuffle aria-hidden className="size-4" />}
           onClick={() => setColor(randomColor())}
-        >
-          {t("color.random")}
-        </Button>
+        />
       }
       notice={
         client && !recent.persistent() ? (
@@ -121,10 +122,7 @@ export function ColorPicker() {
                 style={{ width: "100%" }}
               />
             </div>
-            <div className="space-y-1.5">
-              <p className="text-sm font-medium">{t("color.preview")}</p>
-              <Swatch color={color} className="h-24 w-full" label={t("color.preview")} />
-            </div>
+            <Swatch color={color} className="h-20 w-full" label={t("color.preview")} />
           </div>
         </Panel>
 
@@ -133,9 +131,10 @@ export function ColorPicker() {
             <ValueRow label={t("color.hex")} value={toHex(color)} onValid={setColor} />
             <ValueRow label={t("color.rgb")} value={toRgbString(color)} onValid={setColor} />
             <ValueRow label={t("color.hsl")} value={toHslString(color)} onValid={setColor} />
-            <p className="text-sm text-text-muted">{t("color.formatHint")}</p>
           </div>
         </Panel>
+
+        <ImageColorPanel onPick={setColor} />
 
         <Panel
           title={t("color.recent")}

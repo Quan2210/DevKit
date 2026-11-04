@@ -13,52 +13,56 @@ export interface SidebarNavProps {
   tools: ReadonlyArray<ToolMeta>;
   /** Called when a link is followed (closes the mobile drawer). */
   onNavigate?: () => void;
-  /** Rail mode on tablets: labels and search only appear while the rail is expanded. */
-  collapsible?: boolean;
+  /** Icon rail: labels are hidden (kept as tooltip and accessible name). */
+  collapsed?: boolean;
+  /** In-list search; the top nav has the quick search, so the shell turns this off. */
+  showSearch?: boolean;
 }
 
-export function SidebarNav({ tools, onNavigate, collapsible = false }: SidebarNavProps) {
+export function SidebarNav({
+  tools,
+  onNavigate,
+  collapsed = false,
+  showSearch = true,
+}: SidebarNavProps) {
   const t = useT();
   const searchId = useId();
   const [query, setQuery] = useState("");
   const matches = filterTools(tools, query);
-  // Rail on tablets (labels appear on hover/focus), full labels from lg and in the mobile drawer.
-  const label = collapsible ? "hidden group-hover:inline group-focus-within:inline lg:inline" : "";
+  const label = collapsed ? "sr-only" : "";
 
   return (
-    <nav aria-label={t("nav.main")} className="flex flex-col gap-4 p-3">
+    <nav aria-label={t("nav.main")} className="flex flex-col gap-3 p-3">
       <NavLink
         to="/"
         onClick={onNavigate}
+        title={t("app.name")}
         className="flex items-center gap-2 rounded-md px-2 py-1.5 text-base font-semibold"
       >
         <span
           aria-hidden
-          className="grid size-6 place-items-center rounded-md bg-primary text-xs font-bold text-on-primary"
+          className="grid size-6 shrink-0 place-items-center rounded-md bg-primary text-xs font-bold text-on-primary"
         >
           {BRAND_GLYPH}
         </span>
         <span className={label}>{t("app.name")}</span>
       </NavLink>
 
-      <div
-        className={cn(
-          "flex-col gap-1.5",
-          collapsible ? "hidden group-hover:flex group-focus-within:flex lg:flex" : "flex",
-        )}
-      >
-        <label htmlFor={searchId} className="text-sm font-medium">
-          {t("nav.search")}
-        </label>
-        <input
-          id={searchId}
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder={t("nav.searchPlaceholder")}
-          className="min-h-9 w-full rounded-md border border-border-strong bg-surface px-3 text-sm placeholder:text-text-muted"
-        />
-      </div>
+      {showSearch ? (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={searchId} className="text-sm font-medium">
+            {t("nav.search")}
+          </label>
+          <input
+            id={searchId}
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={t("nav.searchPlaceholder")}
+            className="min-h-9 w-full rounded-md border border-border-strong bg-surface px-3 text-sm placeholder:text-text-muted"
+          />
+        </div>
+      ) : null}
 
       {tools.length === 0 ? (
         <p className={cn("text-sm text-text-muted", label)}>{t("nav.empty")}</p>
@@ -68,7 +72,7 @@ export function SidebarNav({ tools, onNavigate, collapsible = false }: SidebarNa
         </p>
       ) : (
         groupTools(matches).map((group) => (
-          <div key={group.id}>
+          <div key={group.id} className={collapsed ? "border-t border-border pt-2" : undefined}>
             <p className={cn("mb-1 px-2 text-sm font-semibold text-text-muted", label)}>
               {t(group.labelKey)}
             </p>

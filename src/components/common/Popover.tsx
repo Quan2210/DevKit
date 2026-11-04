@@ -8,11 +8,13 @@ export interface PopoverProps {
   /** Content of the trigger button. */
   trigger: ReactNode;
   triggerClassName?: string;
+  /** Tooltip of the trigger (needed when its content is icon-only). */
+  title?: string;
   children: ReactNode;
 }
 
 /** Click-to-open panel. Esc and outside click close it and focus returns to the trigger. */
-export function Popover({ label, trigger, triggerClassName, children }: PopoverProps) {
+export function Popover({ label, trigger, triggerClassName, title, children }: PopoverProps) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const root = useRef<HTMLDivElement>(null);
@@ -42,6 +44,7 @@ export function Popover({ label, trigger, triggerClassName, children }: PopoverP
       <button
         ref={button}
         type="button"
+        title={title}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}

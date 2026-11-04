@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { CodeEditor, type CodeEditorHandle } from "../../components/editors/CodeEditor";
-import { Button } from "../../components/common/Button";
+import { AlignLeft, Download, Eraser, FileText, Shrink } from "lucide-react";
+import { IconButton } from "../../components/common/IconButton";
 import { CopyButton } from "../../components/common/CopyButton";
 import { ErrorBanner } from "../../components/common/ErrorBanner";
 import { Notice } from "../../components/common/Notice";
@@ -89,43 +90,6 @@ export function XmlFormatter() {
     <ToolShell
       tool={tool}
       guide={getGuide("vi", tool.id)}
-      toolbar={
-        <>
-          <Button
-            variant="primary"
-            aria-pressed={mode === "format"}
-            onClick={() => run("format")}
-            disabled={input.trim() === ""}
-          >
-            {t("xml.format")}
-          </Button>
-          <Button
-            aria-pressed={mode === "minify"}
-            onClick={() => run("minify")}
-            disabled={input.trim() === ""}
-          >
-            {t("xml.minify")}
-          </Button>
-          <Segmented<"2" | "4">
-            label={t("xml.indent")}
-            value={String(indent) as "2" | "4"}
-            onChange={(value) => {
-              setIndent(Number(value) as XmlIndent);
-              setManual(input);
-            }}
-            options={[
-              { value: "2", label: t("xml.indent2") },
-              { value: "4", label: t("xml.indent4") },
-            ]}
-          />
-          <Button variant="ghost" onClick={() => setInput(t("xml.sample"))}>
-            {t("action.sample")}
-          </Button>
-          <Button variant="ghost" onClick={clear} disabled={input === ""}>
-            {t("action.clear")}
-          </Button>
-        </>
-      }
       notice={
         error || cleared !== null || pending || otherEncoding ? (
           <div className="space-y-2">
@@ -179,8 +143,51 @@ export function XmlFormatter() {
       }
     >
       <SplitWorkspace
+        actions={
+          <>
+            <IconButton
+              variant="primary"
+              label={t("xml.format")}
+              aria-pressed={mode === "format"}
+              icon={<AlignLeft aria-hidden className="size-4" />}
+              onClick={() => run("format")}
+              disabled={input.trim() === ""}
+            />
+            <IconButton
+              label={t("xml.minify")}
+              aria-pressed={mode === "minify"}
+              icon={<Shrink aria-hidden className="size-4" />}
+              onClick={() => run("minify")}
+              disabled={input.trim() === ""}
+            />
+            <Segmented<"2" | "4">
+              label={t("xml.indent")}
+              iconOnly
+              value={String(indent) as "2" | "4"}
+              onChange={(value) => {
+                setIndent(Number(value) as XmlIndent);
+                setManual(input);
+              }}
+              options={[
+                { value: "2", label: t("xml.indent2"), icon: <span aria-hidden>{"2"}</span> },
+                { value: "4", label: t("xml.indent4"), icon: <span aria-hidden>{"4"}</span> },
+              ]}
+            />
+            <IconButton
+              label={t("action.sample")}
+              icon={<FileText aria-hidden className="size-4" />}
+              onClick={() => setInput(t("xml.sample"))}
+            />
+            <IconButton
+              label={t("action.clear")}
+              icon={<Eraser aria-hidden className="size-4" />}
+              onClick={clear}
+              disabled={input === ""}
+            />
+          </>
+        }
         left={
-          <Panel title={t("xml.input")}>
+          <Panel title={t("xml.input")} expandable>
             <CodeEditor
               ref={editor}
               language="xml"
@@ -194,18 +201,18 @@ export function XmlFormatter() {
         right={
           <Panel
             title={previous ? t("xml.outputPrevious") : t("xml.output")}
+            expandable
             actions={
               <>
-                <Button
-                  variant="ghost"
+                <IconButton
+                  label={t("xml.download")}
+                  icon={<Download aria-hidden className="size-4" />}
                   disabled={lastGood === "" || previous}
                   onClick={() =>
                     downloadText("document.xml", lastGood, "application/xml;charset=utf-8")
                   }
-                >
-                  {t("xml.download")}
-                </Button>
-                <CopyButton text={lastGood} disabled={lastGood === ""} />
+                />
+                <CopyButton iconOnly text={lastGood} disabled={lastGood === ""} />
               </>
             }
           >

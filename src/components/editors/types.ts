@@ -1,5 +1,11 @@
 export type CodeEditorLanguage = "json" | "xml" | "markdown" | "css" | "text";
 
+export interface LineHighlight {
+  /** 1-based line. */
+  line: number;
+  kind: "added" | "removed" | "changed";
+}
+
 export interface CodeEditorProps {
   value: string;
   /** Omit for read-only output. */
@@ -9,6 +15,8 @@ export interface CodeEditorProps {
   /** Accessible name of the editing surface. */
   ariaLabel: string;
   placeholder?: string;
+  /** Lines to tint (compare view). */
+  highlights?: ReadonlyArray<LineHighlight>;
 }
 
 export interface CodeEditorHandle {

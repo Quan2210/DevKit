@@ -198,7 +198,7 @@ describe("navigation", () => {
 });
 
 describe("ToolShell", () => {
-  it("renders the page template with one h1, breadcrumb, toolbar, status and guide", () => {
+  it("renders the page template with one h1, toolbar, status and guide", () => {
     render(
       <MemoryRouter>
         <ToolShell
@@ -217,7 +217,6 @@ describe("ToolShell", () => {
     );
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("JSON Formatter");
-    expect(screen.getByRole("navigation", { name: "Đường dẫn" })).toBeInTheDocument();
     expect(screen.getByRole("toolbar")).toBeInTheDocument();
     expect(screen.getByText("workspace")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Xử lý trên thiết bị/ })).toBeInTheDocument();
