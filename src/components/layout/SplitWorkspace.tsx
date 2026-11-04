@@ -63,12 +63,12 @@ export function SplitWorkspace({ left, right, actions }: SplitWorkspaceProps) {
       ref={grid}
       style={style}
       className={cn(
-        "grid gap-2 lg:h-full lg:min-h-[24rem] lg:gap-0",
+        "grid grid-cols-[minmax(0,1fr)] gap-2 lg:h-full lg:min-h-[24rem] lg:gap-0",
         "lg:grid-cols-[minmax(0,var(--left))_auto_minmax(0,var(--right))]",
         dragging && "lg:select-none",
       )}
     >
-      <div className="h-[55dvh] min-h-72 lg:h-auto [&>section]:h-full">{left}</div>
+      <div className="h-[55dvh] min-h-72 min-w-0 lg:h-auto [&>section]:h-full">{left}</div>
       <div
         className={cn(
           "relative flex flex-col items-center justify-center lg:min-w-6 lg:justify-start",
@@ -106,7 +106,7 @@ export function SplitWorkspace({ left, right, actions }: SplitWorkspaceProps) {
           )}
         />
       </div>
-      <div className="h-[55dvh] min-h-72 lg:h-auto [&>section]:h-full">{right}</div>
+      <div className="h-[55dvh] min-h-72 min-w-0 lg:h-auto [&>section]:h-full">{right}</div>
     </div>
   );
 }

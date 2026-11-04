@@ -57,7 +57,7 @@ export function Panel({
         className,
       )}
     >
-      <header className="flex min-h-10 items-center justify-between gap-2 border-b border-border px-3">
+      <header className="flex min-h-10 flex-wrap items-center justify-between gap-x-2 border-b border-border px-3">
         <h2 id={headingId} className="text-sm font-semibold">
           {title}
         </h2>
