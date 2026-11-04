@@ -1,11 +1,11 @@
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { useId } from "react";
 import { cn } from "../../lib/cn";
 
 export interface CheckboxProps extends Omit<ComponentProps<"input">, "type" | "id"> {
   label: string;
   /** Compact form: only this text shows; the full label stays as accessible name and tooltip. */
-  shortLabel?: string;
+  shortLabel?: ReactNode;
 }
 
 /** Native checkbox with a visible label; the label is the accessible name. */

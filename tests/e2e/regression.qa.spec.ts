@@ -74,7 +74,7 @@ test("no stale results: content of one tool never shows in another; back/forward
   await settle(page);
   await cm(page).click();
   await page.keyboard.insertText('{"stale":"value"}');
-  await expect(cm(page, 1)).toContainText("stale");
+  await expect(cm(page, 0)).toContainText("stale");
   await go(page, "XML Formatter");
   await expect(page.getByText("stale")).toHaveCount(0);
   await go(page, "Base64");

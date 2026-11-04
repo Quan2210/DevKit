@@ -21,6 +21,9 @@ export interface CodeEditorProps {
 
 export interface CodeEditorHandle {
   focus: () => void;
+  /** History of this editor (Ctrl+Z / Ctrl+Shift+Z); external value changes are part of it. */
+  undo: () => void;
+  redo: () => void;
   /** Move the caret to a 1-based line and column (used by "jump to error" links). */
   goTo: (line: number, column: number) => void;
 }

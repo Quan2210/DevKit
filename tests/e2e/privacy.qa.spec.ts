@@ -58,15 +58,15 @@ test.describe("privacy: no off-origin requests and no stored user input", () => 
     await page.goto("tools/json-formatter/");
     await ready(page);
     await typeCm(page, `{"${MARK}":[1,2,3]}`);
-    await page.getByRole("button", { name: "Minify" }).click();
-    await page.getByRole("button", { name: "Format" }).click();
+    await page.getByRole("button", { name: "Format sang ô phải" }).click();
+    await page.getByRole("button", { name: "Copy sang ô phải" }).click();
     await page.getByRole("button", { name: /^Copy/ }).first().click();
-    await page.getByRole("button", { name: "Xóa" }).click();
+    await page.getByRole("button", { name: "Xóa" }).first().click();
 
     await page.goto("tools/xml-formatter/");
     await ready(page);
     await typeCm(page, `<a>${MARK}</a>`);
-    await page.getByRole("button", { name: "Format" }).click();
+    await page.getByRole("button", { name: "Format sang ô phải" }).click();
 
     await page.goto("tools/base64/");
     await ready(page);

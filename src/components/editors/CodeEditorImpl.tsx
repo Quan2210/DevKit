@@ -2,6 +2,7 @@ import { EditorState, StateEffect, StateField, type Extension } from "@codemirro
 import { Decoration, EditorView, placeholder as placeholderExt } from "@codemirror/view";
 import { classHighlighter } from "@lezer/highlight";
 import { syntaxHighlighting } from "@codemirror/language";
+import { redo, undo } from "@codemirror/commands";
 import { basicSetup } from "codemirror";
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import type { CodeEditorHandle, CodeEditorLanguage, CodeEditorProps, LineHighlight } from "./types";
@@ -103,6 +104,12 @@ export default function CodeEditorImpl({
 
   useImperativeHandle(handleRef, () => ({
     focus: () => view.current?.focus(),
+    undo: () => {
+      if (view.current) undo(view.current);
+    },
+    redo: () => {
+      if (view.current) redo(view.current);
+    },
     goTo: (line, column) => {
       const current = view.current;
       if (!current) return;

@@ -1,12 +1,45 @@
 import { Search } from "lucide-react";
-import { useId, useRef, useState, type KeyboardEvent } from "react";
+import { useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router";
 import { useHotkeys } from "../../hooks/useHotkeys";
 import { useT } from "../../i18n/useT";
 import { cn } from "../../lib/cn";
-import { filterTools } from "../../lib/toolSearch";
-import { toolPath, type ToolMeta } from "../../registry/tools.meta";
+import { filterTools, groupTools } from "../../lib/toolSearch";
+import { GROUPS, toolPath, type ToolMeta } from "../../registry/tools.meta";
 import { ToolIcon } from "../common/ToolIcon";
+
+/** At most this many rows, parent groups included. */
+const MAX_ROWS = 10;
+
+type Row =
+  { type: "group"; id: string; label: string } | { type: "tool"; tool: ToolMeta; option: number };
+
+/** Groups act as parent rows: a group whose name matches brings all its tools. */
+function buildRows(
+  tools: ReadonlyArray<ToolMeta>,
+  query: string,
+  groupLabel: (tool: ToolMeta) => string,
+  labelOf: (id: string) => string,
+): Row[] {
+  const needle = query.trim().toLowerCase();
+  const matched = new Set(filterTools(tools, query).map((tool) => tool.id));
+  const visible = tools.filter(
+    (tool) =>
+      matched.has(tool.id) || (needle !== "" && groupLabel(tool).toLowerCase().includes(needle)),
+  );
+  const rows: Row[] = [];
+  let option = 0;
+  for (const group of groupTools(visible)) {
+    if (rows.length + 2 > MAX_ROWS) break;
+    rows.push({ type: "group", id: group.id, label: labelOf(group.id) });
+    for (const tool of group.tools) {
+      if (rows.length >= MAX_ROWS) break;
+      rows.push({ type: "tool", tool, option });
+      option += 1;
+    }
+  }
+  return rows;
+}
 
 /** Top-nav quick jump to a tool page: Ctrl/Cmd+K focuses it, arrows pick, Enter opens. */
 export function QuickSearch({ tools }: { tools: ReadonlyArray<ToolMeta> }) {
@@ -18,8 +51,18 @@ export function QuickSearch({ tools }: { tools: ReadonlyArray<ToolMeta> }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
 
-  const matches = query.trim() === "" ? [] : filterTools(tools, query).slice(0, 8);
-  const showList = open && query.trim() !== "";
+  const rows = useMemo(
+    () =>
+      buildRows(
+        tools,
+        query,
+        (tool) => t(GROUPS.find((g) => g.id === tool.group)?.labelKey ?? "app.name"),
+        (id) => t(GROUPS.find((g) => g.id === id)?.labelKey ?? "app.name"),
+      ),
+    [tools, query, t],
+  );
+  const matches = rows.flatMap((row) => (row.type === "tool" ? [row.tool] : []));
+  const showList = open;
 
   useHotkeys([
     {
@@ -99,34 +142,44 @@ export function QuickSearch({ tools }: { tools: ReadonlyArray<ToolMeta> }) {
           id={listId}
           role="listbox"
           aria-label={t("nav.quickResults")}
-          className="absolute top-full right-0 left-0 z-50 mt-1 max-h-72 overflow-y-auto rounded-lg border border-border bg-surface p-1 shadow-lg"
+          className="absolute top-full right-0 left-0 z-50 mt-1 max-h-[26rem] overflow-y-auto rounded-lg border border-border bg-surface p-1 shadow-lg"
         >
-          {matches.length === 0 ? (
+          {rows.length === 0 ? (
             <li role="option" aria-selected={false} className="px-3 py-2 text-sm text-text-muted">
               {t("nav.noResults", { query })}
             </li>
           ) : (
-            matches.map((tool, index) => (
-              <li
-                key={tool.id}
-                id={`${listId}-${index}`}
-                role="option"
-                aria-selected={index === active}
-                // mousedown, not click: the input's blur would close the list before a click lands
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  go(tool);
-                }}
-                onMouseEnter={() => setActive(index)}
-                className={cn(
-                  "flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-2 text-sm",
-                  index === active && "bg-surface-muted",
-                )}
-              >
-                <ToolIcon name={tool.icon} className="size-4 shrink-0" />
-                {t(tool.titleKey)}
-              </li>
-            ))
+            rows.map((row) =>
+              row.type === "group" ? (
+                <li
+                  key={`g-${row.id}`}
+                  role="presentation"
+                  className="px-2 pt-2 pb-1 text-xs font-semibold tracking-wide text-text-muted"
+                >
+                  {row.label}
+                </li>
+              ) : (
+                <li
+                  key={row.tool.id}
+                  id={`${listId}-${row.option}`}
+                  role="option"
+                  aria-selected={row.option === active}
+                  // mousedown, not click: the input's blur would close the list before a click lands
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    go(row.tool);
+                  }}
+                  onMouseEnter={() => setActive(row.option)}
+                  className={cn(
+                    "flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-2 text-sm",
+                    row.option === active && "bg-surface-muted",
+                  )}
+                >
+                  <ToolIcon name={row.tool.icon} className="size-4 shrink-0" />
+                  {t(row.tool.titleKey)}
+                </li>
+              ),
+            )
           )}
         </ul>
       ) : null}

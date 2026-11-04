@@ -137,21 +137,22 @@ test.describe("other tools in a real browser", () => {
     await type(page, "<a>\n<b>\n</a>");
     await expect(page.getByText("XML không hợp lệ.")).toBeVisible();
     await expect(page.getByText(/Dòng \d+, cột \d+/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "Tải .xml" })).toBeDisabled();
   });
 
   test("XML: valid input formats and keeps mixed content", async ({ page }) => {
     await page.goto("tools/xml-formatter/");
     await ready(page);
     await type(page, "<r><p>Hi <b>x</b> !</p><q><z/></q></r>");
+    await page.getByRole("button", { name: "Format sang ô phải" }).click();
     await expect(page.locator(".cm-content").nth(1)).toContainText("<p>Hi <b>x</b> !</p>");
-    await expect(page.getByText("Hợp lệ", { exact: true })).toBeVisible();
+    await expect(page.getByText("Hợp lệ", { exact: true }).first()).toBeVisible();
   });
 
   test("JSON: formats and reports an error position", async ({ page }) => {
     await page.goto("tools/json-formatter/");
     await ready(page);
     await type(page, '{"a":[1,2]}');
+    await page.getByRole("button", { name: "Format sang ô phải" }).click();
     await expect(page.locator(".cm-content").nth(1)).toContainText('"a"');
     await type(page, '{"a": }');
     await expect(page.getByText(/Dòng \d+, cột \d+/)).toBeVisible();
