@@ -48,13 +48,13 @@ test.describe("copy feedback and clipboard failure", () => {
     const copy = page.getByRole("button", { name: /^(Copy|Đã copy)$/ }).first();
     const widthBefore = (await copy.boundingBox())!.width;
     await copy.click();
-    await expect(copy).toContainText("Đã copy");
+    await expect(copy).toHaveAttribute("aria-label", "Đã copy"); // icon-only: the label is the name and tooltip
     const widthDuring = (await copy.boundingBox())!.width;
     expect(Math.abs(widthDuring - widthBefore), "button must not resize on feedback").toBeLessThan(
       2,
     );
     expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('"DevKit"');
-    await expect(copy).not.toContainText("Đã copy", { timeout: 4000 });
+    await expect(copy).not.toHaveAttribute("aria-label", "Đã copy", { timeout: 4000 });
 
     await page.evaluate(() => {
       Object.defineProperty(navigator, "clipboard", {
