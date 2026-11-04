@@ -81,7 +81,8 @@ export function Segmented<V extends string>({
             onClick={() => onChange(option.value)}
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
-              "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-sm px-3 text-sm font-medium transition-colors sm:min-h-8",
+              "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-sm text-sm font-medium transition-colors sm:min-h-8",
+              iconOnly ? "min-w-9 px-2" : "px-3",
               selected
                 ? "bg-surface text-text shadow-sm ring-1 ring-border-strong"
                 : "text-text hover:bg-surface",

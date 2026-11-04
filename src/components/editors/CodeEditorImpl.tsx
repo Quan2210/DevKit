@@ -1,10 +1,33 @@
-import { EditorState, type Extension } from "@codemirror/state";
-import { EditorView, placeholder as placeholderExt } from "@codemirror/view";
+import { EditorState, StateEffect, StateField, type Extension } from "@codemirror/state";
+import { Decoration, EditorView, placeholder as placeholderExt } from "@codemirror/view";
 import { classHighlighter } from "@lezer/highlight";
 import { syntaxHighlighting } from "@codemirror/language";
 import { basicSetup } from "codemirror";
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
-import type { CodeEditorHandle, CodeEditorLanguage, CodeEditorProps } from "./types";
+import type { CodeEditorHandle, CodeEditorLanguage, CodeEditorProps, LineHighlight } from "./types";
+
+const setHighlights = StateEffect.define<ReadonlyArray<LineHighlight>>();
+
+/** Whole-line tints; they follow edits until the owner recomputes them. */
+const highlightField = StateField.define({
+  create: () => Decoration.none,
+  update(decorations, tr) {
+    let next = decorations.map(tr.changes);
+    for (const effect of tr.effects) {
+      if (!effect.is(setHighlights)) continue;
+      const doc = tr.state.doc;
+      const marks = effect.value
+        .filter((mark) => mark.line >= 1 && mark.line <= doc.lines)
+        .sort((a, b) => a.line - b.line)
+        .map((mark) =>
+          Decoration.line({ class: `cm-diff-${mark.kind}` }).range(doc.line(mark.line).from),
+        );
+      next = Decoration.set(marks, true);
+    }
+    return next;
+  },
+  provide: (field) => EditorView.decorations.from(field),
+});
 
 async function loadLanguage(language: CodeEditorLanguage): Promise<Extension> {
   switch (language) {
@@ -44,6 +67,15 @@ const tokenTheme = EditorView.theme({
   ".tok-propertyName, .tok-attributeName": { color: "var(--color-info-fg)" },
   ".tok-comment": { color: "var(--color-text-muted)", fontStyle: "italic" },
   ".tok-heading": { fontWeight: "600" },
+  ".cm-diff-added": {
+    backgroundColor: "color-mix(in srgb, var(--color-success) 22%, transparent)",
+  },
+  ".cm-diff-removed": {
+    backgroundColor: "color-mix(in srgb, var(--color-danger) 22%, transparent)",
+  },
+  ".cm-diff-changed": {
+    backgroundColor: "color-mix(in srgb, var(--color-warning) 26%, transparent)",
+  },
 });
 
 export default function CodeEditorImpl({
@@ -53,6 +85,7 @@ export default function CodeEditorImpl({
   readOnly = false,
   ariaLabel,
   placeholder,
+  highlights,
   handleRef,
 }: CodeEditorProps & { handleRef?: Ref<CodeEditorHandle> }) {
   const host = useRef<HTMLDivElement>(null);
@@ -60,10 +93,12 @@ export default function CodeEditorImpl({
   const onChangeRef = useRef(onChange);
 
   const latestValue = useRef(value);
+  const latestHighlights = useRef(highlights);
 
   useEffect(() => {
     onChangeRef.current = onChange;
     latestValue.current = value;
+    latestHighlights.current = highlights;
   });
 
   useImperativeHandle(handleRef, () => ({
@@ -94,6 +129,7 @@ export default function CodeEditorImpl({
             languageExt,
             syntaxHighlighting(classHighlighter),
             tokenTheme,
+            highlightField,
             EditorView.lineWrapping,
             EditorState.readOnly.of(readOnly),
             EditorView.editable.of(!readOnly),
@@ -106,6 +142,9 @@ export default function CodeEditorImpl({
         }),
       });
       view.current = created;
+      if (latestHighlights.current?.length) {
+        created.dispatch({ effects: setHighlights.of(latestHighlights.current) });
+      }
     });
     return () => {
       cancelled = true;
@@ -121,6 +160,11 @@ export default function CodeEditorImpl({
       current.dispatch({ changes: { from: 0, to: current.state.doc.length, insert: value } });
     }
   }, [value]);
+
+  // Declared after the value sync effect so a same-render change lands on the new document.
+  useEffect(() => {
+    view.current?.dispatch({ effects: setHighlights.of(highlights ?? []) });
+  }, [highlights]);
 
   return <div ref={host} className="h-full min-h-48" />;
 }

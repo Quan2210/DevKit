@@ -18,6 +18,7 @@ export function DeviceStatus({ externalRequestsEnabled = false }: DeviceStatusPr
   return (
     <Popover
       label={t("device.title")}
+      title={label}
       triggerClassName={cn(
         "min-h-10 px-2 py-1 text-sm font-medium hover:bg-surface-muted sm:min-h-8",
         externalRequestsEnabled ? "text-warning-fg" : "text-info-fg",
@@ -29,7 +30,9 @@ export function DeviceStatus({ externalRequestsEnabled = false }: DeviceStatusPr
           ) : (
             <ShieldCheck aria-hidden className="size-4" />
           )}
-          <span role={externalRequestsEnabled ? "status" : undefined}>{label}</span>
+          <span role={externalRequestsEnabled ? "status" : undefined} className="sr-only">
+            {label}
+          </span>
         </>
       }
     >

@@ -175,14 +175,47 @@ function stringify(value: unknown, indent?: JsonIndent): Result<string, ToolErro
   }
 }
 
-/** Parse and pretty-print. Values are preserved; number spelling is normalised (1.0 becomes 1). */
-export function formatJson(text: string, indent: JsonIndent): Result<string, ToolError> {
+export type SortOrder = "asc" | "desc";
+
+/** Recursively order object keys; arrays keep their order. Keys compare by code point, not locale. */
+export function sortKeys(value: unknown, order: SortOrder): unknown {
+  if (Array.isArray(value)) return value.map((item) => sortKeys(item, order));
+  if (value !== null && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) =>
+      order === "asc" ? (a < b ? -1 : a > b ? 1 : 0) : a < b ? 1 : a > b ? -1 : 0,
+    );
+    const sorted: Record<string, unknown> = {};
+    for (const [key, item] of entries) {
+      // defineProperty keeps a "__proto__" key as data instead of changing the prototype
+      Object.defineProperty(sorted, key, {
+        value: sortKeys(item, order),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    }
+    return sorted;
+  }
+  return value;
+}
+
+function prepare(text: string, sort?: SortOrder): Result<unknown, ToolError> {
   const parsed = parseJson(text);
+  return parsed.ok && sort ? ok(sortKeys(parsed.value, sort)) : parsed;
+}
+
+/** Parse and pretty-print. Values are preserved; number spelling is normalised (1.0 becomes 1). */
+export function formatJson(
+  text: string,
+  indent: JsonIndent,
+  sort?: SortOrder,
+): Result<string, ToolError> {
+  const parsed = prepare(text, sort);
   return parsed.ok ? stringify(parsed.value, indent) : parsed;
 }
 
-export function minifyJson(text: string): Result<string, ToolError> {
-  const parsed = parseJson(text);
+export function minifyJson(text: string, sort?: SortOrder): Result<string, ToolError> {
+  const parsed = prepare(text, sort);
   return parsed.ok ? stringify(parsed.value) : parsed;
 }
 

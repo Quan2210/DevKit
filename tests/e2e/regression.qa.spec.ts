@@ -224,7 +224,7 @@ test("mobile menu: opens, Esc closes, links navigate, focus returns to the menu 
   await page.setViewportSize({ width: 375, height: 800 });
   await page.goto("tools/json-formatter/");
   await settle(page);
-  const open = page.getByRole("button", { name: "Mở menu" });
+  const open = page.getByRole("button", { name: "Ẩn/hiện menu" });
   await open.click();
   await expect(page.getByRole("link", { name: "UUID Generator", exact: true })).toBeVisible();
   await page.keyboard.press("Escape");

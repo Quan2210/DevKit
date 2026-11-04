@@ -1,11 +1,15 @@
-import { Menu } from "lucide-react";
+import { ChevronRight, PanelLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
+import { parseBoolean, useStoredValue } from "../../hooks/useStoredValue";
 import { useT } from "../../i18n/useT";
-import { listedTools, type ToolMeta } from "../../registry/tools.meta";
+import { cn } from "../../lib/cn";
+import { STORAGE_KEYS } from "../../lib/storage";
+import { GROUPS, listedTools, toolPath, type ToolMeta } from "../../registry/tools.meta";
 import { Dialog } from "../common/Dialog";
 import { IconButton } from "../common/IconButton";
+import { QuickSearch } from "./QuickSearch";
 import { SidebarNav } from "./SidebarNav";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
@@ -16,15 +20,26 @@ export interface AppShellProps {
 }
 
 /**
- * docs/design/layouts.md §1-§2: fixed sidebar from lg, expandable rail on tablets,
- * drawer on mobile; skip link is the first focusable element.
+ * Sticky top nav (toggle, breadcrumb, quick search, theme) over a sidebar that is either full or an
+ * icon rail from sm, and a drawer on mobile. The CSS variables tell expanded panels where to sit.
  */
 export function AppShell({ children, tools = listedTools() }: AppShellProps) {
   const t = useT();
+  const { pathname } = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [expanded, setExpanded] = useStoredValue(STORAGE_KEYS.sidebarExpanded, parseBoolean, true);
+
+  const normalized = pathname.replace(/\/+$/, "");
+  const current = tools.find((tool) => normalized.endsWith(toolPath(tool).replace(/\/+$/, "")));
+  const group = current ? GROUPS.find((g) => g.id === current.group) : undefined;
 
   return (
-    <div className="min-h-dvh sm:grid sm:grid-cols-[4.5rem_minmax(0,1fr)] lg:grid-cols-[15rem_minmax(0,1fr)]">
+    <div
+      className={cn(
+        "min-h-dvh [--sidebar-w:0px] [--topnav-h:3rem] sm:grid sm:grid-cols-[var(--sidebar-w)_minmax(0,1fr)]",
+        expanded ? "sm:[--sidebar-w:15rem]" : "sm:[--sidebar-w:4.5rem]",
+      )}
+    >
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-on-primary"
@@ -33,27 +48,52 @@ export function AppShell({ children, tools = listedTools() }: AppShellProps) {
       </a>
 
       <aside className="relative hidden sm:block">
-        <div className="group absolute inset-y-0 left-0 z-30 w-[4.5rem] overflow-x-hidden overflow-y-auto border-r border-border bg-surface transition-[width] hover:w-60 focus-within:w-60 lg:sticky lg:top-0 lg:h-dvh lg:w-60">
-          <SidebarNav tools={tools} collapsible />
+        <div className="sticky top-0 h-dvh overflow-x-hidden overflow-y-auto border-r border-border bg-surface">
+          <SidebarNav tools={tools} collapsed={!expanded} showSearch={false} />
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-col">
-        <header className="flex items-center justify-between gap-2 border-b border-border bg-surface px-3 py-2 sm:justify-end">
-          <div className="flex items-center gap-1 sm:hidden">
-            <IconButton
-              label={t("nav.openMenu")}
-              icon={<Menu aria-hidden className="size-5" />}
-              onClick={() => setDrawerOpen(true)}
-            />
-            <Link to="/" className="inline-flex min-h-10 items-center font-semibold">
-              {t("app.name")}
-            </Link>
+        <header className="sticky top-0 z-30 flex h-[var(--topnav-h)] items-center gap-2 border-b border-border bg-surface px-3">
+          <IconButton
+            label={t("nav.toggleSidebar")}
+            icon={<PanelLeft aria-hidden className="size-5" />}
+            className="sm:hidden"
+            onClick={() => setDrawerOpen(true)}
+          />
+          <IconButton
+            label={t("nav.toggleSidebar")}
+            icon={<PanelLeft aria-hidden className="size-5" />}
+            aria-pressed={expanded}
+            className="max-sm:hidden"
+            onClick={() => setExpanded(!expanded)}
+          />
+          <nav aria-label={t("breadcrumb.label")} className="min-w-0 text-sm text-text-muted">
+            {current ? (
+              <ol className="flex items-center gap-1">
+                {group ? (
+                  <li className="hidden items-center gap-1 md:flex">
+                    <span>{t(group.labelKey)}</span>
+                    <ChevronRight aria-hidden className="size-3.5" />
+                  </li>
+                ) : null}
+                <li aria-current="page" className="truncate font-medium text-text">
+                  {t(current.titleKey)}
+                </li>
+              </ol>
+            ) : (
+              <Link to="/" className="font-semibold text-text">
+                {t("app.name")}
+              </Link>
+            )}
+          </nav>
+          <div className="flex min-w-0 flex-1 justify-center">
+            <QuickSearch tools={tools} />
           </div>
           <ThemeSwitcher />
         </header>
 
-        <main id="main" tabIndex={-1} className="flex-1 px-3 py-4 outline-none sm:px-4 lg:px-6">
+        <main id="main" tabIndex={-1} className="flex-1 px-3 py-3 outline-none sm:px-4">
           {children}
         </main>
       </div>
@@ -64,7 +104,7 @@ export function AppShell({ children, tools = listedTools() }: AppShellProps) {
         title={t("app.name")}
         placement="left"
       >
-        <SidebarNav tools={tools} onNavigate={() => setDrawerOpen(false)} />
+        <SidebarNav tools={tools} onNavigate={() => setDrawerOpen(false)} showSearch={false} />
       </Dialog>
     </div>
   );

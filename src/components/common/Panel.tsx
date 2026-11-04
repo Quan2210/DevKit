@@ -1,6 +1,9 @@
+import { Maximize2, Minimize2 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
+import { useT } from "../../i18n/useT";
 import { cn } from "../../lib/cn";
+import { IconButton } from "./IconButton";
 
 export interface PanelProps {
   title: string;
@@ -8,21 +11,57 @@ export interface PanelProps {
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
+  /** Adds an expand button that fills the content area (below the top nav, beside the sidebar). */
+  expandable?: boolean;
 }
 
 /** Bordered region for one side of a workspace (Input | Output). Border, not shadow. */
-export function Panel({ title, actions, children, className }: PanelProps) {
+export function Panel({ title, actions, children, className, expandable = false }: PanelProps) {
+  const t = useT();
   const headingId = useId();
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setExpanded(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [expanded]);
+
   return (
     <section
       aria-labelledby={headingId}
-      className={cn("flex min-w-0 flex-col rounded-lg border border-border bg-surface", className)}
+      className={cn(
+        "flex min-w-0 flex-col border border-border bg-surface",
+        expanded
+          ? "fixed top-[var(--topnav-h,3rem)] right-0 bottom-0 left-[var(--sidebar-w,0px)] z-40 h-auto! rounded-none"
+          : "rounded-lg",
+        className,
+      )}
     >
-      <header className="flex min-h-11 items-center justify-between gap-2 border-b border-border px-3">
+      <header className="flex min-h-10 items-center justify-between gap-2 border-b border-border px-3">
         <h2 id={headingId} className="text-sm font-semibold">
           {title}
         </h2>
-        {actions ? <div className="flex items-center gap-1">{actions}</div> : null}
+        <div className="flex items-center gap-1">
+          {actions}
+          {expandable ? (
+            <IconButton
+              label={expanded ? t("panel.collapse") : t("panel.expand")}
+              aria-pressed={expanded}
+              onClick={() => setExpanded((value) => !value)}
+              icon={
+                expanded ? (
+                  <Minimize2 aria-hidden className="size-4" />
+                ) : (
+                  <Maximize2 aria-hidden className="size-4" />
+                )
+              }
+            />
+          ) : null}
+        </div>
       </header>
       <div className="min-h-0 flex-1">{children}</div>
     </section>

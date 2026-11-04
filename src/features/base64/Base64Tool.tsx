@@ -1,9 +1,9 @@
-import { ArrowLeftRight } from "lucide-react";
+import { ArrowLeftRight, Eraser, FileText } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
-import { Button } from "../../components/common/Button";
 import { Checkbox } from "../../components/common/Checkbox";
 import { CopyButton } from "../../components/common/CopyButton";
 import { ErrorBanner } from "../../components/common/ErrorBanner";
+import { IconButton } from "../../components/common/IconButton";
 import { Panel } from "../../components/common/Panel";
 import { Segmented } from "../../components/common/Segmented";
 import { StatusBadge } from "../../components/common/StatusBadge";
@@ -69,41 +69,6 @@ export function Base64Tool() {
     <ToolShell
       tool={tool}
       guide={getGuide("vi", tool.id)}
-      toolbar={
-        <>
-          <Segmented<Base64Mode>
-            label={t("common.mode")}
-            value={mode}
-            onChange={setMode}
-            options={[
-              { value: "encode", label: t("base64.encode") },
-              { value: "decode", label: t("base64.decode") },
-            ]}
-          />
-          <Checkbox
-            label={t("base64.urlSafe")}
-            checked={urlSafe}
-            onChange={(e) => setUrlSafe(e.target.checked)}
-          />
-          <Button
-            variant="primary"
-            icon={<ArrowLeftRight aria-hidden className="size-4" />}
-            onClick={swap}
-            disabled={!result.ok || lastGood === ""}
-          >
-            {t("action.swap")}
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => setInput(t(encoding ? "base64.sampleEncode" : "base64.sampleDecode"))}
-          >
-            {t("action.sample")}
-          </Button>
-          <Button variant="ghost" onClick={clear} disabled={input === ""}>
-            {t("action.clear")}
-          </Button>
-        </>
-      }
       notice={
         error || cleared !== null ? (
           <div className="space-y-2">
@@ -148,8 +113,54 @@ export function Base64Tool() {
       }
     >
       <SplitWorkspace
+        actions={
+          <>
+            <Segmented<Base64Mode>
+              label={t("common.mode")}
+              iconOnly
+              value={mode}
+              onChange={setMode}
+              options={[
+                {
+                  value: "encode",
+                  label: t("base64.encode"),
+                  icon: <span aria-hidden>{"Aa"}</span>,
+                },
+                {
+                  value: "decode",
+                  label: t("base64.decode"),
+                  icon: <span aria-hidden>{"64"}</span>,
+                },
+              ]}
+            />
+            <Checkbox
+              label={t("base64.urlSafe")}
+              shortLabel="URL"
+              checked={urlSafe}
+              onChange={(e) => setUrlSafe(e.target.checked)}
+            />
+            <IconButton
+              variant="primary"
+              label={t("action.swap")}
+              icon={<ArrowLeftRight aria-hidden className="size-4" />}
+              onClick={swap}
+              disabled={!result.ok || lastGood === ""}
+            />
+            <IconButton
+              label={t("action.sample")}
+              icon={<FileText aria-hidden className="size-4" />}
+              onClick={() => setInput(t(encoding ? "base64.sampleEncode" : "base64.sampleDecode"))}
+            />
+            <IconButton
+              label={t("action.clear")}
+              icon={<Eraser aria-hidden className="size-4" />}
+              onClick={clear}
+              disabled={input === ""}
+            />
+          </>
+        }
         left={
-          <Panel title={inputTitle}>
+          <Panel title={inputTitle} expandable>
             <CodeEditor
               ref={editor}
               language="text"
@@ -165,7 +176,8 @@ export function Base64Tool() {
             title={
               error && lastGood !== "" ? t("common.previous", { title: outputTitle }) : outputTitle
             }
-            actions={<CopyButton text={lastGood} disabled={lastGood === ""} />}
+            expandable
+            actions={<CopyButton iconOnly text={lastGood} disabled={lastGood === ""} />}
           >
             <CodeEditor
               language="text"
