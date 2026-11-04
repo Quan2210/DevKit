@@ -16,9 +16,9 @@ const STEP = 0.02;
 const clampRatio = (value: number) => Math.min(MAX, Math.max(MIN, value));
 
 /**
- * Left | middle | right: three columns from lg, stacked below. The workspace fills the viewport
- * below the top nav. The middle strip is a drag handle (and a separator for the keyboard) that
- * resizes the two sides; the controls inside it keep working because they sit on top of it.
+ * Left | middle | right: three columns from lg, stacked below. It fills the height its parent gives
+ * it (ToolShell `fill`). The middle strip is a drag handle (and a separator for the keyboard) that
+ * resizes the two sides; it starts below the controls, which sit near the top.
  */
 export function SplitWorkspace({ left, right, actions }: SplitWorkspaceProps) {
   const t = useT();
@@ -63,7 +63,7 @@ export function SplitWorkspace({ left, right, actions }: SplitWorkspaceProps) {
       ref={grid}
       style={style}
       className={cn(
-        "grid gap-2 lg:h-[calc(100dvh-var(--topnav-h,3rem)-6.5rem)] lg:min-h-[24rem] lg:gap-0",
+        "grid gap-2 lg:h-full lg:min-h-[24rem] lg:gap-0",
         "lg:grid-cols-[minmax(0,var(--left))_auto_minmax(0,var(--right))]",
         dragging && "lg:select-none",
       )}
@@ -71,10 +71,19 @@ export function SplitWorkspace({ left, right, actions }: SplitWorkspaceProps) {
       <div className="h-[55dvh] min-h-72 lg:h-auto [&>section]:h-full">{left}</div>
       <div
         className={cn(
-          "relative flex items-center justify-center lg:min-w-6",
+          "relative flex flex-col items-center justify-center lg:min-w-6 lg:justify-start",
           actions ? "lg:px-1.5" : "",
         )}
       >
+        {actions ? (
+          <div
+            role="toolbar"
+            aria-label={t("toolshell.actions")}
+            className="relative flex flex-row flex-wrap items-start justify-center gap-4 lg:mt-[12dvh] lg:flex-col lg:flex-nowrap lg:items-stretch"
+          >
+            {actions}
+          </div>
+        ) : null}
         <div
           role="slider"
           aria-label={t("split.resize")}
@@ -89,21 +98,13 @@ export function SplitWorkspace({ left, right, actions }: SplitWorkspaceProps) {
           onDoubleClick={() => setRatio(0.5)}
           onKeyDown={onKeyDown}
           className={cn(
-            "absolute inset-0 hidden touch-none lg:block lg:cursor-col-resize",
+            "relative hidden w-full touch-none lg:block lg:min-h-16 lg:flex-1 lg:cursor-col-resize",
+            // The divider exists only here, below the controls: that strip is also what drags
             "after:absolute after:inset-y-0 after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-border",
             "hover:after:w-0.5 hover:after:bg-primary focus-visible:after:w-0.5 focus-visible:after:bg-primary",
             dragging && "after:w-0.5 after:bg-primary",
           )}
         />
-        {actions ? (
-          <div
-            role="toolbar"
-            aria-label={t("toolshell.actions")}
-            className="pointer-events-none relative flex flex-row flex-wrap items-start justify-center gap-4 lg:flex-col lg:flex-nowrap lg:items-stretch [&>*]:pointer-events-auto"
-          >
-            {actions}
-          </div>
-        ) : null}
       </div>
       <div className="h-[55dvh] min-h-72 lg:h-auto [&>section]:h-full">{right}</div>
     </div>

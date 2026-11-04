@@ -1,4 +1,10 @@
-import { EditorState, StateEffect, StateField, type Extension } from "@codemirror/state";
+import {
+  EditorSelection,
+  EditorState,
+  StateEffect,
+  StateField,
+  type Extension,
+} from "@codemirror/state";
 import { Decoration, EditorView, placeholder as placeholderExt } from "@codemirror/view";
 import { classHighlighter } from "@lezer/highlight";
 import { syntaxHighlighting } from "@codemirror/language";
@@ -6,6 +12,8 @@ import { redo, undo } from "@codemirror/commands";
 import { basicSetup } from "codemirror";
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import type { CodeEditorHandle, CodeEditorLanguage, CodeEditorProps, LineHighlight } from "./types";
+
+const MAX_SEARCH_MATCHES = 5000;
 
 const setHighlights = StateEffect.define<ReadonlyArray<LineHighlight>>();
 
@@ -29,6 +37,77 @@ const highlightField = StateField.define({
   },
   provide: (field) => EditorView.decorations.from(field),
 });
+
+interface FindState {
+  term: string;
+  /** Case-insensitive matches as [from, to] offsets, in document order. */
+  matches: ReadonlyArray<readonly [number, number]>;
+  /** The match the search is on. */
+  index: number;
+}
+
+const setFind = StateEffect.define<{ term: string; index: number }>();
+
+function findMatches(text: string, term: string): Array<[number, number]> {
+  const matches: Array<[number, number]> = [];
+  if (term === "") return matches;
+  const haystack = text.toLowerCase();
+  const needle = term.toLowerCase();
+  for (
+    let at = haystack.indexOf(needle);
+    at !== -1 && matches.length < MAX_SEARCH_MATCHES;
+    at = haystack.indexOf(needle, at + needle.length)
+  ) {
+    matches.push([at, at + needle.length]);
+  }
+  return matches;
+}
+
+/**
+ * The editor's own find: tints every match and the current one. CodeMirror's search package opens its
+ * built-in panel whenever it moves to a match, which the pane's search bar replaces.
+ */
+const findField = StateField.define<FindState>({
+  create: () => ({ term: "", matches: [], index: 0 }),
+  update(value, tr) {
+    for (const effect of tr.effects) {
+      if (!effect.is(setFind)) continue;
+      const matches = findMatches(tr.state.doc.toString(), effect.value.term);
+      return { term: effect.value.term, matches, index: effect.value.index };
+    }
+    if (tr.docChanged && value.term !== "") {
+      const matches = findMatches(tr.state.doc.toString(), value.term);
+      return { ...value, matches, index: Math.min(value.index, Math.max(matches.length - 1, 0)) };
+    }
+    return value;
+  },
+  provide: (field) =>
+    EditorView.decorations.from(field, (state) =>
+      Decoration.set(
+        state.matches.map(([from, to], index) =>
+          Decoration.mark({
+            class: index === state.index ? "cm-find-current" : "cm-find-match",
+          }).range(from, to),
+        ),
+      ),
+    ),
+});
+
+function selectMatch(view: EditorView, index: number) {
+  const match = view.state.field(findField).matches[index];
+  if (!match) return;
+  view.dispatch({
+    effects: setFind.of({ term: view.state.field(findField).term, index }),
+    selection: EditorSelection.range(match[0], match[1]),
+    scrollIntoView: true,
+  });
+}
+
+function stepMatch(view: EditorView | null, delta: 1 | -1) {
+  if (!view) return;
+  const { matches, index } = view.state.field(findField);
+  if (matches.length > 0) selectMatch(view, (index + delta + matches.length) % matches.length);
+}
 
 async function loadLanguage(language: CodeEditorLanguage): Promise<Extension> {
   switch (language) {
@@ -68,6 +147,15 @@ const tokenTheme = EditorView.theme({
   ".tok-propertyName, .tok-attributeName": { color: "var(--color-info-fg)" },
   ".tok-comment": { color: "var(--color-text-muted)", fontStyle: "italic" },
   ".tok-heading": { fontWeight: "600" },
+  ".cm-find-match": {
+    backgroundColor: "color-mix(in srgb, var(--color-warning) 30%, transparent)",
+    borderRadius: "2px",
+  },
+  ".cm-find-current": {
+    backgroundColor: "color-mix(in srgb, var(--color-warning) 60%, transparent)",
+    outline: "1px solid var(--color-warning)",
+    borderRadius: "2px",
+  },
   ".cm-diff-added": {
     backgroundColor: "color-mix(in srgb, var(--color-success) 22%, transparent)",
   },
@@ -87,17 +175,20 @@ export default function CodeEditorImpl({
   ariaLabel,
   placeholder,
   highlights,
+  onCursor,
   handleRef,
 }: CodeEditorProps & { handleRef?: Ref<CodeEditorHandle> }) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
+  const onCursorRef = useRef(onCursor);
 
   const latestValue = useRef(value);
   const latestHighlights = useRef(highlights);
 
   useEffect(() => {
     onChangeRef.current = onChange;
+    onCursorRef.current = onCursor;
     latestValue.current = value;
     latestHighlights.current = highlights;
   });
@@ -119,6 +210,26 @@ export default function CodeEditorImpl({
       current.dispatch({ selection: { anchor: pos }, scrollIntoView: true });
       current.focus();
     },
+    select: (offset) => {
+      const current = view.current;
+      if (!current) return;
+      const pos = Math.min(Math.max(offset, 0), current.state.doc.length);
+      current.dispatch({ selection: { anchor: pos }, scrollIntoView: true });
+      current.focus();
+    },
+    search: (term) => {
+      const current = view.current;
+      if (!current) return 0;
+      current.dispatch({ effects: setFind.of({ term, index: 0 }) });
+      const { matches } = current.state.field(findField);
+      if (matches.length > 0) selectMatch(current, 0);
+      return matches.length;
+    },
+    findNext: () => stepMatch(view.current, 1),
+    findPrev: () => stepMatch(view.current, -1),
+    clearSearch: () => {
+      view.current?.dispatch({ effects: setFind.of({ term: "", index: 0 }) });
+    },
   }));
 
   // Create the editor once per language/readOnly/placeholder; content is synced by the next effect.
@@ -137,6 +248,7 @@ export default function CodeEditorImpl({
             syntaxHighlighting(classHighlighter),
             tokenTheme,
             highlightField,
+            findField,
             EditorView.lineWrapping,
             EditorState.readOnly.of(readOnly),
             EditorView.editable.of(!readOnly),
@@ -144,6 +256,9 @@ export default function CodeEditorImpl({
             ...(placeholder ? [placeholderExt(placeholder)] : []),
             EditorView.updateListener.of((update) => {
               if (update.docChanged) onChangeRef.current?.(update.state.doc.toString());
+              if (update.docChanged || update.selectionSet) {
+                onCursorRef.current?.(update.state.selection.main.head);
+              }
             }),
           ],
         }),

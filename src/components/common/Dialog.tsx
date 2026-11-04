@@ -10,8 +10,8 @@ export interface DialogProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
-  /** "left" renders a navigation drawer (mobile menu); "center" a modal. */
-  placement?: "center" | "left";
+  /** "left" renders a navigation drawer (mobile menu), "right" a side panel (help); "center" a modal. */
+  placement?: "center" | "left" | "right";
   footer?: ReactNode;
 }
 
@@ -58,7 +58,9 @@ export function Dialog({
         "m-0 border border-border bg-surface p-0 text-text backdrop:bg-black/50",
         placement === "left"
           ? "h-dvh max-h-none w-72 max-w-[85vw] rounded-r-xl"
-          : "m-auto w-[28rem] max-w-[calc(100vw-2rem)] rounded-xl",
+          : placement === "right"
+            ? "ml-auto h-dvh max-h-none w-[32rem] max-w-[92vw] rounded-l-xl"
+            : "m-auto w-[28rem] max-w-[calc(100vw-2rem)] rounded-xl",
       )}
     >
       <div className="flex max-h-dvh flex-col">

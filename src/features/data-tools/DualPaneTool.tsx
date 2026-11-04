@@ -1,34 +1,12 @@
-import {
-  ArrowDownAZ,
-  ArrowUpDown,
-  ArrowUpZA,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  Eraser,
-  FileText,
-  ListTree,
-  Redo2,
-  Shrink,
-  Table2,
-  Undo2,
-} from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { Button } from "../../components/common/Button";
 import { Checkbox } from "../../components/common/Checkbox";
-import { CopyButton } from "../../components/common/CopyButton";
 import { ErrorBanner } from "../../components/common/ErrorBanner";
+import { Notice } from "../../components/common/Notice";
 import { IconButton } from "../../components/common/IconButton";
-import { Panel } from "../../components/common/Panel";
-import { Segmented } from "../../components/common/Segmented";
 import { StatusBadge } from "../../components/common/StatusBadge";
-import {
-  CodeEditor,
-  type CodeEditorHandle,
-  type CodeEditorLanguage,
-  type LineHighlight,
-} from "../../components/editors/CodeEditor";
+import type { CodeEditorHandle } from "../../components/editors/CodeEditor";
 import { SplitWorkspace } from "../../components/layout/SplitWorkspace";
 import { ToolShell } from "../../components/layout/ToolShell";
 import { useDebounced } from "../../hooks/useDebounced";
@@ -36,59 +14,32 @@ import { useHotkeys } from "../../hooks/useHotkeys";
 import { getGuide } from "../../i18n";
 import { formatNumber } from "../../i18n/format";
 import { useT } from "../../i18n/useT";
-import { downloadText } from "../../lib/io/download";
-import type { Result, ToolError } from "../../lib/result";
+import type { ToolError } from "../../lib/result";
 import type { ToolMeta } from "../../registry/tools.meta";
-import { findTable, type TreeNode } from "./model";
-import { TableView } from "./TableView";
-import { TreeView } from "./TreeView";
+import { DataPane, type DataPaneHandle } from "./DataPane";
+import {
+  initialPane,
+  isBlank,
+  isQueryActive,
+  type DataAdapter,
+  type DataLabels,
+  type PaneState,
+  type Side,
+} from "./types";
 
-export type Side = "left" | "right";
-export type View = "text" | "minify" | "tree" | "table";
-export type Indent = 2 | 4;
-export type Sort = "off" | "asc" | "desc";
+export type {
+  CompareResult,
+  DataAdapter,
+  DataLabels,
+  EditorSupport,
+  Indent,
+  Side,
+  Sort,
+  View,
+} from "./types";
 
 const ICON = "size-4";
-const NEXT_SORT: Record<Sort, Sort> = { off: "asc", asc: "desc", desc: "off" };
-
-export interface CompareResult {
-  count: number;
-  left: LineHighlight[];
-  right: LineHighlight[];
-}
-
-/** What differs between JSON and XML; the panes, views and actions are shared. */
-export interface DataAdapter {
-  language: CodeEditorLanguage;
-  /** Validates and returns the tree for the Tree and Table views. */
-  analyze: (text: string) => Result<TreeNode, ToolError>;
-  format: (text: string, indent: Indent, sort: Sort) => Result<string, ToolError>;
-  minify: (text: string) => Result<string, ToolError>;
-  /** Present when sorting keys makes sense (JSON). */
-  sortable?: boolean;
-  /** Present when two texts can be compared (JSON). Null when either side is not valid. */
-  compare?: (left: string, right: string) => CompareResult | null;
-  download?: { filename: string; mime: string };
-}
-
-export interface DataLabels {
-  /** Names of the two editors (textbox accessible names). */
-  leftEditor: string;
-  rightEditor: string;
-  placeholder: string;
-  sample: string;
-  location: (line: number, column: number) => string;
-}
-
-interface PaneState {
-  text: string;
-  view: View;
-  indent: Indent;
-  sort: Sort;
-}
-
-const initialPane: PaneState = { text: "", view: "text", indent: 2, sort: "off" };
-const BLANK = (text: string) => text.trim() === "";
+const BLANK = isBlank;
 
 export interface DualPaneToolProps {
   tool: ToolMeta;
@@ -105,12 +56,19 @@ export function DualPaneTool({ tool, adapter, labels, extraNotice }: DualPaneToo
     right: initialPane,
   });
   const [compare, setCompare] = useState(false);
-  const [jump, setJump] = useState(0);
+  // Compare was asked for while a pane was not in the Tree view.
+  const [compareWarn, setCompareWarn] = useState(false);
+  // The difference the jump buttons are on (-1: none yet).
+  const [cursor, setCursor] = useState(-1);
   const [actionError, setActionError] = useState<{ side: Side; error: ToolError } | null>(null);
   const editors = { left: useRef<CodeEditorHandle>(null), right: useRef<CodeEditorHandle>(null) };
+  const handles = { left: useRef<DataPaneHandle>(null), right: useRef<DataPaneHandle>(null) };
 
-  const patch = (side: Side, change: Partial<PaneState>) =>
+  const patch = (side: Side, change: Partial<PaneState>) => {
+    // Compare lives in the Tree view: leaving it on either side ends the comparison.
+    if (change.view !== undefined && change.view !== "tree") setCompare(false);
     setPanes((current) => ({ ...current, [side]: { ...current[side], ...change } }));
+  };
   const setText = (side: Side, text: string) => {
     setActionError((current) => (current?.side === side ? null : current));
     setPanes((current) =>
@@ -138,7 +96,18 @@ export function DualPaneTool({ tool, adapter, labels, extraNotice }: DualPaneToo
     const from: Side = to === "right" ? "left" : "right";
     const source = panes[from];
     if (BLANK(source.text)) return;
-    const result = adapter.format(source.text, source.indent, source.sort);
+    let text = source.text;
+    // Transform: the query typed in the source pane is applied before formatting.
+    const query = adapter.editor?.query;
+    if (query && source.queryOpen && isQueryActive(source.query)) {
+      const run = query.run(text, source.query, source.indent);
+      if (!run.ok) {
+        setActionError({ side: from, error: run.error });
+        return;
+      }
+      text = run.value.text;
+    }
+    const result = adapter.format(text, source.indent, source.sort);
     if (!result.ok) {
       setActionError({ side: from, error: result.error });
       return;
@@ -151,18 +120,45 @@ export function DualPaneTool({ tool, adapter, labels, extraNotice }: DualPaneToo
     setText(to, panes[from].text);
   };
 
-  const nextDiff = () => {
-    if (!diff) return;
-    const targets = [
-      ...diff.left.map((mark) => ({ side: "left" as const, line: mark.line })),
-      ...diff.right
-        .filter((mark) => mark.kind === "added")
-        .map((mark) => ({ side: "right" as const, line: mark.line })),
-    ];
-    const target = targets[jump % Math.max(targets.length, 1)];
-    if (!target) return;
-    setJump(jump + 1);
-    editors[target.side].current?.goTo(target.line, 1);
+  const bothTree = panes.left.view === "tree" && panes.right.view === "tree";
+  const toggleCompare = (on: boolean) => {
+    if (!on) {
+      setCompare(false);
+      setCompareWarn(false);
+      return;
+    }
+    // Differences are only shown in the Tree view: ask for it instead of switching behind the user's back.
+    if (!bothTree) {
+      setCompareWarn(true);
+      return;
+    }
+    startCompare();
+  };
+  const startCompare = () => {
+    setCompareWarn(false);
+    // Both sides go to the Tree view, where the differences are shown.
+    setPanes((current) => ({
+      left: { ...current.left, view: "tree" },
+      right: { ...current.right, view: "tree" },
+    }));
+    setCompare(true);
+    setCursor(-1);
+    // Open what holds a difference, so they are visible without hunting for them.
+    const result = adapter.compare?.(panes.left.text, panes.right.text);
+    if (result) {
+      handles.left.current?.expand(result.left.containers);
+      handles.right.current?.expand(result.right.containers);
+    }
+  };
+
+  const stepDiff = (delta: 1 | -1) => {
+    if (!diff || diff.count === 0) return;
+    const total = diff.items.length;
+    const index = (cursor + delta + total) % total;
+    setCursor(index);
+    const item = diff.items[index]!;
+    if (item.kind !== "added") handles.left.current?.reveal(item.path);
+    if (item.kind !== "removed") handles.right.current?.reveal(item.path);
   };
 
   useHotkeys([{ key: "Enter", mod: true, allowInInput: true, handler: () => formatInto("right") }]);
@@ -177,180 +173,25 @@ export function DualPaneTool({ tool, adapter, labels, extraNotice }: DualPaneToo
     return null;
   })();
   const compareInvalid = compare && adapter.compare && diff === null;
+  const showWarn = compareWarn && !bothTree;
 
   const sideName = (side: Side) => t(side === "left" ? "pane.left" : "pane.right");
 
-  const renderPane = (side: Side) => {
-    const pane = panes[side];
-    const analysis = side === "left" ? analyses.left : analyses.right;
-    const editorLabel = side === "left" ? labels.leftEditor : labels.rightEditor;
-    const marks = diff ? diff[side] : undefined;
-    const blank = BLANK(pane.text);
-    const texting = pane.view === "text";
-
-    const body = (() => {
-      if (pane.view === "minify") {
-        const minified = blank ? null : adapter.minify(pane.text);
-        return (
-          <CodeEditor
-            language={adapter.language}
-            readOnly
-            value={minified?.ok ? minified.value : ""}
-            ariaLabel={`${editorLabel} · ${t("view.minify")}`}
-          />
-        );
-      }
-      if (pane.view === "tree" || pane.view === "table") {
-        // Fresh parse, not the debounced one, so switching view shows what is in the editor now.
-        const current = blank ? null : adapter.analyze(pane.text);
-        if (!current) return <p className="p-3 text-sm text-text-muted">{labels.placeholder}</p>;
-        if (!current.ok)
-          return <p className="p-3 text-sm text-text-muted">{t("tree.unavailable")}</p>;
-        if (pane.view === "tree") {
-          return <TreeView root={current.value} label={t("view.tree")} />;
-        }
-        const table = findTable(current.value);
-        return table ? (
-          <TableView table={table} label={t("view.table")} />
-        ) : (
-          <p className="p-3 text-sm text-text-muted">{t("table.noData")}</p>
-        );
-      }
-      return null;
-    })();
-
-    return (
-      <Panel
-        title={sideName(side)}
-        expandable
-        toolbar={
-          <>
-            <Segmented<View>
-              label={`${t("view.label")} · ${sideName(side)}`}
-              iconOnly
-              value={pane.view}
-              onChange={(view) => patch(side, { view })}
-              options={[
-                {
-                  value: "text",
-                  label: t("view.text"),
-                  icon: <FileText aria-hidden className={ICON} />,
-                },
-                {
-                  value: "minify",
-                  label: t("view.minify"),
-                  icon: <Shrink aria-hidden className={ICON} />,
-                },
-                {
-                  value: "tree",
-                  label: t("view.tree"),
-                  icon: <ListTree aria-hidden className={ICON} />,
-                },
-                {
-                  value: "table",
-                  label: t("view.table"),
-                  icon: <Table2 aria-hidden className={ICON} />,
-                },
-              ]}
-            />
-            <Segmented<"2" | "4">
-              label={`${t("json.indent")} · ${sideName(side)}`}
-              iconOnly
-              value={String(pane.indent) as "2" | "4"}
-              onChange={(value) => patch(side, { indent: Number(value) as Indent })}
-              options={[
-                { value: "2", label: t("json.indent2"), icon: <span aria-hidden>{"2"}</span> },
-                { value: "4", label: t("json.indent4"), icon: <span aria-hidden>{"4"}</span> },
-              ]}
-            />
-            {adapter.sortable ? (
-              <IconButton
-                label={
-                  pane.sort === "off"
-                    ? t("json.sortOff")
-                    : pane.sort === "asc"
-                      ? t("json.sortAsc")
-                      : t("json.sortDesc")
-                }
-                aria-pressed={pane.sort !== "off"}
-                icon={
-                  pane.sort === "asc" ? (
-                    <ArrowDownAZ aria-hidden className={ICON} />
-                  ) : pane.sort === "desc" ? (
-                    <ArrowUpZA aria-hidden className={ICON} />
-                  ) : (
-                    <ArrowUpDown aria-hidden className={ICON} />
-                  )
-                }
-                onClick={() => patch(side, { sort: NEXT_SORT[pane.sort] })}
-              />
-            ) : null}
-            <span aria-hidden className="mx-0.5 h-5 w-px bg-border" />
-            <IconButton
-              label={t("action.sample")}
-              icon={<FileText aria-hidden className={ICON} />}
-              onClick={() => {
-                patch(side, { view: "text" });
-                setText(side, labels.sample);
-              }}
-            />
-            <IconButton
-              label={t("action.clear")}
-              icon={<Eraser aria-hidden className={ICON} />}
-              onClick={() => setText(side, "")}
-              disabled={pane.text === ""}
-            />
-            <IconButton
-              label={t("pane.undo")}
-              icon={<Undo2 aria-hidden className={ICON} />}
-              onClick={() => editors[side].current?.undo()}
-              disabled={!texting}
-            />
-            <IconButton
-              label={t("pane.redo")}
-              icon={<Redo2 aria-hidden className={ICON} />}
-              onClick={() => editors[side].current?.redo()}
-              disabled={!texting}
-            />
-          </>
-        }
-        actions={
-          <>
-            {analysis ? (
-              <StatusBadge tone={analysis.ok ? "success" : "danger"}>
-                {analysis.ok ? t("status.valid") : t("status.invalid")}
-              </StatusBadge>
-            ) : null}
-            {adapter.download ? (
-              <IconButton
-                label={t("xml.download")}
-                icon={<Download aria-hidden className={ICON} />}
-                disabled={blank}
-                onClick={() =>
-                  downloadText(adapter.download!.filename, pane.text, adapter.download!.mime)
-                }
-              />
-            ) : null}
-            <CopyButton iconOnly text={pane.text} disabled={blank} />
-          </>
-        }
-      >
-        {/* Kept mounted while another view shows, so its undo history survives. */}
-        <div className={texting ? "h-full" : "hidden"}>
-          <CodeEditor
-            ref={editors[side]}
-            language={adapter.language}
-            value={pane.text}
-            onChange={(text) => setText(side, text)}
-            ariaLabel={editorLabel}
-            placeholder={labels.placeholder}
-            highlights={marks}
-          />
-        </div>
-        {texting ? null : <div className="h-full">{body}</div>}
-      </Panel>
-    );
-  };
+  const renderPane = (side: Side) => (
+    <DataPane
+      title={sideName(side)}
+      adapter={adapter}
+      labels={labels}
+      editorLabel={side === "left" ? labels.leftEditor : labels.rightEditor}
+      pane={panes[side]}
+      patch={(change) => patch(side, change)}
+      setText={(text) => setText(side, text)}
+      analysis={analyses[side]}
+      diff={compare && diff ? diff[side] : undefined}
+      editorRef={editors[side]}
+      handleRef={handles[side]}
+    />
+  );
 
   const group = (title: string, children: ReactNode) => (
     <div className="flex flex-col items-center gap-1.5">
@@ -358,10 +199,14 @@ export function DualPaneTool({ tool, adapter, labels, extraNotice }: DualPaneToo
       <div className="flex gap-1.5">{children}</div>
     </div>
   );
+  const transformable = !!adapter.editor?.query;
   const arrow = (side: Side, kind: "copy" | "format") => {
-    const label = t(kind === "copy" ? "pane.copyTo" : "pane.formatTo", {
-      side: t(side === "left" ? "pane.sideLeft" : "pane.sideRight"),
-    });
+    const label = t(
+      kind === "copy" ? "pane.copyTo" : transformable ? "pane.transformTo" : "pane.formatTo",
+      {
+        side: t(side === "left" ? "pane.sideLeft" : "pane.sideRight"),
+      },
+    );
     const from: Side = side === "right" ? "left" : "right";
     return (
       <Button
@@ -390,8 +235,9 @@ export function DualPaneTool({ tool, adapter, labels, extraNotice }: DualPaneToo
     <ToolShell
       tool={tool}
       guide={getGuide("vi", tool.id)}
+      fill
       notice={
-        problem || compareInvalid || extra ? (
+        problem || compareInvalid || showWarn || extra ? (
           <div className="space-y-2">
             {problem ? (
               <ErrorBanner
@@ -406,6 +252,16 @@ export function DualPaneTool({ tool, adapter, labels, extraNotice }: DualPaneToo
                     : undefined
                 }
               />
+            ) : null}
+            {showWarn ? (
+              <Notice tone="warning">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span>{t("compare.needsTree")}</span>
+                  <Button variant="secondary" onClick={startCompare}>
+                    {t("compare.switch")}
+                  </Button>
+                </div>
+              </Notice>
             ) : null}
             {compareInvalid && !problem ? (
               <p role="note" className="text-sm text-text-muted">
@@ -435,20 +291,30 @@ export function DualPaneTool({ tool, adapter, labels, extraNotice }: DualPaneToo
         actions={
           <>
             {group(t("action.copy"), [arrow("left", "copy"), arrow("right", "copy")])}
-            {group(t("json.format"), [arrow("left", "format"), arrow("right", "format")])}
+            {group(t(transformable ? "json.transform" : "json.format"), [
+              arrow("left", "format"),
+              arrow("right", "format"),
+            ])}
             {adapter.compare ? (
               <div className="flex flex-col items-center gap-1.5">
                 <Checkbox
                   label={t("compare.label")}
                   checked={compare}
-                  onChange={(event) => setCompare(event.target.checked)}
+                  onChange={(event) => toggleCompare(event.target.checked)}
                 />
                 {compare && diff && diff.count > 0 ? (
-                  <IconButton
-                    label={t("json.nextDiff")}
-                    icon={<ChevronDown aria-hidden className={ICON} />}
-                    onClick={nextDiff}
-                  />
+                  <div className="flex gap-1.5">
+                    <IconButton
+                      label={t("json.prevDiff")}
+                      icon={<ChevronUp aria-hidden className={ICON} />}
+                      onClick={() => stepDiff(-1)}
+                    />
+                    <IconButton
+                      label={t("json.nextDiff")}
+                      icon={<ChevronDown aria-hidden className={ICON} />}
+                      onClick={() => stepDiff(1)}
+                    />
+                  </div>
                 ) : null}
               </div>
             ) : null}

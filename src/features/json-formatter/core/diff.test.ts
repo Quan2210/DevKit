@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { diffJson, indexLines, markLines } from "./diff";
+import { diffJson, treeMarks } from "./diff";
 import { formatJson, sortKeys } from "./json";
 
 describe("sortKeys", () => {
@@ -38,22 +38,29 @@ describe("diffJson", () => {
   });
 });
 
-describe("markLines", () => {
-  const left = '{\n  "a": 1,\n  "b": {\n    "c": 2\n  }\n}';
-  const right = '{\n  "a": 1,\n  "b": {\n    "c": 3\n  },\n  "d": 4\n}';
+describe("treeMarks", () => {
+  const left = { a: 1, b: { c: 2, gone: true }, list: [1, 2] };
+  const right = { a: 1, b: { c: 3 }, list: [1, 2, 3], extra: "x" };
+  const marks = treeMarks(diffJson(left, right));
 
-  it("indexes the line of each key", () => {
-    const lines = indexLines(left);
-    expect(lines.get(JSON.stringify(["a"]))).toBe(2);
-    expect(lines.get(JSON.stringify(["b", "c"]))).toBe(4);
+  it("marks changed values on both sides and the containers that hold them", () => {
+    expect(marks.left.marks.get("$.b.c")).toBe("changed");
+    expect(marks.right.marks.get("$.b.c")).toBe("changed");
+    expect([...marks.left.containers].sort()).toEqual(["$", "$.b"]);
+    expect([...marks.right.containers].sort()).toEqual(["$", "$.b", "$.list"]);
   });
 
-  it("marks changed lines on both sides and added lines only on the right", () => {
-    const marks = markLines(diffJson(JSON.parse(left), JSON.parse(right)), left, right);
-    expect(marks.left).toEqual([{ line: 4, kind: "changed" }]);
-    expect(marks.right).toEqual([
-      { line: 4, kind: "changed" },
-      { line: 6, kind: "added" },
-    ]);
+  it("marks a value that exists on one side only, on that side only", () => {
+    expect(marks.left.marks.get("$.b.gone")).toBe("removed");
+    expect(marks.right.marks.has("$.b.gone")).toBe(false);
+    expect(marks.right.marks.get("$.extra")).toBe("added");
+    expect(marks.left.marks.has("$.extra")).toBe(false);
+    expect(marks.right.marks.get("$.list[2]")).toBe("added");
+  });
+
+  it("has nothing to mark for equal documents", () => {
+    const none = treeMarks(diffJson(left, left));
+    expect(none.left.marks.size + none.right.marks.size).toBe(0);
+    expect(none.left.containers.size).toBe(0);
   });
 });

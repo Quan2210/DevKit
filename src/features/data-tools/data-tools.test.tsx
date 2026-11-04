@@ -42,7 +42,7 @@ describe("JSON Formatter, two independent panes", () => {
     typeLeft('{"b":1,"a":[1,2]}');
     await new Promise((resolve) => setTimeout(resolve, 350));
     expect(right()).toHaveValue("");
-    await press("Format sang ô phải");
+    await press("Transform sang ô phải");
     expect(right()).toHaveValue('{\n  "b": 1,\n  "a": [\n    1,\n    2\n  ]\n}');
   });
 
@@ -51,7 +51,7 @@ describe("JSON Formatter, two independent panes", () => {
     renderTool(<JsonFormatter />);
     typeRight('{"a":1}');
     await user.click(within(pane("Ô phải")).getByRole("radio", { name: "4 dấu cách" }));
-    await user.click(screen.getByRole("button", { name: "Format sang ô trái" }));
+    await user.click(screen.getByRole("button", { name: "Transform sang ô trái" }));
     expect(left()).toHaveValue('{\n    "a": 1\n}');
   });
 
@@ -73,7 +73,7 @@ describe("JSON Formatter, two independent panes", () => {
     await user.click(
       within(pane("Ô trái")).getByRole("button", { name: "Sắp xếp theo prop: tắt" }),
     );
-    await user.click(screen.getByRole("button", { name: "Format sang ô phải" }));
+    await user.click(screen.getByRole("button", { name: "Transform sang ô phải" }));
     expect(right()).toHaveValue('{\n  "a": {\n    "c": 2,\n    "d": 1\n  },\n  "b": 1\n}');
   });
 
@@ -83,7 +83,7 @@ describe("JSON Formatter, two independent panes", () => {
     typeRight("keep");
     typeLeft('{"a":');
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Ô trái"));
-    await user.click(screen.getByRole("button", { name: "Format sang ô phải" }));
+    await user.click(screen.getByRole("button", { name: "Transform sang ô phải" }));
     expect(right()).toHaveValue("keep");
     expect(within(pane("Ô trái")).getByText("Không hợp lệ")).toBeInTheDocument();
   });
@@ -122,16 +122,78 @@ describe("JSON Formatter, two independent panes", () => {
     expect(within(pane("Ô trái")).getByText(/Không có dữ liệu dạng bảng/)).toBeInTheDocument();
   });
 
-  it("minify view is read-only and does not change the text", async () => {
+  it("minify view shows the text compacted without changing it", async () => {
     const user = userEvent.setup();
     renderTool(<JsonFormatter />);
     typeLeft('{\n  "a": 1\n}');
     await user.click(within(pane("Ô trái")).getByRole("radio", { name: "Nén một dòng" }));
-    const minified = screen.getByRole("textbox", { name: /Nén một dòng/ });
-    expect(minified).toHaveValue('{"a":1}');
-    expect(minified).toHaveAttribute("readonly");
+    expect(screen.getByRole("textbox", { name: /Nén một dòng/ })).toHaveValue('{"a":1}');
     await user.click(within(pane("Ô trái")).getByRole("radio", { name: "Văn bản" }));
     expect(left()).toHaveValue('{\n  "a": 1\n}');
+  });
+
+  it("minify view can be edited, and what is typed stays as typed", async () => {
+    const user = userEvent.setup();
+    renderTool(<JsonFormatter />);
+    typeLeft('{"a":1}');
+    await user.click(within(pane("Ô trái")).getByRole("radio", { name: "Nén một dòng" }));
+    const box = screen.getByRole("textbox", { name: /Nén một dòng/ });
+    fireEvent.change(box, { target: { value: '{"a": 2}' } }); // a space: not compact, still kept
+    expect(box).toHaveValue('{"a": 2}');
+    await user.click(within(pane("Ô trái")).getByRole("radio", { name: "Văn bản" }));
+    expect(left()).toHaveValue('{"a": 2}');
+  });
+
+  describe("paste into a view that is not the text editor", () => {
+    const paste = (target: HTMLElement, text: string) =>
+      fireEvent.paste(target, { clipboardData: { getData: () => text } });
+
+    it("shows pasted data in the Tree view right away", async () => {
+      const user = userEvent.setup();
+      renderTool(<JsonFormatter />);
+      const radio = within(pane("Ô trái")).getByRole("radio", { name: "Cây" });
+      await user.click(radio);
+      expect(within(pane("Ô trái")).getByText(/Ctrl\+V/)).toBeInTheDocument();
+      paste(radio, '{"name":"DevKit","n":[1,2]}'); // focus is on the toolbar, which counts
+      const tree = within(pane("Ô trái")).getByRole("tree");
+      expect(within(tree).getByText('"DevKit"')).toBeInTheDocument();
+      expect(left()).toBeDefined();
+    });
+
+    it("shows pasted data in the Table and the compact views, replacing what was there", async () => {
+      const user = userEvent.setup();
+      renderTool(<JsonFormatter />);
+      typeLeft('["old"]');
+      const table = within(pane("Ô trái")).getByRole("radio", { name: "Bảng" });
+      await user.click(table);
+      paste(table, '[{"a":1},{"a":2}]');
+      expect(within(pane("Ô trái")).getByRole("table")).toHaveTextContent("2");
+      const compact = within(pane("Ô trái")).getByRole("radio", { name: "Nén một dòng" });
+      await user.click(compact);
+      paste(compact, '{\n  "b": 3\n}');
+      expect(screen.getByRole("textbox", { name: /Nén một dòng/ })).toHaveValue('{"b":3}');
+    });
+
+    it("leaves a paste into an edit field alone", async () => {
+      const user = userEvent.setup();
+      renderTool(<JsonFormatter />);
+      typeLeft('{"a":"x"}');
+      await user.click(within(pane("Ô trái")).getByRole("radio", { name: "Cây" }));
+      await user.dblClick(within(pane("Ô trái")).getByText('"x"'));
+      const field = within(pane("Ô trái")).getByRole("textbox", { name: "Giá trị của a" });
+      paste(field, '{"other":true}');
+      expect(left()).toHaveValue('{"a":"x"}');
+    });
+
+    it("pasting something blank changes nothing", async () => {
+      const user = userEvent.setup();
+      renderTool(<JsonFormatter />);
+      typeLeft("[1]");
+      const radio = within(pane("Ô trái")).getByRole("radio", { name: "Cây" });
+      await user.click(radio);
+      paste(radio, "   ");
+      expect(left()).toHaveValue("[1]");
+    });
   });
 
   it("compares the two panes structurally and counts differences", async () => {
@@ -139,6 +201,8 @@ describe("JSON Formatter, two independent panes", () => {
     renderTool(<JsonFormatter />);
     typeLeft('{"a":1,"b":2}');
     typeRight('{"b":3,"a":1}');
+    await user.click(within(pane("Ô trái")).getByRole("radio", { name: "Cây" }));
+    await user.click(within(pane("Ô phải")).getByRole("radio", { name: "Cây" }));
     await user.click(screen.getByRole("checkbox", { name: "So sánh" }));
     await waitFor(() => expect(screen.getByText("1 khác biệt")).toBeInTheDocument());
     typeRight('{"b":2,"a":1}');

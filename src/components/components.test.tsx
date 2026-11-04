@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -220,7 +220,22 @@ describe("ToolShell", () => {
     expect(screen.getByRole("toolbar")).toBeInTheDocument();
     expect(screen.getByText("workspace")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Xử lý trên thiết bị/ })).toBeInTheDocument();
+    // The guide stays in the page but closed; the ? in the status bar opens it as a side panel.
+    expect(screen.queryByRole("heading", { name: "Cách dùng" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Hướng dẫn" }));
+    expect(screen.getByRole("dialog", { name: "Hướng dẫn" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Cách dùng" })).toBeInTheDocument();
     expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("has no guide button when the tool has no guide", () => {
+    render(
+      <MemoryRouter>
+        <ToolShell tool={tools[0]!}>
+          <div>workspace</div>
+        </ToolShell>
+      </MemoryRouter>,
+    );
+    expect(screen.queryByRole("button", { name: "Hướng dẫn" })).not.toBeInTheDocument();
   });
 });

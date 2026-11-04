@@ -152,7 +152,7 @@ test.describe("other tools in a real browser", () => {
     await page.goto("tools/json-formatter/");
     await ready(page);
     await type(page, '{"a":[1,2]}');
-    await page.getByRole("button", { name: "Format sang ô phải" }).click();
+    await page.getByRole("button", { name: "Transform sang ô phải" }).click();
     await expect(page.locator(".cm-content").nth(1)).toContainText('"a"');
     await type(page, '{"a": }');
     await expect(page.getByText(/Dòng \d+, cột \d+/)).toBeVisible();

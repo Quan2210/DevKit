@@ -1,5 +1,5 @@
 import { Maximize2, Minimize2 } from "lucide-react";
-import type { ReactNode } from "react";
+import type { ClipboardEventHandler, ReactNode } from "react";
 import { useEffect, useId, useState } from "react";
 import { useT } from "../../i18n/useT";
 import { cn } from "../../lib/cn";
@@ -11,8 +11,12 @@ export interface PanelProps {
   actions?: ReactNode;
   /** Row of tools under the title (view mode, undo...). Icon buttons with tooltips. */
   toolbar?: ReactNode;
+  /** Rows under the toolbar (breadcrumb, search, query). Each child draws its own bottom border. */
+  subbar?: ReactNode;
   children: ReactNode;
   className?: string;
+  /** Paste anywhere in the panel, including its toolbar (a view that cannot take text itself uses it). */
+  onPaste?: ClipboardEventHandler<HTMLElement>;
   /** Adds an expand button that fills the content area (below the top nav, beside the sidebar). */
   expandable?: boolean;
 }
@@ -22,8 +26,10 @@ export function Panel({
   title,
   actions,
   toolbar,
+  subbar,
   children,
   className,
+  onPaste,
   expandable = false,
 }: PanelProps) {
   const t = useT();
@@ -42,6 +48,7 @@ export function Panel({
   return (
     <section
       aria-labelledby={headingId}
+      onPaste={onPaste}
       className={cn(
         "flex min-w-0 flex-col border border-border bg-surface",
         expanded
@@ -81,6 +88,7 @@ export function Panel({
           {toolbar}
         </div>
       ) : null}
+      {subbar}
       <div className="min-h-0 flex-1">{children}</div>
     </section>
   );
