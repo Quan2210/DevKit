@@ -9,6 +9,8 @@ export interface PanelProps {
   title: string;
   /** Secondary actions (Copy, Clear...) shown on the right of the header. */
   actions?: ReactNode;
+  /** Row of tools under the title (view mode, undo...). Icon buttons with tooltips. */
+  toolbar?: ReactNode;
   children: ReactNode;
   className?: string;
   /** Adds an expand button that fills the content area (below the top nav, beside the sidebar). */
@@ -16,7 +18,14 @@ export interface PanelProps {
 }
 
 /** Bordered region for one side of a workspace (Input | Output). Border, not shadow. */
-export function Panel({ title, actions, children, className, expandable = false }: PanelProps) {
+export function Panel({
+  title,
+  actions,
+  toolbar,
+  children,
+  className,
+  expandable = false,
+}: PanelProps) {
   const t = useT();
   const headingId = useId();
   const [expanded, setExpanded] = useState(false);
@@ -63,6 +72,15 @@ export function Panel({ title, actions, children, className, expandable = false 
           ) : null}
         </div>
       </header>
+      {toolbar ? (
+        <div
+          role="toolbar"
+          aria-label={title}
+          className="flex flex-wrap items-center gap-1 border-b border-border px-2 py-1"
+        >
+          {toolbar}
+        </div>
+      ) : null}
       <div className="min-h-0 flex-1">{children}</div>
     </section>
   );

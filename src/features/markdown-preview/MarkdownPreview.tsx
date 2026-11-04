@@ -1,15 +1,29 @@
-import { FileUp } from "lucide-react";
-import { Children, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  Columns2,
+  Eraser,
+  Eye,
+  FileText,
+  FileUp,
+  Image as ImageIcon,
+  PenLine,
+  Redo2,
+  Save,
+  StretchHorizontal,
+  Undo2,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Button } from "../../components/common/Button";
 import { Checkbox } from "../../components/common/Checkbox";
 import { Dialog } from "../../components/common/Dialog";
+import { IconButton } from "../../components/common/IconButton";
 import { ErrorBanner } from "../../components/common/ErrorBanner";
 import { MenuButton } from "../../components/common/MenuButton";
 import { Notice } from "../../components/common/Notice";
 import { Panel } from "../../components/common/Panel";
 import { Segmented } from "../../components/common/Segmented";
 import { UndoBar } from "../../components/common/UndoBar";
-import { CodeEditor } from "../../components/editors/CodeEditor";
+import { CodeEditor, type CodeEditorHandle } from "../../components/editors/CodeEditor";
+import { SplitWorkspace } from "../../components/layout/SplitWorkspace";
 import { ToolShell } from "../../components/layout/ToolShell";
 import { useDebounced } from "../../hooks/useDebounced";
 import { useIsClient } from "../../hooks/useIsClient";
@@ -18,7 +32,6 @@ import { parseBoolean, parseString, useStoredValue } from "../../hooks/useStored
 import { getGuide } from "../../i18n";
 import { formatNumber } from "../../i18n/format";
 import { useT } from "../../i18n/useT";
-import { cn } from "../../lib/cn";
 import { copyText } from "../../lib/io/clipboard";
 import { downloadText } from "../../lib/io/download";
 import { STORAGE_KEYS } from "../../lib/storage";
@@ -70,10 +83,10 @@ export function MarkdownPreview() {
   const [dragging, setDragging] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const editor = useRef<CodeEditorHandle>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const effectiveView: View = narrow && view === "split" ? "edit" : view;
-  const showEditor = effectiveView !== "preview";
   const showPreview = effectiveView !== "edit";
   const rendered = useMarkdownRender(input, allowExternal, showPreview);
 
@@ -153,26 +166,70 @@ export function MarkdownPreview() {
     }
   };
 
+  const icon = "size-4";
   const viewOptions = [
-    { value: "edit" as const, label: t("markdown.modeEdit") },
-    ...(narrow ? [] : [{ value: "split" as const, label: t("markdown.modeSplit") }]),
-    { value: "preview" as const, label: t("markdown.modePreview") },
+    {
+      value: "edit" as const,
+      label: t("markdown.modeEdit"),
+      icon: <PenLine aria-hidden className={icon} />,
+    },
+    ...(narrow
+      ? []
+      : [
+          {
+            value: "split" as const,
+            label: t("markdown.modeSplit"),
+            icon: <Columns2 aria-hidden className={icon} />,
+          },
+        ]),
+    {
+      value: "preview" as const,
+      label: t("markdown.modePreview"),
+      icon: <Eye aria-hidden className={icon} />,
+    },
   ];
 
   const toolbar = client ? (
     <>
       <Segmented<View>
         label={t("markdown.modeLabel")}
+        iconOnly
         value={effectiveView}
         onChange={setView}
         options={viewOptions}
       />
-      <Button
-        icon={<FileUp aria-hidden className="size-4" />}
-        onClick={() => fileInput.current?.click()}
-      >
-        {t("markdown.open")}
-      </Button>
+      <Checkbox
+        label={t("markdown.externalImages")}
+        shortLabel={<ImageIcon aria-hidden className={icon} />}
+        checked={allowExternal}
+        onChange={(event) =>
+          event.target.checked ? setConfirmOpen(true) : setAllowExternal(false)
+        }
+      />
+      <Checkbox
+        label={t("markdown.docWidth")}
+        shortLabel={<StretchHorizontal aria-hidden className={icon} />}
+        checked={docWidth}
+        onChange={(event) => setDocWidth(event.target.checked)}
+      />
+      <Checkbox
+        label={t("markdown.draft")}
+        shortLabel={<Save aria-hidden className={icon} />}
+        checked={draftEnabled}
+        onChange={(event) => toggleDraft(event.target.checked)}
+      />
+      {draftEnabled ? (
+        <Button
+          variant="ghost"
+          onClick={() => {
+            clearTimeout(draftSaver.current);
+            setTyped(input); // keep what is on screen, forget only the stored copy
+            removeDraft();
+          }}
+        >
+          {t("markdown.draftClear")}
+        </Button>
+      ) : null}
       <input
         ref={fileInput}
         type="file"
@@ -185,6 +242,42 @@ export function MarkdownPreview() {
           event.target.value = ""; // allow opening the same file again
         }}
       />
+    </>
+  ) : null;
+
+  const editorToolbar = (
+    <>
+      <IconButton
+        label={t("markdown.open")}
+        icon={<FileUp aria-hidden className={icon} />}
+        onClick={() => fileInput.current?.click()}
+      />
+      <IconButton
+        label={t("action.sample")}
+        icon={<FileText aria-hidden className={icon} />}
+        onClick={() => edit(t("markdown.sample"))}
+      />
+      <IconButton
+        label={t("action.clear")}
+        icon={<Eraser aria-hidden className={icon} />}
+        onClick={clear}
+        disabled={input === ""}
+      />
+      <IconButton
+        label={t("pane.undo")}
+        icon={<Undo2 aria-hidden className={icon} />}
+        onClick={() => editor.current?.undo()}
+      />
+      <IconButton
+        label={t("pane.redo")}
+        icon={<Redo2 aria-hidden className={icon} />}
+        onClick={() => editor.current?.redo()}
+      />
+    </>
+  );
+
+  const exportMenus = (
+    <>
       <MenuButton
         label={t("markdown.copyMenu")}
         disabled={input === ""}
@@ -228,44 +321,8 @@ export function MarkdownPreview() {
           },
         ]}
       />
-      <Checkbox
-        label={t("markdown.externalImages")}
-        checked={allowExternal}
-        onChange={(event) =>
-          event.target.checked ? setConfirmOpen(true) : setAllowExternal(false)
-        }
-      />
-      <Checkbox
-        label={t("markdown.docWidth")}
-        checked={docWidth}
-        onChange={(event) => setDocWidth(event.target.checked)}
-      />
-      <Checkbox
-        label={t("markdown.draft")}
-        title={t("markdown.draftHint")}
-        checked={draftEnabled}
-        onChange={(event) => toggleDraft(event.target.checked)}
-      />
-      {draftEnabled ? (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            clearTimeout(draftSaver.current);
-            setTyped(input); // keep what is on screen, forget only the stored copy
-            removeDraft();
-          }}
-        >
-          {t("markdown.draftClear")}
-        </Button>
-      ) : null}
-      <Button variant="ghost" onClick={() => edit(t("markdown.sample"))}>
-        {t("action.sample")}
-      </Button>
-      <Button variant="ghost" onClick={clear} disabled={input === ""}>
-        {t("action.clear")}
-      </Button>
     </>
-  ) : null;
+  );
 
   const notice = client ? (
     <div className="space-y-2">
@@ -340,50 +397,64 @@ export function MarkdownPreview() {
         dragging={dragging}
         onDragging={setDragging}
         onDropFile={(file) => void openFile(file)}
-        layout={effectiveView}
       >
-        {showEditor ? (
-          <Panel title={t("markdown.input")}>
-            <CodeEditor
-              language="markdown"
-              value={input}
-              onChange={edit}
-              ariaLabel={t("markdown.inputLabel")}
-              placeholder={t("markdown.placeholder")}
-            />
-          </Panel>
-        ) : null}
-        {showPreview ? (
-          <Panel
-            title={t("markdown.preview")}
-            actions={
-              <MenuButton
-                label={t("markdown.toc")}
-                emptyLabel={t("markdown.tocEmpty")}
-                items={rendered.headings.map((heading) => ({
-                  label: heading.text,
-                  indent: heading.depth - 1,
-                  onSelect: () =>
-                    document.getElementById(heading.id)?.scrollIntoView({ block: "start" }),
-                }))}
+        {(() => {
+          const editorPanel = (
+            <Panel title={t("markdown.input")} toolbar={editorToolbar} expandable>
+              <CodeEditor
+                ref={editor}
+                language="markdown"
+                value={input}
+                onChange={edit}
+                ariaLabel={t("markdown.inputLabel")}
+                placeholder={t("markdown.placeholder")}
               />
-            }
-          >
-            <PreviewPane
-              html={rendered.html}
-              docWidth={docWidth}
-              busy={rendered.pending}
-              empty={
-                <div className="space-y-3 text-text-muted">
-                  <p>{t("markdown.previewEmpty")}</p>
-                  <Button onClick={() => edit(t("markdown.sample"))}>
-                    {t("markdown.insertSample")}
-                  </Button>
-                </div>
+            </Panel>
+          );
+          const previewPanel = (
+            <Panel
+              title={t("markdown.preview")}
+              expandable
+              actions={
+                <>
+                  <MenuButton
+                    label={t("markdown.toc")}
+                    emptyLabel={t("markdown.tocEmpty")}
+                    items={rendered.headings.map((heading) => ({
+                      label: heading.text,
+                      indent: heading.depth - 1,
+                      onSelect: () =>
+                        document.getElementById(heading.id)?.scrollIntoView({ block: "start" }),
+                    }))}
+                  />
+                  {exportMenus}
+                </>
               }
-            />
-          </Panel>
-        ) : null}
+            >
+              <PreviewPane
+                html={rendered.html}
+                docWidth={docWidth}
+                busy={rendered.pending}
+                empty={
+                  <div className="space-y-3 text-text-muted">
+                    <p>{t("markdown.previewEmpty")}</p>
+                    <Button onClick={() => edit(t("markdown.sample"))}>
+                      {t("markdown.insertSample")}
+                    </Button>
+                  </div>
+                }
+              />
+            </Panel>
+          );
+          if (effectiveView === "split") {
+            return <SplitWorkspace left={editorPanel} right={previewPanel} />;
+          }
+          return (
+            <div className="h-[70dvh] lg:h-[calc(100dvh-var(--topnav-h,3rem)-6.5rem)] lg:min-h-[24rem] [&>section]:h-full">
+              {effectiveView === "edit" ? editorPanel : previewPanel}
+            </div>
+          );
+        })()}
       </MarkdownWorkspace>
 
       <Dialog
@@ -416,17 +487,15 @@ interface WorkspaceProps {
   dragging: boolean;
   onDragging: (dragging: boolean) => void;
   onDropFile: (file: File | undefined) => void;
-  layout: View;
   children: ReactNode;
 }
 
-/** Workspace grid with file drag-and-drop. Listeners live in an effect so static elements carry no handlers. */
+/** Workspace with file drag-and-drop. Listeners live in an effect so static elements carry no handlers. */
 function MarkdownWorkspace({
   enabled,
   dragging,
   onDragging,
   onDropFile,
-  layout,
   children,
 }: WorkspaceProps) {
   const t = useT();
@@ -469,18 +538,8 @@ function MarkdownWorkspace({
   if (!enabled) return <div className="h-[60dvh] rounded-lg bg-surface-muted" />;
 
   return (
-    <div
-      ref={node}
-      className={cn(
-        "relative grid gap-4 lg:h-[calc(100dvh-24rem)] lg:min-h-[28rem]",
-        layout === "split" && "lg:grid-cols-2",
-      )}
-    >
-      {Children.toArray(children).map((child, index) => (
-        <div key={index} className="h-[60dvh] min-h-64 lg:h-auto [&>section]:h-full">
-          {child}
-        </div>
-      ))}
+    <div ref={node} className="relative grid">
+      {children}
       {dragging ? (
         <div
           data-testid="md-drop-overlay"

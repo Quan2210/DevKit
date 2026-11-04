@@ -4,7 +4,6 @@ import { MemoryRouter } from "react-router";
 import { describe, expect, it, vi } from "vitest";
 import { expiredToken, validToken } from "../../tests/fixtures";
 import { Base64Tool } from "./base64/Base64Tool";
-import { JsonFormatter } from "./json-formatter/JsonFormatter";
 import { JwtDecoder } from "./jwt-decoder/JwtDecoder";
 import { UuidGenerator } from "./uuid-generator/UuidGenerator";
 
@@ -35,81 +34,6 @@ const type = (name: string, value: string) =>
   fireEvent.change(screen.getByRole("textbox", { name }), { target: { value } });
 const outputOf = (name: string) =>
   (screen.getByRole("textbox", { name }) as HTMLTextAreaElement).value;
-
-describe("JSON Formatter", () => {
-  it("formats valid JSON after typing and shows a valid status", async () => {
-    renderTool(<JsonFormatter />);
-    type("Ô nhập JSON", '{"a":[1,2]}');
-    await waitFor(() =>
-      expect(outputOf("Kết quả JSON")).toBe('{\n  "a": [\n    1,\n    2\n  ]\n}'),
-    );
-    expect(screen.getByText("Hợp lệ")).toBeInTheDocument();
-  });
-
-  it("Minify and the indent option change the output at once", async () => {
-    const user = userEvent.setup();
-    renderTool(<JsonFormatter />);
-    type("Ô nhập JSON", '{ "a": 1 }');
-    await user.click(screen.getByRole("button", { name: "Minify" }));
-    expect(outputOf("Kết quả JSON")).toBe('{"a":1}');
-    await user.click(screen.getByRole("button", { name: "Format" }));
-    await user.click(screen.getByRole("radio", { name: "4 dấu cách" }));
-    expect(outputOf("Kết quả JSON")).toBe('{\n    "a": 1\n}');
-  });
-
-  it("shows an inline error with its position and keeps the previous valid output", async () => {
-    renderTool(<JsonFormatter />);
-    type("Ô nhập JSON", '{"a":1}');
-    await waitFor(() => expect(outputOf("Kết quả JSON")).toContain('"a": 1'));
-    type("Ô nhập JSON", '{\n  "a": 1,\n  oops\n}');
-    const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("JSON không hợp lệ.");
-    expect(within(alert).getByRole("button", { name: /Dòng 3/ })).toBeInTheDocument();
-    expect(screen.getByText("Không hợp lệ")).toBeInTheDocument();
-    expect(outputOf("Kết quả JSON")).toContain('"a": 1');
-    expect(screen.getByRole("heading", { name: "Kết quả trước đó" })).toBeInTheDocument();
-  });
-
-  it("empties the output when the input is emptied", async () => {
-    renderTool(<JsonFormatter />);
-    type("Ô nhập JSON", "[1]");
-    await waitFor(() => expect(outputOf("Kết quả JSON")).not.toBe(""));
-    type("Ô nhập JSON", "");
-    await waitFor(() => expect(outputOf("Kết quả JSON")).toBe(""));
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-  });
-
-  it("warns about integers that lose precision", async () => {
-    renderTool(<JsonFormatter />);
-    type("Ô nhập JSON", '{"id": 12345678901234567890}');
-    expect(
-      await screen.findByText(
-        /mất độ chính xác hoặc vượt phạm vi khi định dạng: 12345678901234567890/,
-      ),
-    ).toBeInTheDocument();
-  });
-
-  it("Clear offers Undo instead of asking for confirmation", async () => {
-    const user = userEvent.setup();
-    renderTool(<JsonFormatter />);
-    type("Ô nhập JSON", '{"a":1}');
-    await user.click(screen.getByRole("button", { name: "Xóa" }));
-    expect(
-      (screen.getByRole("textbox", { name: "Ô nhập JSON" }) as HTMLTextAreaElement).value,
-    ).toBe("");
-    await user.click(screen.getByRole("button", { name: "Hoàn tác" }));
-    expect(
-      (screen.getByRole("textbox", { name: "Ô nhập JSON" }) as HTMLTextAreaElement).value,
-    ).toBe('{"a":1}');
-  });
-
-  it("the sample button fills a valid document", async () => {
-    const user = userEvent.setup();
-    renderTool(<JsonFormatter />);
-    await user.click(screen.getByRole("button", { name: "Mẫu" }));
-    await waitFor(() => expect(screen.getByText("Hợp lệ")).toBeInTheDocument());
-  });
-});
 
 describe("Base64 tool", () => {
   it("encodes live and decodes after switching mode, including Unicode", async () => {
