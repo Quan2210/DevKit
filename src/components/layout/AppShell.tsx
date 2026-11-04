@@ -65,7 +65,7 @@ export function AppShell({ children, tools = listedTools() }: AppShellProps) {
             label={t("nav.toggleSidebar")}
             icon={<PanelLeft aria-hidden className="size-5" />}
             aria-pressed={expanded}
-            className="hidden sm:inline-flex"
+            className="max-sm:hidden"
             onClick={() => setExpanded(!expanded)}
           />
           <nav aria-label={t("breadcrumb.label")} className="min-w-0 text-sm text-text-muted">
