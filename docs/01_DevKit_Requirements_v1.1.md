@@ -55,13 +55,14 @@ DevKit là website cung cấp các tiện ích thường dùng trong quá trình
 | Generator | UUID Generator | P0 | v1 |
 | Data Tools | XML Formatter & Validator | P1 | v1 |
 | Writing & Docs | **Markdown Preview** *(mới)* | P1 | v1 |
+| Writing & Docs | **Text Compare** *(bổ sung 2026-11-05)* | P1 | v1 |
 | Color Tools | Color Picker | P1 | v1 |
 | Color Tools | Color Palette Generator | P1 | v1 |
 | Color Tools | Color Contrast Checker | P1 | v1 |
 | Color Tools | CSS Gradient Generator | P1 | v1 |
 | Developer Tools | SQL Formatter | P2 | Nếu còn thời gian |
 
-**Tổng scope:** 10 tools P0/P1 (4 P0 + 6 P1); 11 tools nếu tính SQL Formatter (P2).
+**Tổng scope:** 11 tools P0/P1 (4 P0 + 7 P1); 12 tools nếu tính SQL Formatter (P2).
 
 ## 2.2. Quy chuẩn chung cho mọi tool
 
@@ -221,6 +222,29 @@ Không bắt buộc mọi tool phải có đủ hai cột Input/Output; chọn b
 - Hoạt động hoàn toàn trên client.
 
 **Ngoài phạm vi (Markdown Preview v1):** export PDF, hỗ trợ Mermaid/KaTeX, cộng tác realtime, lưu lên cloud. Có thể xem xét ở bản sau.
+
+## 3.12. Text Compare — P1 *(bổ sung 2026-11-05)*
+
+**Mục tiêu:** so sánh hai văn bản thuần theo trải nghiệm của diffchecker.com/text-compare: nhập hai bên, bấm So sánh, xem hai ô canh thẳng hàng, sửa trực tiếp và sai khác tự cập nhật. UI/UX: `docs/design/text-compare-spec.md`.
+
+**Yêu cầu chức năng:**
+- Bước Nhập: hai ô (Văn bản gốc, Văn bản đã sửa), Mở tệp (UTF-8, tối đa 25 MB, kéo thả), Mẫu, Xóa, Undo/Redo, Đổi hai bên; `Ctrl/Cmd+Enter` để So sánh.
+- Bước Kết quả: Hai cột canh thẳng (cuộn đồng bộ) hoặc Một cột (xen kẽ); tô dòng thêm/xóa/đổi và đoạn chữ khác trong dòng; sửa trực tiếp được (ở Một cột chỉ sửa được văn bản đã sửa).
+- Tùy chọn: bỏ qua khoảng trắng, bỏ qua hoa/thường, ẩn dòng giống nhau, xuống dòng, độ chi tiết Tự động/Từ/Ký tự.
+- Thanh tóm tắt: số khác biệt (thêm/xóa/đổi), nhảy tới khác biệt trước/sau; Copy từng bên.
+- Xuống dòng CRLF/CR được chuẩn hóa nên không tạo khác biệt giả.
+
+**Quy tắc:** xử lý hoàn toàn trên client, không lưu input, không gửi đi đâu. Phụ thuộc mới đã duyệt: `@codemirror/merge`.
+
+**Acceptance Criteria:**
+- Hai văn bản giống nhau cho thông báo "giống nhau"; khác nhau cho đúng số khối khác biệt và đúng dòng được tô ở mỗi bên.
+- Đổi tùy chọn hoặc sửa văn bản thì kết quả cập nhật mà không cần So sánh lại.
+- Văn bản lớn (~20.000 dòng, hàng chục khác biệt) so sánh được trong vài giây, không đơ UI; quá lớn thì báo kết quả gần đúng.
+- Layout dưới 1024px mặc định Một cột, không tràn ngang toàn trang ở 320 px; đạt WCAG AA ở sáng và tối.
+- Không có request ra ngoài origin.
+
+**Ngoài phạm vi:** lưu/chia sẻ diff, comment, xuất PDF, tóm tắt AI, rule bỏ qua chuỗi tùy ý, merge từng thay đổi (hoãn).
+
 
 ## 3.11. SQL Formatter — P2
 
@@ -452,7 +476,7 @@ Thực hiện theo *UI/UX Design Workflow* trong Design System §2: dùng skill 
 
 # 11. Definition of Done
 
-- [ ] Tất cả tools P0/P1 (10 tool, gồm Markdown Preview) có route riêng và hoạt động đúng.
+- [ ] Tất cả tools P0/P1 (11 tool, gồm Markdown Preview và Text Compare) có route riêng và hoạt động đúng.
 - [ ] SQL Formatter ghi nhận là P2, không block release.
 - [ ] UI/UX design đã được duyệt **trước** khi implement frontend; mọi sai khác so với design đã có lý do và được review.
 - [ ] Shared layout và design system nhất quán; không hard-code màu thuộc token.

@@ -125,7 +125,7 @@ async function loadLanguage(language: CodeEditorLanguage): Promise<Extension> {
 }
 
 // Colours come from the design tokens, so the editor follows light/dark with no extra wiring.
-const tokenTheme = EditorView.theme({
+export const tokenTheme = EditorView.theme({
   "&": { color: "var(--color-text)", backgroundColor: "var(--color-surface)", height: "100%" },
   "&.cm-focused": { outline: "2px solid var(--color-primary)", outlineOffset: "-2px" },
   ".cm-scroller": { fontFamily: "var(--font-mono)", fontSize: "13.5px", lineHeight: "1.6" },

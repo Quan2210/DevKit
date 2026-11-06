@@ -5,6 +5,7 @@ import {
   Code,
   Contrast,
   Database,
+  Diff,
   FileText,
   Fingerprint,
   KeyRound,
@@ -26,6 +27,7 @@ const icons: Record<ToolIconName, LucideIcon> = {
   contrast: Contrast,
   blend: Blend,
   database: Database,
+  diff: Diff,
 };
 
 export function ToolIcon({

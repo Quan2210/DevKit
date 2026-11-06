@@ -292,6 +292,7 @@ Cùng toolbar, cùng vị trí Copy / Clear / Download, cùng cách báo lỗi t
 | Contrast | Hai màu + preview text + bảng Pass/Fail (AA/AAA) + ratio |
 | Gradient | Preview lớn + panel stops + code CSS |
 | Markdown Preview | Xem §9.3 |
+| Text Compare | Hai bước: Nhập (hai ô cạnh nhau) rồi Kết quả (hai ô canh thẳng, sửa được; Một cột dưới 1024px). Xem `docs/design/text-compare-spec.md` |
 
 ## 9.3. Markdown Preview — UI spec
 
@@ -441,5 +442,17 @@ Skill `frontend-design` thiên về thiết kế có cá tính, tránh "mặc đ
 | 2026-11-04 | Behaviour | So sánh khi một trong hai ô chưa ở dạng Cây: hiện cảnh báo "chỉ chạy ở dạng Cây" kèm nút "Chuyển cả hai ô sang Cây", không tự chuyển và không bật so sánh (sửa điều đã làm ở dòng So sánh trước) | Chỉnh theo phản hồi | Đã duyệt (2026-11-04) |
 | 2026-11-04 | Component | `TreeView` hiện `{` hoặc `[` sau khóa của đối tượng/mảng (`{}` `[]` khi rỗng, `{…}` `[…]` khi thu gọn) và dòng đóng `}` `]` dưới container đang mở; dòng đóng là phần trang trí, không chọn được và ẩn với trình đọc màn hình. XML không đổi | Phân biệt đối tượng và mảng như jsoneditoronline | Đã duyệt (2026-11-04) |
 
+| 2026-11-05 | Scope | Thêm tool Text Compare (nhóm Writing & Docs) theo `docs/design/text-compare-spec.md` | Yêu cầu bổ sung, tham khảo diffchecker.com/text-compare | Đã duyệt (2026-11-05) |
+| 2026-11-05 | Dependency | Thêm `@codemirror/merge` | Hai ô canh thẳng, sửa được, tô trong dòng, gập dòng giống nhau; tự viết trên `CodeEditor` tốn công và dễ lệch khi wrap | Đã duyệt (2026-11-05) |
+| 2026-11-05 | Component | Thêm `DiffEditor` (bọc `MergeView` và `unifiedMergeView`, lazy như `CodeEditor`); `CodeEditorImpl` xuất `tokenTheme` để dùng chung | Cùng theme token; không đổi hành vi của `CodeEditor` | Đã duyệt (2026-11-05) |
+| 2026-11-05 | Behaviour | Text Compare: Mẫu nằm ở cột giữa (điền cả hai ô), không nằm trong toolbar từng ô; đổi bên có ở cả hai bước | Một thao tác cho cả hai ô | Chờ duyệt |
+| 2026-11-05 | Behaviour | Text Compare: "Bỏ qua khoảng trắng" bỏ qua mọi dấu cách/tab (không chỉ hai đầu dòng), xuống dòng vẫn tính | Giống Diffchecker; dễ giải thích | Chờ duyệt |
+| 2026-11-05 | Visual | Text Compare: chữ khác nhau được phân biệt bằng gạch ngang (bên xóa) / gạch chân (bên thêm) kèm nền đậm; thanh lề của thư viện chỉ là dải màu. Chưa có ký hiệu `+`/`−`/`~` ở lề như spec §4 | Không cần thêm gutter tự viết; vẫn có tín hiệu ngoài màu ở mức chữ và nhãn đếm bằng chữ | Chờ duyệt |
+| 2026-11-05 | Behaviour | Text Compare: đổi tùy chọn so sánh, chế độ xem hoặc wrap dựng lại trình xem nên lịch sử Undo của trình xem bị đặt lại; nội dung giữ nguyên | `@codemirror/merge` không tính lại diff khi đổi cấu hình | Chờ duyệt |
+| 2026-11-05 | Behaviour | Text Compare: không có ngưỡng "bấm So sánh lại" cho văn bản lớn; diff đi theo dòng rồi mới theo ký tự, quá giới hạn thì tự chuyển sang gần đúng và hiện Notice | Nhanh hơn và đơn giản hơn spec §5; vẫn báo khi kết quả không chính xác | Chờ duyệt |
+| 2026-11-05 | Behaviour | Text Compare: thêm dòng vào cuối văn bản không có xuống dòng cuối thì dòng cuối cũ cũng bị tô (như "no newline at end of file" của git) | Hành vi của `@codemirror/merge` | Chờ duyệt |
+
 | 2026-11-05 | Component | Cột giữa của `SplitWorkspace`: thêm `SplitButton` (icon và chữ trong một khối, rộng bằng cột) cho So sánh, Đổi hai bên, Mẫu (Text Compare), Đổi chiều, Mẫu, Xóa (Base64) và Đến khác biệt trước/kế tiếp (JSON/XML); `Segmented` thêm `stacked` (Base64: Mã hóa/Giải mã xếp dọc, hiện chữ). Nhóm Copy/Transform ◀▶ của JSON/XML giữ nguyên vì đã có tiêu đề chữ | Yêu cầu bổ sung: nút ở cột giữa hiện chữ mô tả cùng icon, dễ dùng hơn tooltip | Chờ duyệt |
+
+
 *(Bổ sung dòng mới cho mỗi sai khác trong quá trình thiết kế/implement.)*

@@ -178,13 +178,13 @@ test.describe("SEO on the built output (fetched without JavaScript)", () => {
     }
   });
 
-  test("sitemap lists exactly the 11 public URLs, robots points at it, 404 is not indexed", async ({
+  test("sitemap lists exactly the 12 public URLs, robots points at it, 404 is not indexed", async ({
     request,
   }) => {
     const sitemap = await (await request.get("sitemap.xml")).text();
     const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    expect(locs).toHaveLength(11);
-    expect(new Set(locs).size).toBe(11);
+    expect(locs).toHaveLength(12);
+    expect(new Set(locs).size).toBe(12);
     expect(locs.some((l) => l!.includes("404"))).toBe(false);
     const robots = await (await request.get("robots.txt")).text();
     expect(robots).toContain("Sitemap: https://quan2210.github.io/DevKit/sitemap.xml");

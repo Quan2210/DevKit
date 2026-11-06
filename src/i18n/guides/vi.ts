@@ -33,6 +33,42 @@ export const viGuides: Record<string, GuideBlock[]> = {
       text: "JSON có chấp nhận chú thích hoặc dấu phẩy cuối không? Không. Đó là JSON không hợp lệ theo chuẩn, công cụ sẽ báo lỗi chứ không tự sửa.",
     },
   ],
+  "text-compare": [
+    { type: "h2", text: "Cách dùng" },
+    {
+      type: "ul",
+      items: [
+        "Dán hoặc mở tệp vào hai ô “Văn bản gốc” và “Văn bản đã sửa”, rồi bấm So sánh (hoặc Ctrl+Enter).",
+        "Kết quả hiện hai ô canh thẳng hàng; dòng thêm tô xanh, dòng xóa tô đỏ, phần chữ khác nhau trong dòng được tô đậm hơn (chữ thêm có gạch chân, chữ xóa có gạch ngang).",
+        "Bạn sửa trực tiếp ở bên nào cũng được, sai khác tự cập nhật. Bấm Nhập lại để quay về hai ô nhập.",
+        "Dùng Khác biệt trước / sau để nhảy giữa các chỗ khác nhau, hoặc chuyển sang Một cột để xem dạng xen kẽ.",
+      ],
+    },
+    { type: "h2", text: "Tùy chọn" },
+    {
+      type: "ul",
+      items: [
+        "Bỏ qua khoảng trắng: dấu cách và tab không được tính (xuống dòng vẫn được tính).",
+        "Bỏ qua hoa/thường: “Hello” và “hello” coi như giống nhau.",
+        "Độ chi tiết: Tự động chọn mức tô theo từng thay đổi, Từ tô cả từ, Ký tự tô từng ký tự.",
+        "Ẩn dòng giống nhau gập các đoạn không đổi; bấm vào dải để mở ra.",
+      ],
+    },
+    { type: "h2", text: "Giới hạn" },
+    {
+      type: "ul",
+      items: [
+        "Với văn bản rất lớn, công cụ chuyển sang so sánh gần đúng và báo cho bạn biết.",
+        "Ở chế độ Một cột, chỉ văn bản đã sửa được chỉnh trực tiếp; để sửa văn bản gốc hãy chuyển sang Hai cột hoặc bấm Nhập lại.",
+        "Tệp mở vào phải là văn bản UTF-8, tối đa 25 MB. Dữ liệu được xử lý ngay trong trình duyệt, không gửi đi đâu.",
+      ],
+    },
+    { type: "h2", text: "Câu hỏi thường gặp" },
+    {
+      type: "p",
+      text: "Xuống dòng kiểu Windows (CRLF) có làm hai văn bản khác nhau không? Không. Công cụ chuẩn hóa xuống dòng trước khi so sánh.",
+    },
+  ],
   base64: [
     { type: "h2", text: "Cách dùng" },
     {
