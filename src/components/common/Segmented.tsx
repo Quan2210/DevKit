@@ -16,6 +16,8 @@ export interface SegmentedProps<V extends string> {
   onChange: (value: V) => void;
   /** Hide the text and keep it for assistive tech (icon-only groups such as the theme switcher). */
   iconOnly?: boolean;
+  /** From lg the options stack and fill the width (the middle column of a split tool). */
+  stacked?: boolean;
 }
 
 /** Radio-group semantics with roving tabindex: arrows, Home and End move and select. */
@@ -25,6 +27,7 @@ export function Segmented<V extends string>({
   value,
   onChange,
   iconOnly = false,
+  stacked = false,
 }: SegmentedProps<V>) {
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -62,7 +65,10 @@ export function Segmented<V extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="inline-flex gap-0.5 rounded-md border border-border-strong bg-surface-muted p-0.5"
+      className={cn(
+        "inline-flex gap-0.5 rounded-md border border-border-strong bg-surface-muted p-0.5",
+        stacked && "lg:w-full lg:flex-col",
+      )}
     >
       {options.map((option, index) => {
         const selected = option.value === value;
