@@ -62,7 +62,7 @@ describe("preview", () => {
     const user = userEvent.setup();
     renderTool();
     await user.click(within(preview()).getByRole("button", { name: "Chèn nội dung mẫu" }));
-    expect(editor().value).toContain("Xin chào DevKit");
+    expect(editor().value).toContain("Xin chào KunKit");
     expect(await within(preview()).findByRole("table")).toBeInTheDocument();
   });
 

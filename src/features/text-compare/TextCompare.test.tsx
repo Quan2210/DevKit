@@ -83,7 +83,7 @@ describe("Text Compare input step", () => {
     const user = userEvent.setup();
     setup();
     await user.click(screen.getByRole("button", { name: "Mẫu" }));
-    expect(box("Văn bản gốc").value).toContain("Xin chào DevKit");
+    expect(box("Văn bản gốc").value).toContain("Xin chào KunKit");
     expect(box("Văn bản đã sửa").value).toContain("Không gửi dữ liệu đi đâu");
   });
 

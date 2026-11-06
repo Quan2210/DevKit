@@ -51,7 +51,7 @@ test.describe("copy feedback and clipboard failure", () => {
     await copyMenu.click();
     await page.getByRole("menuitem", { name: "Copy nội dung" }).click();
     await expect(copied.first()).toBeAttached();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('"DevKit"');
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('"KunKit"');
     await expect(copied).toHaveCount(0, { timeout: 4000 });
 
     await page.evaluate(() => {
@@ -84,7 +84,7 @@ test("JSON clipboard failure pre-selects the content (components.md 2.5)", async
   await expect(page.getByText(/Không copy được/).first()).toBeVisible();
   // components.md 2.5: on failure the content is pre-selected so Ctrl+C works.
   const selected = await page.evaluate(() => window.getSelection()?.toString() ?? "");
-  expect(selected, "content is pre-selected after a clipboard failure").toContain("DevKit");
+  expect(selected, "content is pre-selected after a clipboard failure").toContain("KunKit");
 });
 
 test.describe("invalid input keeps the previous output and labels it", () => {

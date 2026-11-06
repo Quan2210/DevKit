@@ -7,7 +7,7 @@ import { toolPath, type ToolMeta } from "../../registry/tools.meta";
 import { ToolIcon } from "../common/ToolIcon";
 
 /** Logo glyph; a brand mark, not translatable text. */
-const BRAND_GLYPH = "D";
+const BRAND_GLYPH = "K";
 
 export interface SidebarNavProps {
   tools: ReadonlyArray<ToolMeta>;

@@ -4,7 +4,7 @@
  * so another language is one more file with the same keys.
  */
 export const vi = {
-  "app.name": "DevKit",
+  "app.name": "KunKit",
 
   "nav.skip": "Bỏ qua điều hướng",
   "nav.openMenu": "Mở menu",
@@ -34,15 +34,15 @@ export const vi = {
   "group.color": "Màu sắc",
   "group.developer": "Công cụ khác",
 
-  "home.metaTitle": "DevKit - Công cụ cho developer, chạy trong trình duyệt",
+  "home.metaTitle": "KunKit - Công cụ cho developer, chạy trong trình duyệt",
   "home.metaDescription":
     "Bộ công cụ nhỏ cho developer: định dạng JSON, giải mã JWT, Base64, UUID, màu sắc và hơn thế. Xử lý hoàn toàn trên trình duyệt, dữ liệu không rời khỏi trang.",
-  "home.title": "DevKit",
+  "home.title": "KunKit",
   "home.lead":
     "Công cụ cho developer, chạy hoàn toàn trong trình duyệt. Dữ liệu của bạn không rời khỏi trang này.",
   "home.toolsLabel": "Danh sách công cụ",
 
-  "notFound.metaTitle": "Không tìm thấy trang - DevKit",
+  "notFound.metaTitle": "Không tìm thấy trang - KunKit",
   "notFound.metaDescription": "Địa chỉ này không tồn tại hoặc đã được chuyển đi.",
   "notFound.title": "Không tìm thấy trang",
   "notFound.body": "Địa chỉ này không tồn tại hoặc đã được chuyển đi.",
@@ -72,7 +72,7 @@ export const vi = {
   "device.external": "Ảnh ngoài đang bật: trang gửi request tới máy chủ khác",
   "device.title": "Dữ liệu ở lại trình duyệt",
   "device.body":
-    "Nội dung bạn nhập được xử lý ngay trong trình duyệt này và không được gửi tới máy chủ của DevKit. Mọi thư viện được đóng gói cùng trang.",
+    "Nội dung bạn nhập được xử lý ngay trong trình duyệt này và không được gửi tới máy chủ của KunKit. Mọi thư viện được đóng gói cùng trang.",
   "device.verify":
     "Tự kiểm chứng: mở DevTools, chọn tab Network rồi dùng công cụ. Bạn sẽ không thấy request nào mang dữ liệu của mình.",
   "device.externalBody":
@@ -257,9 +257,9 @@ export const vi = {
   "textCompare.copyOriginal": "Copy văn bản gốc",
   "textCompare.copyModified": "Copy văn bản đã sửa",
   "textCompare.sampleOriginal":
-    "Xin chào DevKit\nBộ công cụ cho developer\nChạy ngay trong trình duyệt\nKhông cần cài đặt",
+    "Xin chào KunKit\nBộ công cụ cho developer\nChạy ngay trong trình duyệt\nKhông cần cài đặt",
   "textCompare.sampleModified":
-    "Xin chào DevKit!\nBộ công cụ cho lập trình viên\nChạy ngay trong trình duyệt\nKhông gửi dữ liệu đi đâu\nKhông cần cài đặt",
+    "Xin chào KunKit!\nBộ công cụ cho lập trình viên\nChạy ngay trong trình duyệt\nKhông gửi dữ liệu đi đâu\nKhông cần cài đặt",
   "common.chars": "{count} ký tự",
   "common.mode": "Chế độ",
   "common.previous": "{title} (trước đó)",
@@ -293,7 +293,7 @@ export const vi = {
     "Tài liệu lớn (trên 200.000 ký tự): bấm Format hoặc Minify để cập nhật kết quả.",
   "json.tooDeep": "Không định dạng được: JSON lồng quá sâu.",
   "json.sample":
-    '{"name":"DevKit","tools":["json","jwt","base64","uuid"],"private":true,"version":1.5}',
+    '{"name":"KunKit","tools":["json","jwt","base64","uuid"],"private":true,"version":1.5}',
 
   "xml.input": "XML đầu vào",
   "xml.output": "Kết quả",
@@ -334,7 +334,7 @@ export const vi = {
   "base64.outputLabel": "Kết quả",
   "base64.invalid": "Không giải mã được Base64.",
   "base64.location": "Dòng {line}, cột {column}",
-  "base64.sampleEncode": "Xin chào, DevKit! 👋",
+  "base64.sampleEncode": "Xin chào, KunKit! 👋",
   "base64.sampleDecode": "WGluIGNow6BvLCBEZXZLaXQhIPCfkYs=",
 
   "jwt.token": "Token JWT",
@@ -404,7 +404,7 @@ export const vi = {
   "markdown.previewEmpty": "Bản xem trước sẽ hiện ở đây.",
   "markdown.insertSample": "Chèn nội dung mẫu",
   "markdown.sample":
-    '# Xin chào DevKit\n\nĐây là bản xem trước **Markdown** chạy hoàn toàn trong trình duyệt.\n\n## Tính năng\n\n- Danh sách và *nhấn mạnh*\n- [x] Danh sách việc cần làm\n- [ ] Việc chưa xong\n\n| Cột | Ý nghĩa |\n|:----|:--------|\n| `code` | mã nội dòng |\n| ~~gạch~~ | gạch ngang |\n\n```js\nconst greet = (name) => `Xin chào, ${name}!`;\nconsole.log(greet("DevKit"));\n```\n\n> Trích dẫn: dữ liệu của bạn không rời khỏi trang này.\n\nXem thêm tại https://example.com.',
+    '# Xin chào KunKit\n\nĐây là bản xem trước **Markdown** chạy hoàn toàn trong trình duyệt.\n\n## Tính năng\n\n- Danh sách và *nhấn mạnh*\n- [x] Danh sách việc cần làm\n- [ ] Việc chưa xong\n\n| Cột | Ý nghĩa |\n|:----|:--------|\n| `code` | mã nội dòng |\n| ~~gạch~~ | gạch ngang |\n\n```js\nconst greet = (name) => `Xin chào, ${name}!`;\nconsole.log(greet("KunKit"));\n```\n\n> Trích dẫn: dữ liệu của bạn không rời khỏi trang này.\n\nXem thêm tại https://example.com.',
   "markdown.toc": "Mục lục",
   "markdown.tocEmpty": "Chưa có tiêu đề nào.",
   "markdown.words": "{count} từ",
