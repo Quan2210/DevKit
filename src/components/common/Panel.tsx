@@ -57,7 +57,10 @@ export function Panel({
         className,
       )}
     >
-      <header className="flex min-h-10 flex-wrap items-center justify-between gap-x-2 border-b border-border px-3">
+      <header
+        data-region="panel-header"
+        className="flex min-h-10 flex-wrap items-center justify-between gap-x-2 border-b border-border bg-region-panel-header px-3"
+      >
         <h2 id={headingId} className="text-sm font-semibold">
           {title}
         </h2>
@@ -83,7 +86,8 @@ export function Panel({
         <div
           role="toolbar"
           aria-label={title}
-          className="flex flex-wrap items-center gap-1 border-b border-border px-2 py-1"
+          data-region="panel-header"
+          className="flex flex-wrap items-center gap-1 border-b border-border bg-region-panel-header px-2 py-1"
         >
           {toolbar}
         </div>

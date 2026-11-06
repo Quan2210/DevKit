@@ -245,6 +245,15 @@ Không bắt buộc mọi tool phải có đủ hai cột Input/Output; chọn b
 
 **Ngoài phạm vi:** lưu/chia sẻ diff, comment, xuất PDF, tóm tắt AI, rule bỏ qua chuỗi tùy ý, merge từng thay đổi (hoãn).
 
+## 3.13. Tùy chỉnh màu giao diện — P1 *(bổ sung 2026-11-05)*
+
+**Mục tiêu:** người dùng chọn một màu để tô các vùng khung của app (nền trang, sidebar và top nav, header của ô, status bar), lưu trên máy, áp dụng không nháy màu và luôn đạt WCAG AA. UI/UX: `docs/design/appearance-spec.md`.
+
+**Yêu cầu chức năng:** nút Giao diện ở top nav mở popover (dialog dưới 640px): chọn 1 trong 7 preset hoặc màu HEX tự do, bật/tắt từng vùng, kiểu Nhạt/Đậm cho sidebar và top nav, Đặt lại. Áp dụng ngay, lưu ở `localStorage`, theo dõi thay đổi giữa các tab.
+
+**Quy tắc:** không đổi màu thân ô, vùng soạn thảo, màu trạng thái và màu nhấn. Chữ và control trên mỗi vùng luôn đạt 4.5:1 / 3:1 ở cả sáng và tối (tự chỉnh, không bao giờ lưu cấu hình chưa đạt). Chỉ lưu màu và lựa chọn, không có nội dung người dùng.
+
+**Acceptance Criteria:** chọn màu thì vùng đổi ngay và còn sau khi tải lại; trang đã lưu màu hiện đúng màu ở lần vẽ đầu; Đặt lại trả về giao diện mặc định; giá trị lạ trong storage bị bỏ qua; axe không lỗi với nhiều cấu hình màu (sáng/tối, Nhạt/Đậm); không tràn ngang ở 320px.
 
 ## 3.11. SQL Formatter — P2
 

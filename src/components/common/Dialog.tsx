@@ -53,6 +53,7 @@ export function Dialog({
     <dialog
       ref={ref}
       aria-labelledby={titleId}
+      data-region-reset
       onClose={onClose}
       className={cn(
         "m-0 border border-border bg-surface p-0 text-text backdrop:bg-black/50",

@@ -7,7 +7,7 @@ export type StatusTone = "success" | "danger" | "warning" | "info" | "neutral";
 const tones: Record<StatusTone, { text: string; bg: string; icon: ReactNode }> = {
   success: {
     text: "text-success-fg",
-    bg: "bg-[color-mix(in_srgb,var(--color-success)_12%,var(--color-surface))]",
+    bg: "bg-[color-mix(in_srgb,var(--color-success)_8%,var(--color-surface))]",
     icon: <CheckCircle2 aria-hidden className="size-4" />,
   },
   danger: {

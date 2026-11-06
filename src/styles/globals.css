@@ -7,7 +7,7 @@
 @layer base {
   html {
     font-family: var(--font-sans);
-    background: var(--color-bg);
+    background: var(--color-region-page);
     color: var(--color-text);
     -webkit-text-size-adjust: 100%;
   }

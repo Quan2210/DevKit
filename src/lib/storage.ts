@@ -1,6 +1,7 @@
-/** Every key is versioned and prefixed; only `mdDraft` ever holds user-entered content. */
+/** Every key is versioned and prefixed; only `mdDraft` ever holds user-entered content (`appearance` holds the chosen frame colours). */
 export const STORAGE_KEYS = {
   theme: "devkit:v1:theme",
+  appearance: "devkit:v1:appearance",
   recentColors: "devkit:v1:recent-colors",
   sidebarExpanded: "devkit:v1:sidebar-expanded",
   mdView: "devkit:v1:md-view",

@@ -76,7 +76,8 @@ export function ToolShell({
 
       <div
         aria-label={t("toolshell.status")}
-        className="flex min-h-10 flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface px-3 text-sm"
+        data-region="status"
+        className="flex min-h-10 flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-region-status px-3 text-sm"
       >
         <div className="flex flex-wrap items-center gap-3">{status}</div>
         <div className="flex items-center gap-1">
