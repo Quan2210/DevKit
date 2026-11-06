@@ -29,6 +29,7 @@ describe("appearance store", () => {
     expect(apAttrs()).toEqual([
       "data-ap-page",
       "data-ap-nav",
+      "data-ap-topnav",
       "data-ap-panel-header",
       "data-ap-status",
     ]);
@@ -52,7 +53,7 @@ describe("appearance store", () => {
       navStyle: "tint",
       regions: { page: false, nav: true, panel: false, status: false },
     });
-    expect(apAttrs()).toEqual(["data-ap-nav"]);
+    expect(apAttrs()).toEqual(["data-ap-nav", "data-ap-topnav"]);
   });
 
   it("the default look clears everything, storage included", () => {

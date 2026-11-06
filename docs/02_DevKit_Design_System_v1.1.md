@@ -462,4 +462,6 @@ Skill `frontend-design` thiên về thiết kế có cá tính, tránh "mặc đ
 | 2026-11-05 | Scope | Popover Giao diện chưa có "dải xem trước" thu nhỏ (spec §3.2): trang thật là bản xem trước vì áp dụng ngay | Giảm một thành phần không cần thiết | Chờ duyệt |
 | 2026-11-05 | Component | `StatusBadge` success: nền pha 8% thay vì 12% | `success-fg` trên nền 12% chỉ 4.39:1 (axe `color-contrast`) | Chờ duyệt |
 
+| 2026-11-06 | Behaviour | Tùy chỉnh màu: sidebar và top nav là hai màu riêng dù chung một công tắc "Sidebar và top nav" (sidebar đậm hơn, top nav nhạt hơn, nền trang nhạt nhất; kiểu Đậm: top nav sáng hơn sidebar một bậc). Mỗi khối có đường kẻ chia rõ hơn (`--color-border` cục bộ). Token `--color-region-topnav`, thuộc tính `data-ap-topnav`, `data-region="topnav"` | Cùng một màu khiến sidebar và top nav trộn vào nhau khi đổi sang màu tím, xanh (phản hồi người dùng) | Chờ duyệt |
+
 *(Bổ sung dòng mới cho mỗi sai khác trong quá trình thiết kế/implement.)*

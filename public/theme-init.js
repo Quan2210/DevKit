@@ -17,6 +17,7 @@ try {
   const attrs = [
     "data-ap-page",
     "data-ap-nav",
+    "data-ap-topnav",
     "data-ap-nav-solid",
     "data-ap-panel-header",
     "data-ap-status",

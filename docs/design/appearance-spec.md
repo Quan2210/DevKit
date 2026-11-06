@@ -97,7 +97,8 @@ Màu gốc `B` đổi sang OKLCH bằng Culori. Mỗi vùng tính từ `B` và t
 | Vùng | Sáng | Tối |
 |---|---|---|
 | Nền trang | `B` 6% trên `--color-bg` | `B` 8% trên `--color-bg` |
-| Khung điều hướng (Nhạt) | `B` 16% trên `--color-surface` | `B` 18% trên `--color-surface` |
+| Sidebar (Nhạt) | `B` 22% trên `--color-surface` | `B` 22% trên `--color-surface` |
+| Top nav (Nhạt) | `B` 10% trên `--color-surface` | `B` 12% trên `--color-surface` |
 | Header của ô | `B` 24% trên `--color-surface` | `B` 22% trên `--color-surface` |
 | Status bar | `B` 12% trên `--color-surface` | `B` 14% trên `--color-surface` |
 | Khung điều hướng (Đậm) | `B` làm tối tới L≈0.30 | `B` làm tối tới L≈0.24 |

@@ -79,7 +79,7 @@ describe("resolveAppearance", () => {
 
   it("sets a colour and the attribute for each region and theme", () => {
     const resolved = resolveAppearance(asked("#0d9488"))!;
-    for (const name of ["page", "nav", "panel-header", "status"]) {
+    for (const name of ["page", "nav", "topnav", "panel-header", "status"]) {
       for (const suffix of ["l", "d"]) {
         expect(resolved.vars[`--ap-${name}-${suffix}`], name).toMatch(/^#[0-9a-f]{6}$/);
         for (const extra of ["muted", "border-strong", "primary"]) {
@@ -92,6 +92,7 @@ describe("resolveAppearance", () => {
     expect(resolved.attrs).toEqual([
       "data-ap-page",
       "data-ap-nav",
+      "data-ap-topnav",
       "data-ap-panel-header",
       "data-ap-status",
     ]);
@@ -103,8 +104,12 @@ describe("resolveAppearance", () => {
         regions: { page: false, nav: true, panel: false, status: false },
       }),
     )!;
-    expect(resolved.attrs).toEqual(["data-ap-nav"]);
-    expect(Object.keys(resolved.vars).every((name) => name.startsWith("--ap-nav-"))).toBe(true);
+    expect(resolved.attrs).toEqual(["data-ap-nav", "data-ap-topnav"]);
+    expect(
+      Object.keys(resolved.vars).every(
+        (name) => name.startsWith("--ap-nav-") || name.startsWith("--ap-topnav-"),
+      ),
+    ).toBe(true);
   });
 
   it("uses only valid property names and hex values", () => {
@@ -135,11 +140,11 @@ describe("resolveAppearance", () => {
         const resolved = resolveAppearance(asked(base, { navStyle }))!;
         for (const [suffix, tokens] of Object.entries(tokensOf)) {
           const text = token(tokens, "text");
-          for (const region of ["page", "panel-header", "status", "nav"]) {
+          for (const region of ["page", "panel-header", "status", "nav", "topnav"]) {
             const background = resolved.vars[`--ap-${region}-${suffix}`];
             if (!background) continue;
             const get = (key: string) => resolved.vars[`--ap-${region}-${key}-${suffix}`]!;
-            if (region === "nav" && navStyle === "solid") {
+            if ((region === "nav" || region === "topnav") && navStyle === "solid") {
               expect(ratio(get("text"), background), "solid text").toBeGreaterThanOrEqual(4.5);
               expect(ratio(get("text-muted"), background), "solid muted").toBeGreaterThanOrEqual(
                 4.5,
@@ -182,6 +187,30 @@ describe("resolveAppearance", () => {
       ratio(token(lightTokens, "text-muted"), "#ffffff"),
     );
     expect(resolved.status).toBe("ok");
+  });
+
+  describe("sidebar, top nav and page stay distinct blocks", () => {
+    const set = [...PRESETS.map((preset) => preset.hex), "#ffff00", "#000000", "#808080"];
+    for (const base of set) {
+      for (const navStyle of ["tint", "solid"] as const) {
+        it(`${base} (${navStyle})`, () => {
+          const resolved = resolveAppearance(asked(base, { navStyle }))!;
+          for (const suffix of ["l", "d"]) {
+            const nav = resolved.vars[`--ap-nav-${suffix}`]!;
+            const top = resolved.vars[`--ap-topnav-${suffix}`]!;
+            const page = resolved.vars[`--ap-page-${suffix}`]!;
+            expect(nav, `nav ${suffix}`).not.toBe(top);
+            expect(top, `topnav ${suffix}`).not.toBe(page);
+            // the dividing line has to be visible against the block it closes
+            for (const region of ["nav", "topnav"]) {
+              const own = resolved.vars[`--ap-${region}-${suffix}`]!;
+              const line = resolved.vars[`--ap-${region}-border-${suffix}`]!;
+              expect(ratio(line, own), `${region} ${suffix} divider`).toBeGreaterThan(1.25);
+            }
+          }
+        });
+      }
+    }
   });
 
   it("makes the solid navigation dark with light text", () => {

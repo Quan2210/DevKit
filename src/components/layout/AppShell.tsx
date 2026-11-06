@@ -59,8 +59,8 @@ export function AppShell({ children, tools = listedTools() }: AppShellProps) {
 
       <div className="flex min-w-0 flex-col">
         <header
-          data-region="nav"
-          className="sticky top-0 z-30 flex h-[var(--topnav-h)] items-center gap-2 border-b border-border bg-region-nav px-3"
+          data-region="topnav"
+          className="sticky top-0 z-30 flex h-[var(--topnav-h)] items-center gap-2 border-b border-border bg-region-topnav px-3"
         >
           <IconButton
             label={t("nav.toggleSidebar")}

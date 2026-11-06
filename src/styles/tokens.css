@@ -30,6 +30,7 @@
      are undefined, so every region falls back to its normal token. */
   --color-region-page: var(--ap-page, var(--color-bg));
   --color-region-nav: var(--ap-nav, var(--color-surface));
+  --color-region-topnav: var(--ap-topnav, var(--color-surface));
   --color-region-panel-header: var(--ap-panel-header, var(--color-surface));
   --color-region-status: var(--ap-status, var(--color-surface));
 
@@ -78,6 +79,16 @@
   --ap-nav-text-muted: var(--ap-nav-text-muted-l);
   --ap-nav-border: var(--ap-nav-border-l);
   --ap-nav-on-primary: var(--ap-nav-on-primary-l);
+  --ap-topnav: var(--ap-topnav-l);
+  --ap-topnav-muted: var(--ap-topnav-muted-l);
+  --ap-topnav-border-strong: var(--ap-topnav-border-strong-l);
+  --ap-topnav-primary: var(--ap-topnav-primary-l);
+  --ap-topnav-border: var(--ap-topnav-border-l);
+  --ap-topnav-surface: var(--ap-topnav-surface-l);
+  --ap-topnav-surface-muted: var(--ap-topnav-surface-muted-l);
+  --ap-topnav-text: var(--ap-topnav-text-l);
+  --ap-topnav-text-muted: var(--ap-topnav-text-muted-l);
+  --ap-topnav-on-primary: var(--ap-topnav-on-primary-l);
 }
 
 :root[data-theme="dark"] {
@@ -104,6 +115,16 @@
   --ap-nav-text-muted: var(--ap-nav-text-muted-d);
   --ap-nav-border: var(--ap-nav-border-d);
   --ap-nav-on-primary: var(--ap-nav-on-primary-d);
+  --ap-topnav: var(--ap-topnav-d);
+  --ap-topnav-muted: var(--ap-topnav-muted-d);
+  --ap-topnav-border-strong: var(--ap-topnav-border-strong-d);
+  --ap-topnav-primary: var(--ap-topnav-primary-d);
+  --ap-topnav-border: var(--ap-topnav-border-d);
+  --ap-topnav-surface: var(--ap-topnav-surface-d);
+  --ap-topnav-surface-muted: var(--ap-topnav-surface-muted-d);
+  --ap-topnav-text: var(--ap-topnav-text-d);
+  --ap-topnav-text-muted: var(--ap-topnav-text-muted-d);
+  --ap-topnav-on-primary: var(--ap-topnav-on-primary-d);
   --color-bg: #0b1120;
   --color-surface: #111827;
   --color-surface-muted: #1f2937;
@@ -148,6 +169,16 @@
     --ap-nav-text-muted: var(--ap-nav-text-muted-d);
     --ap-nav-border: var(--ap-nav-border-d);
     --ap-nav-on-primary: var(--ap-nav-on-primary-d);
+    --ap-topnav: var(--ap-topnav-d);
+    --ap-topnav-muted: var(--ap-topnav-muted-d);
+    --ap-topnav-border-strong: var(--ap-topnav-border-strong-d);
+    --ap-topnav-primary: var(--ap-topnav-primary-d);
+    --ap-topnav-border: var(--ap-topnav-border-d);
+    --ap-topnav-surface: var(--ap-topnav-surface-d);
+    --ap-topnav-surface-muted: var(--ap-topnav-surface-muted-d);
+    --ap-topnav-text: var(--ap-topnav-text-d);
+    --ap-topnav-text-muted: var(--ap-topnav-text-muted-d);
+    --ap-topnav-on-primary: var(--ap-topnav-on-primary-d);
     --color-bg: #0b1120;
     --color-surface: #111827;
     --color-surface-muted: #1f2937;
@@ -182,6 +213,13 @@
   --color-text-muted: var(--ap-nav-muted);
   --color-border-strong: var(--ap-nav-border-strong);
   --color-primary: var(--ap-nav-primary);
+  --color-border: var(--ap-nav-border);
+}
+:root[data-ap-topnav] [data-region="topnav"] {
+  --color-text-muted: var(--ap-topnav-muted);
+  --color-border-strong: var(--ap-topnav-border-strong);
+  --color-primary: var(--ap-topnav-primary);
+  --color-border: var(--ap-topnav-border);
 }
 :root[data-ap-panel-header] [data-region="panel-header"] {
   --color-text-muted: var(--ap-panel-header-muted);
@@ -193,7 +231,18 @@
   --color-border-strong: var(--ap-status-border-strong);
   --color-primary: var(--ap-status-primary);
 }
-/* A dark navigation re-scopes the whole palette for sidebar and top nav. */
+/* A dark navigation re-scopes the whole palette; the top nav is a step lighter than the sidebar. */
+:root[data-ap-nav-solid] [data-region="topnav"] {
+  --color-surface: var(--ap-topnav-surface);
+  --color-surface-muted: var(--ap-topnav-surface-muted);
+  --color-text: var(--ap-topnav-text);
+  --color-text-muted: var(--ap-topnav-text-muted);
+  --color-border: var(--ap-topnav-border);
+  --color-border-strong: var(--ap-topnav-border-strong);
+  --color-primary: var(--ap-topnav-primary);
+  --color-on-primary: var(--ap-topnav-on-primary);
+  color: var(--ap-topnav-text);
+}
 :root[data-ap-nav-solid] [data-region="nav"] {
   --color-surface: var(--ap-nav-surface);
   --color-surface-muted: var(--ap-nav-surface-muted);

@@ -51,6 +51,7 @@ export interface Resolved {
 export const ATTRS = [
   "data-ap-page",
   "data-ap-nav",
+  "data-ap-topnav",
   "data-ap-nav-solid",
   "data-ap-panel-header",
   "data-ap-status",
@@ -88,10 +89,16 @@ const THEMES: Record<
   },
 };
 
+/**
+ * The sidebar and the top nav are one switch ("nav") but two colours: the sidebar is the stronger
+ * one, the top nav sits between it and the page, so the three read as separate blocks.
+ */
+type TintId = RegionId | "topnav";
+
 /** Share of the base colour mixed into each region, per theme (spec §5). */
-const SHARE: Record<ThemeName, Record<RegionId, number>> = {
-  light: { page: 0.06, nav: 0.16, panel: 0.24, status: 0.12 },
-  dark: { page: 0.08, nav: 0.18, panel: 0.22, status: 0.14 },
+const SHARE: Record<ThemeName, Record<TintId, number>> = {
+  light: { page: 0.06, nav: 0.22, topnav: 0.1, panel: 0.24, status: 0.12 },
+  dark: { page: 0.08, nav: 0.22, topnav: 0.12, panel: 0.22, status: 0.14 },
 };
 
 const SOLID_LIGHTNESS: Record<ThemeName, number> = { light: 0.3, dark: 0.24 };
@@ -147,13 +154,15 @@ interface Tinted {
   muted: string;
   borderStrong: string;
   primary: string;
+  /** A visible dividing line, darker (light) or lighter (dark) than the region. */
+  border: string;
 }
 
 /**
  * The region colour: the base mixed into the theme surface. The mix is kept as designed; what is
  * adjusted is what sits on it (muted text, control borders, accent), which only ever gets stronger.
  */
-function tint(base: string, theme: ThemeName, region: RegionId): Tinted {
+function tint(base: string, theme: ThemeName, region: TintId): Tinted {
   const t = THEMES[theme];
   const ground = region === "page" ? t.bg : t.surface;
   for (let step = 0; step <= STEPS; step += 1) {
@@ -164,9 +173,20 @@ function tint(base: string, theme: ThemeName, region: RegionId): Tinted {
       muted: strengthen(t.textMuted, background, theme, TEXT_RATIO),
       borderStrong: strengthen(t.borderStrong, background, theme, UI_RATIO),
       primary: strengthen(t.primary, background, theme, UI_RATIO),
+      border: mix(
+        background,
+        theme === "light" ? "#000000" : "#ffffff",
+        theme === "light" ? 0.14 : 0.18,
+      ),
     };
   }
-  return { background: null, muted: t.textMuted, borderStrong: t.borderStrong, primary: t.primary };
+  return {
+    background: null,
+    muted: t.textMuted,
+    borderStrong: t.borderStrong,
+    primary: t.primary,
+    border: t.borderStrong,
+  };
 }
 
 export interface SolidScope {
@@ -180,43 +200,57 @@ export interface SolidScope {
   "on-primary": string;
 }
 
+/** The palette inside a dark region, built from its own background. */
+function solidScope(surface: string, primary: string): SolidScope {
+  const text = "#f8fafc";
+  return {
+    surface,
+    "surface-muted": mix(surface, "#ffffff", 0.1),
+    text,
+    "text-muted": mix(text, surface, 0.25),
+    border: mix(surface, "#ffffff", 0.25),
+    "border-strong": mix(surface, "#ffffff", 0.55),
+    primary,
+    "on-primary": "#0b1120",
+  };
+}
+
+function scopeReadable(scope: SolidScope): boolean {
+  return (
+    ratio(scope.text, scope.surface) >= TEXT_RATIO &&
+    ratio(scope["text-muted"], scope.surface) >= TEXT_RATIO &&
+    ratio(scope.text, scope["surface-muted"]) >= TEXT_RATIO &&
+    ratio(scope["text-muted"], scope["surface-muted"]) >= TEXT_RATIO &&
+    ratio(scope["border-strong"], scope.surface) >= UI_RATIO &&
+    ratio(scope.primary, scope.surface) >= UI_RATIO &&
+    ratio(scope["on-primary"], scope.primary) >= TEXT_RATIO
+  );
+}
+
 interface Solid {
-  scope: SolidScope | null;
+  /** Sidebar and top nav; the top nav is a step lighter so the two do not merge. */
+  scopes: { nav: SolidScope; topnav: SolidScope } | null;
   adjusted: boolean;
 }
 
 function solidNav(base: string, theme: ThemeName): Solid {
   const { h = 0, c = 0 } = toOklch(parse(base)!);
   const hue = Number.isFinite(h) ? h : 0;
+  const primary = formatHex(
+    clampChroma({ mode: "oklch", l: 0.86, c: Math.min(c, 0.12), h: hue }, "oklch"),
+  )!;
   for (let step = 0; step <= STEPS; step += 1) {
     const lightness = Math.max(SOLID_LIGHTNESS[theme] - 0.02 * step, 0.08);
     const surface = formatHex(
       clampChroma({ mode: "oklch", l: lightness, c: Math.min(c, 0.14), h: hue }, "oklch"),
     )!;
-    const text = "#f8fafc";
-    const scope: SolidScope = {
-      surface,
-      "surface-muted": mix(surface, "#ffffff", 0.1),
-      text,
-      "text-muted": mix(text, surface, 0.25),
-      border: mix(surface, "#ffffff", 0.18),
-      "border-strong": mix(surface, "#ffffff", 0.55),
-      primary: formatHex(
-        clampChroma({ mode: "oklch", l: 0.86, c: Math.min(c, 0.12), h: hue }, "oklch"),
-      )!,
-      "on-primary": "#0b1120",
-    };
-    const ok =
-      ratio(scope.text, scope.surface) >= TEXT_RATIO &&
-      ratio(scope["text-muted"], scope.surface) >= TEXT_RATIO &&
-      ratio(scope.text, scope["surface-muted"]) >= TEXT_RATIO &&
-      ratio(scope["text-muted"], scope["surface-muted"]) >= TEXT_RATIO &&
-      ratio(scope["border-strong"], scope.surface) >= UI_RATIO &&
-      ratio(scope.primary, scope.surface) >= UI_RATIO &&
-      ratio(scope["on-primary"], scope.primary) >= TEXT_RATIO;
-    if (ok) return { scope, adjusted: step > 0 };
+    const nav = solidScope(surface, primary);
+    const topnav = solidScope(mix(surface, "#ffffff", 0.09), primary);
+    if (scopeReadable(nav) && scopeReadable(topnav)) {
+      return { scopes: { nav, topnav }, adjusted: step > 0 };
+    }
   }
-  return { scope: null, adjusted: true };
+  return { scopes: null, adjusted: true };
 }
 
 const SUFFIX: Record<ThemeName, string> = { light: "l", dark: "d" };
@@ -234,8 +268,8 @@ export function resolveAppearance(appearance: Appearance): Resolved | null {
 
   for (const theme of ["light", "dark"] as const) {
     const s = SUFFIX[theme];
-    const place = (region: RegionId, name: string) => {
-      if (!appearance.regions[region]) return;
+    const place = (flag: RegionId, region: TintId, name: string) => {
+      if (!appearance.regions[flag]) return;
       const result = tint(base, theme, region);
       if (!result.background) {
         rejected = true;
@@ -246,26 +280,30 @@ export function resolveAppearance(appearance: Appearance): Resolved | null {
       vars[`--ap-${name}-muted-${s}`] = result.muted;
       vars[`--ap-${name}-border-strong-${s}`] = result.borderStrong;
       vars[`--ap-${name}-primary-${s}`] = result.primary;
+      vars[`--ap-${name}-border-${s}`] = result.border;
     };
-    place("page", "page");
-    place("panel", "panel-header");
-    place("status", "status");
+    place("page", "page", "page");
+    place("panel", "panel", "panel-header");
+    place("status", "status", "status");
 
     if (appearance.regions.nav) {
       if (appearance.navStyle === "solid") {
         const result = solidNav(base, theme);
         if (result.adjusted) adjusted = true;
-        if (result.scope) {
+        if (result.scopes) {
           attrs.add("data-ap-nav-solid");
-          vars[`--ap-nav-${s}`] = result.scope.surface;
-          for (const [key, value] of Object.entries(result.scope)) {
-            vars[`--ap-nav-${key}-${s}`] = value;
+          for (const [region, scope] of Object.entries(result.scopes)) {
+            vars[`--ap-${region}-${s}`] = scope.surface;
+            for (const [key, value] of Object.entries(scope)) {
+              vars[`--ap-${region}-${key}-${s}`] = value;
+            }
           }
         } else {
           rejected = true;
         }
       } else {
-        place("nav", "nav");
+        place("nav", "nav", "nav");
+        place("nav", "topnav", "topnav");
       }
     }
   }
