@@ -1,4 +1,10 @@
-import type { CSSProperties, KeyboardEvent, PointerEvent, ReactNode } from "react";
+import type {
+  ButtonHTMLAttributes,
+  CSSProperties,
+  KeyboardEvent,
+  PointerEvent,
+  ReactNode,
+} from "react";
 import { useRef, useState } from "react";
 import { useT } from "../../i18n/useT";
 import { cn } from "../../lib/cn";
@@ -26,6 +32,45 @@ const clampRatio = (value: number) => Math.min(MAX, Math.max(MIN, value));
  */
 export function SplitAction({ children }: { children: ReactNode }) {
   return <div className="flex min-h-10 items-center justify-center lg:w-full">{children}</div>;
+}
+
+export interface SplitButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  icon: ReactNode;
+  /** The visible name; it is also the accessible name. */
+  children: ReactNode;
+  variant?: "default" | "primary";
+}
+
+/**
+ * A control for the middle column: icon and text in one block, as wide as the column (icon above the
+ * text from lg, side by side when the column is a row). One word or two, so it never needs a tooltip.
+ */
+export function SplitButton({
+  icon,
+  children,
+  variant = "default",
+  className,
+  type = "button",
+  ...rest
+}: SplitButtonProps) {
+  return (
+    <button
+      type={type}
+      className={cn(
+        "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border px-3 py-2 text-center text-sm leading-tight font-medium transition-colors",
+        "lg:w-full lg:flex-col lg:gap-1 lg:px-2",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        variant === "primary"
+          ? "border-transparent bg-primary text-on-primary hover:bg-primary-hover"
+          : "border-border-strong bg-surface text-text hover:bg-surface-muted",
+        className,
+      )}
+      {...rest}
+    >
+      {icon}
+      <span>{children}</span>
+    </button>
+  );
 }
 
 export function SplitWorkspace({ left, right, actions }: SplitWorkspaceProps) {

@@ -18,7 +18,8 @@ export type ToolIconName =
   | "palette"
   | "contrast"
   | "blend"
-  | "database";
+  | "database"
+  | "diff";
 
 /** `planned` tools have metadata but no route, nav entry, Home row or sitemap entry yet. */
 export type ToolStatus = "ready" | "planned";
@@ -122,6 +123,18 @@ export const TOOLS: ReadonlyArray<ToolMeta> = [
     status: "ready",
     icon: "file-text",
     routeFile: "routes/tools/markdown-preview.tsx",
+  },
+  {
+    id: "text-compare",
+    slug: "text-compare",
+    group: "writing",
+    titleKey: "tool.textCompare.title",
+    descriptionKey: "tool.textCompare.description",
+    keywords: ["diff", "compare", "text", "so sánh", "khác biệt"],
+    priority: "P1",
+    status: "ready",
+    icon: "diff",
+    routeFile: "routes/tools/text-compare.tsx",
   },
   {
     id: "color-picker",

@@ -131,7 +131,7 @@ test("theme switch while a tool has content keeps the content, editors and previ
   await page.goto("tools/markdown-preview/");
   await settle(page);
   await page.getByRole("button", { name: "Mẫu", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Xin chào DevKit" })).toBeVisible({
+  await expect(page.getByRole("heading", { name: "Xin chào KunKit" })).toBeVisible({
     timeout: 15000,
   });
   const bg = () =>
@@ -149,8 +149,8 @@ test("theme switch while a tool has content keeps the content, editors and previ
   const dark = await bg();
   expect(dark).not.toBe(light);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(cm(page)).toContainText("Xin chào DevKit");
-  await expect(page.getByRole("heading", { name: "Xin chào DevKit" })).toBeVisible();
+  await expect(cm(page)).toContainText("Xin chào KunKit");
+  await expect(page.getByRole("heading", { name: "Xin chào KunKit" })).toBeVisible();
   // Preview text must remain readable (not dark-on-dark): compare luminance of preview text vs its background.
   const contrastOk = await page.evaluate(() => {
     const el = document.querySelector("[class*=md-prose] p, [class*=md-prose] h1") as HTMLElement;
@@ -184,7 +184,7 @@ test("Markdown: resizing across the narrow breakpoint keeps the text and falls b
   await settle(page);
   await page.getByRole("button", { name: "Mẫu", exact: true }).click();
   await expect(page.getByRole("radio", { name: "Chia đôi" })).toBeChecked();
-  await expect(page.getByRole("heading", { name: "Xin chào DevKit" })).toBeVisible({
+  await expect(page.getByRole("heading", { name: "Xin chào KunKit" })).toBeVisible({
     timeout: 15000,
   });
   for (const width of [600, 375, 900, 320, 1200, 500]) {
@@ -194,7 +194,7 @@ test("Markdown: resizing across the narrow breakpoint keeps the text and falls b
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(over, `overflow at ${width}`).toBeLessThanOrEqual(0);
-    await expect(cm(page)).toContainText("Xin chào DevKit"); // text kept
+    await expect(cm(page)).toContainText("Xin chào KunKit"); // text kept
     if (width < 768) {
       await expect(page.getByRole("radio", { name: "Chia đôi" })).toHaveCount(0);
       // exactly one pane visible
@@ -207,14 +207,14 @@ test("Markdown: resizing across the narrow breakpoint keeps the text and falls b
   // Mobile: switch to preview, preview shows the heading; back to wide keeps working.
   await page.setViewportSize({ width: 375, height: 800 });
   await page.getByRole("radio", { name: "Xem" }).click();
-  await expect(page.getByRole("heading", { name: "Xin chào DevKit" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Xin chào KunKit" })).toBeVisible();
   await page.setViewportSize({ width: 1200, height: 800 });
   await page.waitForTimeout(400);
   // The explicit "Xem" choice persists on a wide screen; split can be chosen again with the text intact.
   await expect(page.getByRole("radio", { name: "Xem" })).toBeChecked();
   await page.getByRole("radio", { name: "Chia đôi" }).click();
-  await expect(cm(page)).toContainText("Xin chào DevKit");
-  await expect(page.getByRole("heading", { name: "Xin chào DevKit" })).toBeVisible();
+  await expect(cm(page)).toContainText("Xin chào KunKit");
+  await expect(page.getByRole("heading", { name: "Xin chào KunKit" })).toBeVisible();
   expect(list).toEqual([]);
 });
 

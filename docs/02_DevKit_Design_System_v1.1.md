@@ -292,6 +292,7 @@ Cùng toolbar, cùng vị trí Copy / Clear / Download, cùng cách báo lỗi t
 | Contrast | Hai màu + preview text + bảng Pass/Fail (AA/AAA) + ratio |
 | Gradient | Preview lớn + panel stops + code CSS |
 | Markdown Preview | Xem §9.3 |
+| Text Compare | Hai bước: Nhập (hai ô cạnh nhau) rồi Kết quả (hai ô canh thẳng, sửa được; Một cột dưới 1024px). Xem `docs/design/text-compare-spec.md` |
 
 ## 9.3. Markdown Preview — UI spec
 
@@ -440,5 +441,27 @@ Skill `frontend-design` thiên về thiết kế có cá tính, tránh "mặc đ
 | 2026-11-04 | Layout | `SplitWorkspace`: bỏ đường kẻ chạy suốt chiều cao; đường chia chỉ nằm ở dải bên dưới các nút (cũng là vùng kéo) | Chỉnh theo phản hồi | Đã duyệt (2026-11-04) |
 | 2026-11-04 | Behaviour | So sánh khi một trong hai ô chưa ở dạng Cây: hiện cảnh báo "chỉ chạy ở dạng Cây" kèm nút "Chuyển cả hai ô sang Cây", không tự chuyển và không bật so sánh (sửa điều đã làm ở dòng So sánh trước) | Chỉnh theo phản hồi | Đã duyệt (2026-11-04) |
 | 2026-11-04 | Component | `TreeView` hiện `{` hoặc `[` sau khóa của đối tượng/mảng (`{}` `[]` khi rỗng, `{…}` `[…]` khi thu gọn) và dòng đóng `}` `]` dưới container đang mở; dòng đóng là phần trang trí, không chọn được và ẩn với trình đọc màn hình. XML không đổi | Phân biệt đối tượng và mảng như jsoneditoronline | Đã duyệt (2026-11-04) |
+
+| 2026-11-05 | Scope | Thêm tool Text Compare (nhóm Writing & Docs) theo `docs/design/text-compare-spec.md` | Yêu cầu bổ sung, tham khảo diffchecker.com/text-compare | Đã duyệt (2026-11-05) |
+| 2026-11-05 | Dependency | Thêm `@codemirror/merge` | Hai ô canh thẳng, sửa được, tô trong dòng, gập dòng giống nhau; tự viết trên `CodeEditor` tốn công và dễ lệch khi wrap | Đã duyệt (2026-11-05) |
+| 2026-11-05 | Component | Thêm `DiffEditor` (bọc `MergeView` và `unifiedMergeView`, lazy như `CodeEditor`); `CodeEditorImpl` xuất `tokenTheme` để dùng chung | Cùng theme token; không đổi hành vi của `CodeEditor` | Đã duyệt (2026-11-05) |
+| 2026-11-05 | Behaviour | Text Compare: Mẫu nằm ở cột giữa (điền cả hai ô), không nằm trong toolbar từng ô; đổi bên có ở cả hai bước | Một thao tác cho cả hai ô | Chờ duyệt |
+| 2026-11-05 | Behaviour | Text Compare: "Bỏ qua khoảng trắng" bỏ qua mọi dấu cách/tab (không chỉ hai đầu dòng), xuống dòng vẫn tính | Giống Diffchecker; dễ giải thích | Chờ duyệt |
+| 2026-11-05 | Visual | Text Compare: chữ khác nhau được phân biệt bằng gạch ngang (bên xóa) / gạch chân (bên thêm) kèm nền đậm; thanh lề của thư viện chỉ là dải màu. Chưa có ký hiệu `+`/`−`/`~` ở lề như spec §4 | Không cần thêm gutter tự viết; vẫn có tín hiệu ngoài màu ở mức chữ và nhãn đếm bằng chữ | Chờ duyệt |
+| 2026-11-05 | Behaviour | Text Compare: đổi tùy chọn so sánh, chế độ xem hoặc wrap dựng lại trình xem nên lịch sử Undo của trình xem bị đặt lại; nội dung giữ nguyên | `@codemirror/merge` không tính lại diff khi đổi cấu hình | Chờ duyệt |
+| 2026-11-05 | Behaviour | Text Compare: không có ngưỡng "bấm So sánh lại" cho văn bản lớn; diff đi theo dòng rồi mới theo ký tự, quá giới hạn thì tự chuyển sang gần đúng và hiện Notice | Nhanh hơn và đơn giản hơn spec §5; vẫn báo khi kết quả không chính xác | Chờ duyệt |
+| 2026-11-05 | Behaviour | Text Compare: thêm dòng vào cuối văn bản không có xuống dòng cuối thì dòng cuối cũ cũng bị tô (như "no newline at end of file" của git) | Hành vi của `@codemirror/merge` | Chờ duyệt |
+
+| 2026-11-05 | Component | Cột giữa của `SplitWorkspace`: thêm `SplitButton` (icon và chữ trong một khối, rộng bằng cột) cho So sánh, Đổi hai bên, Mẫu (Text Compare), Đổi chiều, Mẫu, Xóa (Base64) và Đến khác biệt trước/kế tiếp (JSON/XML); `Segmented` thêm `stacked` (Base64: Mã hóa/Giải mã xếp dọc, hiện chữ). Nhóm Copy/Transform ◀▶ của JSON/XML giữ nguyên vì đã có tiêu đề chữ | Yêu cầu bổ sung: nút ở cột giữa hiện chữ mô tả cùng icon, dễ dùng hơn tooltip | Chờ duyệt |
+
+| 2026-11-05 | Scope | Thêm tùy chỉnh màu khung giao diện (nền trang, sidebar và top nav, header ô, status bar) theo `docs/design/appearance-spec.md`; nút Giao diện ở top nav trước `ThemeSwitcher` | Yêu cầu bổ sung | Đã duyệt (2026-11-05) |
+| 2026-11-05 | Tokens | Thêm token vùng `--color-region-page/nav/panel-header/status` (mặc định trỏ về `--color-bg`/`--color-surface`), biến `--ap-*` do JS đặt, thuộc tính `data-ap-*` trên `<html>` và thuộc tính `data-region` trên các vùng; thêm bản sao `--base-*` của token để popover/dialog trong vùng đổi màu giữ bảng màu thường (`data-region-reset`) | Mỗi vùng tô màu riêng mà không sửa từng component; mặc định không đổi gì | Đã duyệt (2026-11-05) |
+| 2026-11-05 | Component | Thêm `AppearanceMenu` (popover từ sm, `Dialog` dưới sm); `Popover` thêm `placement` (above/below) | Theo spec §3 và §8 | Đã duyệt (2026-11-05) |
+| 2026-11-05 | Behaviour | Màu gốc được tính trong `src/lib/appearance.ts` (Culori) và lưu ở `devkit:v1:appearance` cùng giá trị đã tính; `public/theme-init.js` chỉ gán các giá trị đó (kiểm tên và giá trị như `parseStored`) | Không nháy màu, không cần Culori ở script, vẫn nằm ngoài hash CSP | Đã duyệt (2026-11-05) |
+| 2026-11-05 | Behaviour | Cổng tương phản khác spec §5: giữ nguyên độ đậm tint như thiết kế, và làm đậm hơn thứ nằm trên vùng (chữ phụ, viền control, màu nhấn) cho tới khi đạt 4.5:1/3:1. Spec ban đầu giảm độ đậm tint, nhưng `--color-border-strong` mặc định chỉ hơn 3:1 một chút nên tint thành gần trắng | Tint đủ rõ mà vẫn đạt AA; vùng chỉ bị từ chối khi chữ chính cũng không đọc được | Chờ duyệt |
+| 2026-11-05 | Scope | Popover Giao diện chưa có "dải xem trước" thu nhỏ (spec §3.2): trang thật là bản xem trước vì áp dụng ngay | Giảm một thành phần không cần thiết | Chờ duyệt |
+| 2026-11-05 | Component | `StatusBadge` success: nền pha 8% thay vì 12% | `success-fg` trên nền 12% chỉ 4.39:1 (axe `color-contrast`) | Chờ duyệt |
+
+| 2026-11-06 | Behaviour | Tùy chỉnh màu: sidebar và top nav là hai màu riêng dù chung một công tắc "Sidebar và top nav" (sidebar đậm hơn, top nav nhạt hơn, nền trang nhạt nhất; kiểu Đậm: top nav sáng hơn sidebar một bậc). Mỗi khối có đường kẻ chia rõ hơn (`--color-border` cục bộ). Token `--color-region-topnav`, thuộc tính `data-ap-topnav`, `data-region="topnav"` | Cùng một màu khiến sidebar và top nav trộn vào nhau khi đổi sang màu tím, xanh (phản hồi người dùng) | Chờ duyệt |
 
 *(Bổ sung dòng mới cho mỗi sai khác trong quá trình thiết kế/implement.)*

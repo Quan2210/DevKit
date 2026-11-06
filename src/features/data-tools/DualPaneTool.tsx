@@ -4,10 +4,9 @@ import { Button } from "../../components/common/Button";
 import { Checkbox } from "../../components/common/Checkbox";
 import { ErrorBanner } from "../../components/common/ErrorBanner";
 import { Notice } from "../../components/common/Notice";
-import { IconButton } from "../../components/common/IconButton";
 import { StatusBadge } from "../../components/common/StatusBadge";
 import type { CodeEditorHandle } from "../../components/editors/CodeEditor";
-import { SplitAction, SplitWorkspace } from "../../components/layout/SplitWorkspace";
+import { SplitAction, SplitButton, SplitWorkspace } from "../../components/layout/SplitWorkspace";
 import { ToolShell } from "../../components/layout/ToolShell";
 import { useDebounced } from "../../hooks/useDebounced";
 import { useHotkeys } from "../../hooks/useHotkeys";
@@ -308,17 +307,19 @@ export function DualPaneTool({ tool, adapter, labels, extraNotice }: DualPaneToo
                     onChange={(event) => toggleCompare(event.target.checked)}
                   />
                   {compare && diff && diff.count > 0 ? (
-                    <div className="flex gap-1.5">
-                      <IconButton
-                        label={t("json.prevDiff")}
+                    <div className="flex w-full flex-wrap justify-center gap-1.5 lg:flex-col">
+                      <SplitButton
                         icon={<ChevronUp aria-hidden className={ICON} />}
                         onClick={() => stepDiff(-1)}
-                      />
-                      <IconButton
-                        label={t("json.nextDiff")}
+                      >
+                        {t("json.prevDiff")}
+                      </SplitButton>
+                      <SplitButton
                         icon={<ChevronDown aria-hidden className={ICON} />}
                         onClick={() => stepDiff(1)}
-                      />
+                      >
+                        {t("json.nextDiff")}
+                      </SplitButton>
                     </div>
                   ) : null}
                 </div>

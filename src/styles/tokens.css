@@ -26,6 +26,14 @@
   --color-info: #0284c7;
   --color-info-fg: #0369a1;
 
+  /* Regions of the app frame (docs/design/appearance-spec.md). Without a custom colour the --ap-* values
+     are undefined, so every region falls back to its normal token. */
+  --color-region-page: var(--ap-page, var(--color-bg));
+  --color-region-nav: var(--ap-nav, var(--color-surface));
+  --color-region-topnav: var(--ap-topnav, var(--color-surface));
+  --color-region-panel-header: var(--ap-panel-header, var(--color-surface));
+  --color-region-status: var(--ap-status, var(--color-surface));
+
   --font-sans: "Inter Variable", system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", Consolas, monospace;
 
@@ -35,12 +43,88 @@
   --radius-xl: 16px;
 }
 
+/* Copies of the tokens as they are on <html>, for floating panels that sit inside a recoloured region. */
+:root {
+  --base-surface: var(--color-surface);
+  --base-surface-muted: var(--color-surface-muted);
+  --base-text: var(--color-text);
+  --base-text-muted: var(--color-text-muted);
+  --base-border: var(--color-border);
+  --base-border-strong: var(--color-border-strong);
+  --base-primary: var(--color-primary);
+  --base-on-primary: var(--color-on-primary);
+}
+
 :root {
   color-scheme: light;
+  --ap-page: var(--ap-page-l);
+  --ap-page-muted: var(--ap-page-muted-l);
+  --ap-page-border-strong: var(--ap-page-border-strong-l);
+  --ap-page-primary: var(--ap-page-primary-l);
+  --ap-nav: var(--ap-nav-l);
+  --ap-nav-muted: var(--ap-nav-muted-l);
+  --ap-nav-border-strong: var(--ap-nav-border-strong-l);
+  --ap-nav-primary: var(--ap-nav-primary-l);
+  --ap-panel-header: var(--ap-panel-header-l);
+  --ap-panel-header-muted: var(--ap-panel-header-muted-l);
+  --ap-panel-header-border-strong: var(--ap-panel-header-border-strong-l);
+  --ap-panel-header-primary: var(--ap-panel-header-primary-l);
+  --ap-status: var(--ap-status-l);
+  --ap-status-muted: var(--ap-status-muted-l);
+  --ap-status-border-strong: var(--ap-status-border-strong-l);
+  --ap-status-primary: var(--ap-status-primary-l);
+  --ap-nav-surface: var(--ap-nav-surface-l);
+  --ap-nav-surface-muted: var(--ap-nav-surface-muted-l);
+  --ap-nav-text: var(--ap-nav-text-l);
+  --ap-nav-text-muted: var(--ap-nav-text-muted-l);
+  --ap-nav-border: var(--ap-nav-border-l);
+  --ap-nav-on-primary: var(--ap-nav-on-primary-l);
+  --ap-topnav: var(--ap-topnav-l);
+  --ap-topnav-muted: var(--ap-topnav-muted-l);
+  --ap-topnav-border-strong: var(--ap-topnav-border-strong-l);
+  --ap-topnav-primary: var(--ap-topnav-primary-l);
+  --ap-topnav-border: var(--ap-topnav-border-l);
+  --ap-topnav-surface: var(--ap-topnav-surface-l);
+  --ap-topnav-surface-muted: var(--ap-topnav-surface-muted-l);
+  --ap-topnav-text: var(--ap-topnav-text-l);
+  --ap-topnav-text-muted: var(--ap-topnav-text-muted-l);
+  --ap-topnav-on-primary: var(--ap-topnav-on-primary-l);
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
+  --ap-page: var(--ap-page-d);
+  --ap-page-muted: var(--ap-page-muted-d);
+  --ap-page-border-strong: var(--ap-page-border-strong-d);
+  --ap-page-primary: var(--ap-page-primary-d);
+  --ap-nav: var(--ap-nav-d);
+  --ap-nav-muted: var(--ap-nav-muted-d);
+  --ap-nav-border-strong: var(--ap-nav-border-strong-d);
+  --ap-nav-primary: var(--ap-nav-primary-d);
+  --ap-panel-header: var(--ap-panel-header-d);
+  --ap-panel-header-muted: var(--ap-panel-header-muted-d);
+  --ap-panel-header-border-strong: var(--ap-panel-header-border-strong-d);
+  --ap-panel-header-primary: var(--ap-panel-header-primary-d);
+  --ap-status: var(--ap-status-d);
+  --ap-status-muted: var(--ap-status-muted-d);
+  --ap-status-border-strong: var(--ap-status-border-strong-d);
+  --ap-status-primary: var(--ap-status-primary-d);
+  --ap-nav-surface: var(--ap-nav-surface-d);
+  --ap-nav-surface-muted: var(--ap-nav-surface-muted-d);
+  --ap-nav-text: var(--ap-nav-text-d);
+  --ap-nav-text-muted: var(--ap-nav-text-muted-d);
+  --ap-nav-border: var(--ap-nav-border-d);
+  --ap-nav-on-primary: var(--ap-nav-on-primary-d);
+  --ap-topnav: var(--ap-topnav-d);
+  --ap-topnav-muted: var(--ap-topnav-muted-d);
+  --ap-topnav-border-strong: var(--ap-topnav-border-strong-d);
+  --ap-topnav-primary: var(--ap-topnav-primary-d);
+  --ap-topnav-border: var(--ap-topnav-border-d);
+  --ap-topnav-surface: var(--ap-topnav-surface-d);
+  --ap-topnav-surface-muted: var(--ap-topnav-surface-muted-d);
+  --ap-topnav-text: var(--ap-topnav-text-d);
+  --ap-topnav-text-muted: var(--ap-topnav-text-muted-d);
+  --ap-topnav-on-primary: var(--ap-topnav-on-primary-d);
   --color-bg: #0b1120;
   --color-surface: #111827;
   --color-surface-muted: #1f2937;
@@ -63,6 +147,38 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]):not([data-theme="dark"]) {
     color-scheme: dark;
+    --ap-page: var(--ap-page-d);
+    --ap-page-muted: var(--ap-page-muted-d);
+    --ap-page-border-strong: var(--ap-page-border-strong-d);
+    --ap-page-primary: var(--ap-page-primary-d);
+    --ap-nav: var(--ap-nav-d);
+    --ap-nav-muted: var(--ap-nav-muted-d);
+    --ap-nav-border-strong: var(--ap-nav-border-strong-d);
+    --ap-nav-primary: var(--ap-nav-primary-d);
+    --ap-panel-header: var(--ap-panel-header-d);
+    --ap-panel-header-muted: var(--ap-panel-header-muted-d);
+    --ap-panel-header-border-strong: var(--ap-panel-header-border-strong-d);
+    --ap-panel-header-primary: var(--ap-panel-header-primary-d);
+    --ap-status: var(--ap-status-d);
+    --ap-status-muted: var(--ap-status-muted-d);
+    --ap-status-border-strong: var(--ap-status-border-strong-d);
+    --ap-status-primary: var(--ap-status-primary-d);
+    --ap-nav-surface: var(--ap-nav-surface-d);
+    --ap-nav-surface-muted: var(--ap-nav-surface-muted-d);
+    --ap-nav-text: var(--ap-nav-text-d);
+    --ap-nav-text-muted: var(--ap-nav-text-muted-d);
+    --ap-nav-border: var(--ap-nav-border-d);
+    --ap-nav-on-primary: var(--ap-nav-on-primary-d);
+    --ap-topnav: var(--ap-topnav-d);
+    --ap-topnav-muted: var(--ap-topnav-muted-d);
+    --ap-topnav-border-strong: var(--ap-topnav-border-strong-d);
+    --ap-topnav-primary: var(--ap-topnav-primary-d);
+    --ap-topnav-border: var(--ap-topnav-border-d);
+    --ap-topnav-surface: var(--ap-topnav-surface-d);
+    --ap-topnav-surface-muted: var(--ap-topnav-surface-muted-d);
+    --ap-topnav-text: var(--ap-topnav-text-d);
+    --ap-topnav-text-muted: var(--ap-topnav-text-muted-d);
+    --ap-topnav-on-primary: var(--ap-topnav-on-primary-d);
     --color-bg: #0b1120;
     --color-surface: #111827;
     --color-surface-muted: #1f2937;
@@ -81,4 +197,73 @@
     --color-info: #38bdf8;
     --color-info-fg: #38bdf8;
   }
+}
+
+/*
+ * Custom colours: inside a region that has one, the tokens of what sits on it (muted text, control
+ * borders, the accent) are replaced by the strengthened values from src/lib/appearance.ts, so
+ * every component keeps its contrast without knowing about the region. JS sets the data-ap-* attribute.
+ */
+:root[data-ap-page] [data-region="page"] {
+  --color-text-muted: var(--ap-page-muted);
+  --color-border-strong: var(--ap-page-border-strong);
+  --color-primary: var(--ap-page-primary);
+}
+:root[data-ap-nav] [data-region="nav"] {
+  --color-text-muted: var(--ap-nav-muted);
+  --color-border-strong: var(--ap-nav-border-strong);
+  --color-primary: var(--ap-nav-primary);
+  --color-border: var(--ap-nav-border);
+}
+:root[data-ap-topnav] [data-region="topnav"] {
+  --color-text-muted: var(--ap-topnav-muted);
+  --color-border-strong: var(--ap-topnav-border-strong);
+  --color-primary: var(--ap-topnav-primary);
+  --color-border: var(--ap-topnav-border);
+}
+:root[data-ap-panel-header] [data-region="panel-header"] {
+  --color-text-muted: var(--ap-panel-header-muted);
+  --color-border-strong: var(--ap-panel-header-border-strong);
+  --color-primary: var(--ap-panel-header-primary);
+}
+:root[data-ap-status] [data-region="status"] {
+  --color-text-muted: var(--ap-status-muted);
+  --color-border-strong: var(--ap-status-border-strong);
+  --color-primary: var(--ap-status-primary);
+}
+/* A dark navigation re-scopes the whole palette; the top nav is a step lighter than the sidebar. */
+:root[data-ap-nav-solid] [data-region="topnav"] {
+  --color-surface: var(--ap-topnav-surface);
+  --color-surface-muted: var(--ap-topnav-surface-muted);
+  --color-text: var(--ap-topnav-text);
+  --color-text-muted: var(--ap-topnav-text-muted);
+  --color-border: var(--ap-topnav-border);
+  --color-border-strong: var(--ap-topnav-border-strong);
+  --color-primary: var(--ap-topnav-primary);
+  --color-on-primary: var(--ap-topnav-on-primary);
+  color: var(--ap-topnav-text);
+}
+:root[data-ap-nav-solid] [data-region="nav"] {
+  --color-surface: var(--ap-nav-surface);
+  --color-surface-muted: var(--ap-nav-surface-muted);
+  --color-text: var(--ap-nav-text);
+  --color-text-muted: var(--ap-nav-text-muted);
+  --color-border: var(--ap-nav-border);
+  --color-border-strong: var(--ap-nav-border-strong);
+  --color-primary: var(--ap-nav-primary);
+  --color-on-primary: var(--ap-nav-on-primary);
+  color: var(--ap-nav-text);
+}
+
+/* Popovers and dialogs opened from a recoloured region keep the normal palette. */
+[data-region-reset] {
+  --color-surface: var(--base-surface);
+  --color-surface-muted: var(--base-surface-muted);
+  --color-text: var(--base-text);
+  --color-text-muted: var(--base-text-muted);
+  --color-border: var(--base-border);
+  --color-border-strong: var(--base-border-strong);
+  --color-primary: var(--base-primary);
+  --color-on-primary: var(--base-on-primary);
+  color: var(--base-text);
 }

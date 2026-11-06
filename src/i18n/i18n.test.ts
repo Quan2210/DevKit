@@ -4,7 +4,7 @@ import { vi } from "./locales/vi";
 
 describe("i18n", () => {
   it("translates keys and fills placeholders", () => {
-    expect(t("app.name")).toBe("DevKit");
+    expect(t("app.name")).toBe("KunKit");
     expect(t("nav.noResults", { query: "xyz" })).toBe("Không có công cụ nào khớp “xyz”.");
   });
 

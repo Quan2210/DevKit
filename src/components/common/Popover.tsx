@@ -8,13 +8,22 @@ export interface PopoverProps {
   /** Content of the trigger button. */
   trigger: ReactNode;
   triggerClassName?: string;
+  /** Where the panel opens: above the trigger (status bar) or below it (top nav). */
+  placement?: "above" | "below";
   /** Tooltip of the trigger (needed when its content is icon-only). */
   title?: string;
   children: ReactNode;
 }
 
 /** Click-to-open panel. Esc and outside click close it and focus returns to the trigger. */
-export function Popover({ label, trigger, triggerClassName, title, children }: PopoverProps) {
+export function Popover({
+  label,
+  trigger,
+  triggerClassName,
+  placement = "above",
+  title,
+  children,
+}: PopoverProps) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const root = useRef<HTMLDivElement>(null);
@@ -57,7 +66,11 @@ export function Popover({ label, trigger, triggerClassName, title, children }: P
           id={panelId}
           role="group"
           aria-label={label}
-          className="absolute right-0 bottom-full z-20 mb-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-border bg-surface p-4 text-sm shadow-lg"
+          data-region-reset
+          className={cn(
+            "absolute right-0 z-20 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-border bg-surface p-4 text-sm shadow-lg",
+            placement === "above" ? "bottom-full mb-2" : "top-full mt-2",
+          )}
         >
           {children}
         </div>

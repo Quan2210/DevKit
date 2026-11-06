@@ -9,6 +9,7 @@ import { STORAGE_KEYS } from "../../lib/storage";
 import { GROUPS, listedTools, toolPath, type ToolMeta } from "../../registry/tools.meta";
 import { Dialog } from "../common/Dialog";
 import { IconButton } from "../common/IconButton";
+import { AppearanceMenu } from "./AppearanceMenu";
 import { QuickSearch } from "./QuickSearch";
 import { SidebarNav } from "./SidebarNav";
 import { ThemeSwitcher } from "./ThemeSwitcher";
@@ -48,13 +49,19 @@ export function AppShell({ children, tools = listedTools() }: AppShellProps) {
       </a>
 
       <aside className="relative hidden sm:block">
-        <div className="sticky top-0 h-dvh overflow-x-hidden overflow-y-auto border-r border-border bg-surface">
+        <div
+          data-region="nav"
+          className="sticky top-0 h-dvh overflow-x-hidden overflow-y-auto border-r border-border bg-region-nav"
+        >
           <SidebarNav tools={tools} collapsed={!expanded} showSearch={false} />
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-col">
-        <header className="sticky top-0 z-30 flex h-[var(--topnav-h)] items-center gap-2 border-b border-border bg-surface px-3">
+        <header
+          data-region="topnav"
+          className="sticky top-0 z-30 flex h-[var(--topnav-h)] items-center gap-2 border-b border-border bg-region-topnav px-3"
+        >
           <IconButton
             label={t("nav.toggleSidebar")}
             icon={<PanelLeft aria-hidden className="size-5" />}
@@ -90,10 +97,16 @@ export function AppShell({ children, tools = listedTools() }: AppShellProps) {
           <div className="flex min-w-0 flex-1 justify-end">
             <QuickSearch tools={tools} />
           </div>
+          <AppearanceMenu />
           <ThemeSwitcher />
         </header>
 
-        <main id="main" tabIndex={-1} className="flex-1 px-3 py-3 outline-none sm:px-4">
+        <main
+          id="main"
+          data-region="page"
+          tabIndex={-1}
+          className="flex-1 px-3 py-3 outline-none sm:px-4"
+        >
           {children}
         </main>
       </div>
@@ -104,7 +117,9 @@ export function AppShell({ children, tools = listedTools() }: AppShellProps) {
         title={t("app.name")}
         placement="left"
       >
-        <SidebarNav tools={tools} onNavigate={() => setDrawerOpen(false)} showSearch={false} />
+        <div data-region="nav" className="min-h-full bg-region-nav">
+          <SidebarNav tools={tools} onNavigate={() => setDrawerOpen(false)} showSearch={false} />
+        </div>
       </Dialog>
     </div>
   );
