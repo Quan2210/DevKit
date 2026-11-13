@@ -10,7 +10,7 @@ export default function NotFound() {
     <div className="mx-auto w-full max-w-xl space-y-4">
       <h1 className="text-2xl font-semibold">{t("notFound.title")}</h1>
       <p>{t("notFound.body")}</p>
-      <Link to="/" className="inline-flex min-h-9 items-center font-medium text-primary underline">
+      <Link to="/" className="inline-flex min-h-11 items-center font-medium text-primary underline">
         {t("notFound.home")}
       </Link>
     </div>

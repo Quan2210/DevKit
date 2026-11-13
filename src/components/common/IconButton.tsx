@@ -30,7 +30,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        "inline-flex size-10 items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:size-9",
+        "inline-flex size-11 shrink-0 items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:size-9",
         variants[variant],
         className,
       )}

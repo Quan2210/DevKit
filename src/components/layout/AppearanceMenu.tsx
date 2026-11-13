@@ -53,7 +53,7 @@ function BaseOption({
   return (
     <label
       className={cn(
-        "flex min-h-9 cursor-pointer items-center gap-2 rounded-md border px-2 text-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary",
+        "flex min-h-11 sm:min-h-9 cursor-pointer items-center gap-2 rounded-md border px-2 text-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary",
         checked
           ? "border-primary bg-surface-muted font-medium"
           : "border-border hover:bg-surface-muted",
@@ -129,9 +129,9 @@ function AppearancePanel() {
             type="color"
             aria-label={t("appearance.picker")}
             title={t("appearance.picker")}
-            value={appearance.base ?? "#0d9488"}
+            value={appearance.base ?? PRESETS[0]!.hex}
             onChange={(event) => pick(event.target.value)}
-            className="size-10 shrink-0 cursor-pointer rounded-md border border-border-strong bg-surface p-1"
+            className="size-11 shrink-0 cursor-pointer rounded-md border border-border-strong bg-surface p-1"
           />
           <div className="min-w-0 flex-1">
             <label htmlFor="appearance-hex" className="mb-1 block text-xs font-medium">
@@ -159,7 +159,7 @@ function AppearancePanel() {
                 else setBlurred(true);
               }}
               className={cn(
-                "min-h-9 w-full rounded-md border bg-surface px-2 font-mono text-sm",
+                "min-h-11 sm:min-h-9 w-full rounded-md border bg-surface px-2 font-mono text-sm",
                 invalid ? "border-danger" : "border-border-strong",
               )}
             />
@@ -258,7 +258,7 @@ export function AppearanceMenu() {
     </span>
   );
   const buttonClass =
-    "inline-flex size-10 items-center justify-center rounded-md text-text hover:bg-surface-muted sm:size-9";
+    "inline-flex size-11 items-center justify-center rounded-md text-text hover:bg-surface-muted sm:size-9";
 
   if (wide) {
     return (

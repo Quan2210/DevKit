@@ -84,8 +84,8 @@ export function MenuButton({
         className={cn(
           "inline-flex items-center transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50",
           iconOnly
-            ? "h-10 gap-0.5 rounded-md px-2 sm:h-9"
-            : "min-h-10 gap-1.5 rounded-md border border-border-strong bg-surface px-3.5 py-2 text-sm font-medium sm:min-h-9",
+            ? "h-11 min-w-11 justify-center gap-0.5 rounded-md px-2 sm:h-9 sm:min-w-9"
+            : "min-h-11 gap-1.5 rounded-md border border-border-strong bg-surface px-3.5 py-2 text-sm font-medium sm:min-h-9",
         )}
       >
         {icon}
@@ -117,7 +117,7 @@ export function MenuButton({
                 }}
                 style={item.indent ? { paddingLeft: `${0.75 + item.indent * 0.75}rem` } : undefined}
                 className={cn(
-                  "flex min-h-10 w-full items-center rounded-md px-3 text-left text-sm hover:bg-surface-muted focus-visible:bg-surface-muted disabled:opacity-50 sm:min-h-9",
+                  "flex min-h-11 w-full items-center rounded-md px-3 text-left text-sm hover:bg-surface-muted focus-visible:bg-surface-muted disabled:opacity-50 sm:min-h-9",
                 )}
               >
                 {item.label}

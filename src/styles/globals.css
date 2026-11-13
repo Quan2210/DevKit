@@ -38,3 +38,15 @@
     }
   }
 }
+
+/* react-colorful sliders are 24px tall; on touch screens they need a 44px target (WCAG 2.2 AA, 2.5.8). */
+@media (pointer: coarse) {
+  .devkit-color-picker .react-colorful__hue,
+  .devkit-color-picker .react-colorful__alpha {
+    height: 44px;
+  }
+  .devkit-color-picker .react-colorful__pointer {
+    width: 32px;
+    height: 32px;
+  }
+}
