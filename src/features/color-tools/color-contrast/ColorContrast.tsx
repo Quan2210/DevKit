@@ -72,6 +72,9 @@ export function ColorContrast() {
 
   return (
     <ToolShell
+      status={
+        <span className="tabular-nums">{t("contrast.ratioValue", { ratio: result.display })}</span>
+      }
       tool={tool}
       guide={getGuide("vi", tool.id)}
       toolbar={<Button onClick={swap}>{t("contrast.swap")}</Button>}

@@ -94,6 +94,7 @@ export function ColorPicker() {
 
   return (
     <ToolShell
+      status={<span className="font-mono tabular-nums">{toHex(color)}</span>}
       tool={tool}
       guide={getGuide("vi", tool.id)}
       toolbar={
@@ -159,7 +160,7 @@ export function ColorPicker() {
                       title={toHex(entry)}
                       className="block rounded-md focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
-                      <Swatch color={entry} className="size-10 sm:size-9" />
+                      <Swatch color={entry} className="size-11 sm:size-9" />
                     </button>
                   </li>
                 ))}
