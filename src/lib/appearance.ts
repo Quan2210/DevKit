@@ -75,7 +75,7 @@ const THEMES: Record<
     bg: "#f8fafc",
     surface: "#ffffff",
     text: "#0f172a",
-    textMuted: "#64748b",
+    textMuted: "#5b6b82",
     borderStrong: "#8391a7",
     primary: "#4f46e5",
   },
