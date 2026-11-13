@@ -18,9 +18,14 @@ export function Checkbox({ label, shortLabel, className, ...rest }: CheckboxProp
       <label
         htmlFor={id}
         title={label}
-        className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-transparent px-2.5 text-sm text-text transition-colors hover:bg-surface-muted has-[:checked]:border-border-strong has-[:checked]:bg-surface-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary sm:min-h-9 sm:min-w-9"
+        className="relative inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-transparent px-2.5 text-sm text-text transition-colors hover:bg-surface-muted has-[:checked]:border-border-strong has-[:checked]:bg-surface-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary sm:min-h-9 sm:min-w-9"
       >
-        <input id={id} type="checkbox" className={cn("peer sr-only", className)} {...rest} />
+        <input
+          id={id}
+          type="checkbox"
+          className={cn("absolute inset-0 size-full cursor-pointer opacity-0", className)}
+          {...rest}
+        />
         <span aria-hidden className="inline-flex">
           {shortLabel}
         </span>
