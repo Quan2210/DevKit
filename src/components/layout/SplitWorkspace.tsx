@@ -57,7 +57,7 @@ export function SplitButton({
     <button
       type={type}
       className={cn(
-        "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border px-3 py-2 text-center text-sm leading-tight font-medium transition-colors",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-md border px-3 py-2 text-center text-sm leading-tight font-medium transition-colors",
         "lg:w-full lg:flex-col lg:gap-1 lg:px-2",
         "disabled:cursor-not-allowed disabled:opacity-50",
         variant === "primary"

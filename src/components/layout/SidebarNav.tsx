@@ -59,7 +59,7 @@ export function SidebarNav({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("nav.searchPlaceholder")}
-            className="min-h-9 w-full rounded-md border border-border-strong bg-surface px-3 text-sm placeholder:text-text-muted"
+            className="min-h-11 sm:min-h-9 w-full rounded-md border border-border-strong bg-surface px-3 text-sm placeholder:text-text-muted"
           />
         </div>
       ) : null}
@@ -85,7 +85,7 @@ export function SidebarNav({
                     title={t(tool.titleKey)}
                     className={({ isActive }) =>
                       cn(
-                        "flex min-h-9 items-center gap-2 rounded-md px-2 text-sm",
+                        "flex min-h-11 sm:min-h-9 items-center gap-2 rounded-md px-2 text-sm",
                         isActive ? "bg-surface-muted font-medium" : "hover:bg-surface-muted",
                       )
                     }

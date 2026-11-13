@@ -262,7 +262,11 @@ export function TextCompare() {
         </>
       }
     >
-      <div ref={region} tabIndex={-1} className="h-full outline-none">
+      <div
+        ref={region}
+        tabIndex={-1}
+        className="h-full outline-none focus-visible:outline-2 focus-visible:outline-primary"
+      >
         {comparing ? (
           <div className="h-[75dvh] min-h-96 lg:h-full lg:min-h-0 [&>section]:h-full">
             <Panel

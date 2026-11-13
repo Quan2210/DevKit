@@ -126,7 +126,7 @@ export function QuickSearch({ tools }: { tools: ReadonlyArray<ToolMeta> }) {
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
         onKeyDown={onKeyDown}
-        className="min-h-9 w-full rounded-lg border border-border-strong bg-surface py-1 pr-16 pl-3 text-sm placeholder:text-text-muted [&::-webkit-search-cancel-button]:hidden"
+        className="min-h-11 sm:min-h-9 w-full rounded-lg border border-border-strong bg-surface py-1 pr-16 pl-3 text-sm placeholder:text-text-muted [&::-webkit-search-cancel-button]:hidden"
       />
       <span
         aria-hidden
@@ -171,7 +171,7 @@ export function QuickSearch({ tools }: { tools: ReadonlyArray<ToolMeta> }) {
                   }}
                   onMouseEnter={() => setActive(row.option)}
                   className={cn(
-                    "flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-2 text-sm",
+                    "flex min-h-11 sm:min-h-9 cursor-pointer items-center gap-2 rounded-md px-2 text-sm",
                     row.option === active && "bg-surface-muted",
                   )}
                 >

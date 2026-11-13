@@ -36,7 +36,7 @@ export function Input({
         id={inputId}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className={cn(control, borderClass(error), "min-h-10 sm:min-h-9", className)}
+        className={cn(control, borderClass(error), "min-h-11 sm:min-h-9", className)}
         {...rest}
       />
       {error ? (

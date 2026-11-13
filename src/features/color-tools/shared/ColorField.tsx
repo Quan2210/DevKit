@@ -60,7 +60,7 @@ export function ColorField({ label, value, onChange, format = toHex, className }
           }}
           className="absolute inset-0 size-full cursor-pointer opacity-0"
         />
-        <Swatch color={value} className="size-10 sm:size-9" />
+        <Swatch color={value} className="size-11 sm:size-9" />
       </label>
     </div>
   );

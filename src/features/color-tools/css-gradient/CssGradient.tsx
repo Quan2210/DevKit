@@ -91,7 +91,11 @@ export function CssGradient() {
     });
 
   return (
-    <ToolShell tool={tool} guide={getGuide("vi", tool.id)}>
+    <ToolShell
+      tool={tool}
+      guide={getGuide("vi", tool.id)}
+      status={<span className="min-w-0 break-all font-mono">{`background: ${css};`}</span>}
+    >
       <div className="space-y-4">
         <div
           role="img"
@@ -128,7 +132,7 @@ export function CssGradient() {
                     value={angle}
                     aria-label={t("gradient.angleSlider")}
                     onChange={(event) => setAngle(Number(event.target.value))}
-                    className="h-10 w-full accent-primary sm:h-5"
+                    className="h-11 w-full accent-primary sm:h-5"
                   />
                 </div>
               ) : (
@@ -150,7 +154,7 @@ export function CssGradient() {
                       id={select}
                       value={position}
                       onChange={(event) => setPosition(event.target.value as RadialPosition)}
-                      className="min-h-10 rounded-md border border-border-strong bg-surface px-3 py-2 text-sm sm:min-h-9"
+                      className="min-h-11 rounded-md border border-border-strong bg-surface px-3 py-2 text-sm sm:min-h-9"
                     >
                       {RADIAL_POSITIONS.map((value) => (
                         <option key={value} value={value}>

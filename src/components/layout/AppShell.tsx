@@ -105,7 +105,7 @@ export function AppShell({ children, tools = listedTools() }: AppShellProps) {
           id="main"
           data-region="page"
           tabIndex={-1}
-          className="flex-1 px-3 py-3 outline-none sm:px-4"
+          className="flex-1 px-3 py-3 outline-none focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary sm:px-4"
         >
           {children}
         </main>

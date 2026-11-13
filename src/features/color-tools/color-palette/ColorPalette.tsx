@@ -51,6 +51,7 @@ export function ColorPalette() {
 
   return (
     <ToolShell
+      status={<span className="font-mono tabular-nums">{colors.map(toHex).join(" ")}</span>}
       tool={tool}
       guide={getGuide("vi", tool.id)}
       toolbar={

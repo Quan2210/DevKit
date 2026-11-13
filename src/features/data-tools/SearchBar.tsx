@@ -56,7 +56,7 @@ export function SearchBar({
         onChange={(event) => onTermChange(event.target.value)}
         onKeyDown={onKeyDown}
         spellCheck={false}
-        className="min-h-9 min-w-0 flex-1 rounded-md border border-border-strong bg-surface px-2 text-sm placeholder:text-text-muted"
+        className="min-h-11 sm:min-h-9 min-w-0 flex-1 rounded-md border border-border-strong bg-surface px-2 text-sm placeholder:text-text-muted"
       />
       <span
         role="status"

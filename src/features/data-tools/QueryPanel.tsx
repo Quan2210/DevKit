@@ -17,7 +17,7 @@ export interface QueryPanelProps {
 }
 
 const field =
-  "min-h-9 w-full rounded-md border bg-surface px-2 font-mono text-[13px] placeholder:text-text-muted";
+  "min-h-11 sm:min-h-9 w-full rounded-md border bg-surface px-2 font-mono text-[13px] placeholder:text-text-muted";
 
 /** The query bar of one pane: Filter, Project and Sort boxes written like MongoDB Compass, plus the result count. */
 export function QueryPanel({

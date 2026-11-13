@@ -18,7 +18,7 @@ export function ToolErrorBoundary() {
         </Button>
         <Link
           to="/"
-          className="inline-flex min-h-9 items-center px-3 text-sm font-medium text-primary underline"
+          className="inline-flex min-h-11 items-center px-3 text-sm font-medium text-primary underline"
         >
           {t("notFound.home")}
         </Link>

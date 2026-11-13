@@ -11,26 +11,32 @@ export interface CheckboxProps extends Omit<ComponentProps<"input">, "type" | "i
 /** Native checkbox with a visible label; the label is the accessible name. */
 export function Checkbox({ label, shortLabel, className, ...rest }: CheckboxProps) {
   const id = useId();
+  // Compact form is a toggle chip: the native checkbox stays (hidden) for the accessible name and keyboard,
+  // the chip shows the icon and its pressed state, so the target is 44px and the meaning is clear.
+  if (shortLabel) {
+    return (
+      <label
+        htmlFor={id}
+        title={label}
+        className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-transparent px-2.5 text-sm text-text transition-colors hover:bg-surface-muted has-[:checked]:border-border-strong has-[:checked]:bg-surface-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary sm:min-h-9 sm:min-w-9"
+      >
+        <input id={id} type="checkbox" className={cn("peer sr-only", className)} {...rest} />
+        <span aria-hidden className="inline-flex">
+          {shortLabel}
+        </span>
+        <span className="sr-only">{label}</span>
+      </label>
+    );
+  }
   return (
-    <label
-      htmlFor={id}
-      title={shortLabel ? label : undefined}
-      className="inline-flex min-h-10 items-center gap-2 text-sm sm:min-h-9"
-    >
+    <label htmlFor={id} className="inline-flex min-h-11 items-center gap-2 text-sm sm:min-h-9">
       <input
         id={id}
         type="checkbox"
         className={cn("size-4 rounded-sm border-border-strong accent-primary", className)}
         {...rest}
       />
-      {shortLabel ? (
-        <>
-          <span aria-hidden>{shortLabel}</span>
-          <span className="sr-only">{label}</span>
-        </>
-      ) : (
-        label
-      )}
+      {label}
     </label>
   );
 }

@@ -20,7 +20,7 @@ export function DeviceStatus({ externalRequestsEnabled = false }: DeviceStatusPr
       label={t("device.title")}
       title={label}
       triggerClassName={cn(
-        "min-h-10 px-2 py-1 text-sm font-medium hover:bg-surface-muted sm:min-h-8",
+        "min-h-11 min-w-11 px-2 py-1 text-sm font-medium hover:bg-surface-muted sm:min-h-8 sm:min-w-0",
         externalRequestsEnabled ? "text-warning-fg" : "text-info-fg",
       )}
       trigger={
